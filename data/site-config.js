@@ -6,7 +6,7 @@ const MAV_SITE = {
   ],
   "mainOrigin": "https://proprieteenvente.ca",
   "account": {
-    "enabled": false,
+    "enabled": true,
     "d1DatabaseId": "def96fbe-c980-43db-8349-1900180990df",
     "privacyContact": "Propriétaire — achat.vente.garderie@gmail.com",
     "mailFrom": "Motel à vendre <compte@mail.motelavendre.ca>"

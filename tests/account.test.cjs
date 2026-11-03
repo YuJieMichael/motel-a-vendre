@@ -76,10 +76,10 @@ test('account pages exist in all languages, are never indexed and stay out of th
  if(fs.existsSync(release)){for(const r of routes)assert.match(fs.readFileSync(path.join(release,r,'index.html'),'utf8'),/name="robots" content="noindex,nofollow"/);const robots=fs.readFileSync(path.join(release,'robots.txt'),'utf8');for(const r of routes)assert.ok(robots.includes('Disallow: /'+r),r);}
 });
 
-test('account scripts load from the site itself and accounts start disabled',()=>{
+test('account scripts load from the site itself and the menu link follows the account switch',()=>{
  const config=vm.runInNewContext(fs.readFileSync(path.join(root,'data/site-config.js'),'utf8')+';MAV_SITE');
- assert.equal(config.account.enabled,false);
  const html=fs.readFileSync(path.join(root,'fr/compte/index.html'),'utf8');
  assert.ok(html.indexOf('lib/account-core.js')<html.indexOf('src="../../app.js"'));assert.ok(html.indexOf('src="../../app.js"')<html.indexOf('account.js"'));
- assert.doesNotMatch(html,/<script[^>]+src="https?:/);assert.doesNotMatch(fs.readFileSync(path.join(root,'fr/index.html'),'utf8'),/data-route="account"/);
+ assert.doesNotMatch(html,/<script[^>]+src="https?:/);assert.equal(/data-route="account"/.test(fs.readFileSync(path.join(root,'fr/index.html'),'utf8')),config.account.enabled===true);
+ if(config.account.enabled){assert.match(config.account.d1DatabaseId,/^[0-9a-f-]{36}$/);assert.ok(config.account.privacyContact.trim());assert.match(config.account.mailFrom,/@mail\.motelavendre\.ca>$/);}
 });
