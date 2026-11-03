@@ -2,12 +2,12 @@ import Core from '../lib/catalogue-core.js';
 export const freshnessMs=300000;
 export function publicRowsURL(site){
  const url=new URL(new URL(site.endpoint).origin+'/rest/v1/published_listings');
- url.searchParams.set('select','listing_number,type:property->>type,city:property->>city,region:property->>region,price:property->price,lotArea:property->lotArea,parkingSpaces:property->parkingSpaces,features:property->features,photoIllustrative:property->source->placeholder,photo_paths,published_at');
+ url.searchParams.set('select','listing_number,type:property->>type,city:property->>city,region:property->>region,price:property->price,lotArea:property->lotArea,parkingSpaces:property->parkingSpaces,features:property->features,photoIllustrative:property->source->placeholder,description:property->description,descriptionTranslations:property->descriptionTranslations,photo_paths,published_at');
  url.searchParams.set('property->>type','eq.hotel-motel');url.searchParams.set('order','published_at.desc');url.searchParams.set('limit','1000');return url;
 }
 export function catalogueFromRows(rows,now=new Date(),covers={}){
  if(!Array.isArray(rows)||rows.length>1000)throw Error('Invalid public catalogue');
- const catalogue=Core.importMainRows(rows.map(r=>({listing_number:r.listing_number,property:{type:r.type,city:r.city,region:r.region,price:r.price,lotArea:r.lotArea,parkingSpaces:r.parkingSpaces,features:r.features,photoIllustrative:r.photoIllustrative}})),now.toISOString());
+ const catalogue=Core.importMainRows(rows.map(r=>({listing_number:r.listing_number,property:{type:r.type,city:r.city,region:r.region,price:r.price,lotArea:r.lotArea,parkingSpaces:r.parkingSpaces,features:r.features,photoIllustrative:r.photoIllustrative,description:r.description,descriptionTranslations:r.descriptionTranslations}})),now.toISOString());
  for(const p of catalogue.items){
   const row=rows.find(r=>String(r.listing_number)===p.reference);
   p.photos=[...new Set(row.photo_paths??[])].filter(x=>/^\/centris\/\d{7,8}\/\d{3}\.webp$/.test(x)).slice(0,30).map(x=>'assets'+x);

@@ -1,15 +1,20 @@
 {
   "schemaVersion": 1,
   "mode": "main-snapshot",
-  "updatedAt": "2026-11-02T04:53:41.740Z",
+  "updatedAt": "2026-11-03T02:50:24.576Z",
   "source": "proprieteenvente.ca",
   "items": [
     {
       "id": "main-100021",
       "reference": "100021",
-      "name": "Hôtel / Motel — Laurier-Station",
+      "name": "Motel — Laurier-Station",
+      "names": {
+        "fr": "Motel — Laurier-Station",
+        "en": "Motel — Laurier-Station",
+        "zh": "Laurier-Station 汽车旅馆"
+      },
       "city": "Laurier-Station",
-      "region": "Laurier-Station",
+      "region": "Chaudière-Appalaches",
       "type": "motel",
       "price": 1180000,
       "rooms": null,
@@ -115,8 +120,8 @@
       "illustrative": false,
       "copy": {
         "fr": {
-          "short": "Annonce publique de Propriété En Vente.",
-          "description": "Consultez la fiche publiée sur le site principal pour confirmer les renseignements et la disponibilité.",
+          "short": "Environ 17 chambres pour ce motel à Laurier-Station, près d’une sortie de l’autoroute 20 donnant accès vers Québec et Lévis.",
+          "description": "Environ 17 chambres pour ce motel à Laurier-Station, près d’une sortie de l’autoroute 20 donnant accès vers Québec et Lévis. La fiche décrit un grand stationnement et une exploitation existante. Données publiées : construction de 1986, superficie commerciale de 6 954 pi² et terrain de 53 392 pi². Renseignements financiers disponibles sur demande.",
           "features": [
             "Construction: 1986",
             "Superficie commerciale: 6 954 pi²",
@@ -126,8 +131,8 @@
           ]
         },
         "en": {
-          "short": "A public Propriété En Vente listing.",
-          "description": "Consult the published listing on the main website to confirm the details and current availability.",
+          "short": "Approximately 17 guest rooms at this Laurier-Station motel, near an Autoroute 20 exit with access toward Québec City and Lévis.",
+          "description": "Approximately 17 guest rooms at this Laurier-Station motel, near an Autoroute 20 exit with access toward Québec City and Lévis. The listing describes a large parking area and an existing operation. Published figures: built in 1986, 6,954 sq. ft. of commercial area and a 53,392 sq. ft. lot. Financial information is available on request.",
           "features": [
             "Year built: 1986",
             "Commercial area: 6,954 sq. ft.",
@@ -137,8 +142,8 @@
           ]
         },
         "zh": {
-          "short": "来自 Propriété En Vente 的公开房源。",
-          "description": "请查看主站已发布的房源，核对详细资料及当前挂牌状态。",
+          "short": "约 17 间客房的 Laurier-Station 汽车旅馆，靠近 20 号高速出口，可通往魁北克城及 Lévis。",
+          "description": "约 17 间客房的 Laurier-Station 汽车旅馆，靠近 20 号高速出口，可通往魁北克城及 Lévis。挂牌介绍为现有经营项目，设有较大停车场。公开参数：1986 年建造，商业面积 6,954 平方英尺，土地 53,392 平方英尺。财务资料可申请索取。",
           "features": [
             "建造年份: 1986",
             "商业面积: 6,954平方英尺",
@@ -153,9 +158,14 @@
     {
       "id": "main-100028",
       "reference": "100028",
-      "name": "Hôtel / Motel — Sherbrooke (Brompton/Rock Forest/Saint-Élie/Deauville)",
+      "name": "Motel — Sherbrooke",
+      "names": {
+        "fr": "Motel — Sherbrooke",
+        "en": "Motel — Sherbrooke",
+        "zh": "Sherbrooke 汽车旅馆"
+      },
       "city": "Sherbrooke (Brompton/Rock Forest/Saint-Élie/Deauville)",
-      "region": "Sherbrooke",
+      "region": "Estrie",
       "type": "motel",
       "price": 1490000,
       "rooms": 18,
@@ -168,9 +178,9 @@
       "parking": null,
       "tenure": null,
       "season": "unknown",
-      "image": "assets/covers/100028.webp",
+      "image": "assets/main/100028-001.webp",
       "photos": [
-        "assets/covers/100028.webp"
+        "assets/main/100028-001.webp"
       ],
       "facts": [
         {
@@ -273,8 +283,8 @@
       "illustrative": true,
       "copy": {
         "fr": {
-          "short": "Annonce publique de Propriété En Vente.",
-          "description": "Consultez la fiche publiée sur le site principal pour confirmer les renseignements et la disponibilité.",
+          "short": "18 chambres et une résidence pour le propriétaire dans ce motel du boulevard Bourque à Sherbrooke.",
+          "description": "18 chambres et une résidence pour le propriétaire dans ce motel du boulevard Bourque à Sherbrooke. La fiche décrit de grandes chambres, une piscine extérieure, une cour paysagée et la proximité de l’autoroute. Superficies publiées : 6 650 pi² commerciales et terrain de 40 484 pi². Les données d’exploitation et l’inventaire détaillé des chambres sont à demander au courtier.",
           "features": [
             "Construction: Non précisée",
             "Superficie commerciale: 6 650 pi²",
@@ -284,8 +294,8 @@
           ]
         },
         "en": {
-          "short": "A public Propriété En Vente listing.",
-          "description": "Consult the published listing on the main website to confirm the details and current availability.",
+          "short": "18 guest rooms and an owner’s residence at this motel on boulevard Bourque in Sherbrooke.",
+          "description": "18 guest rooms and an owner’s residence at this motel on boulevard Bourque in Sherbrooke. The listing describes large rooms, an outdoor pool, landscaped grounds and nearby highway access. Published areas are 6,650 sq. ft. of commercial space and a 40,484 sq. ft. lot. Ask the broker for operating figures and the detailed room inventory.",
           "features": [
             "Year built: Not specified",
             "Commercial area: 6,650 sq. ft.",
@@ -295,8 +305,8 @@
           ]
         },
         "zh": {
-          "short": "来自 Propriété En Vente 的公开房源。",
-          "description": "请查看主站已发布的房源，核对详细资料及当前挂牌状态。",
+          "short": "Sherbrooke 市 boulevard Bourque 汽车旅馆，设 18 间客房及业主住宅。",
+          "description": "Sherbrooke 市 boulevard Bourque 汽车旅馆，设 18 间客房及业主住宅。挂牌注明客房较大，配室外泳池、绿化庭院，邻近高速。商业面积 6,650 平方英尺，土地 40,484 平方英尺。具体经营数据和客房配置清单可向经纪索取。",
           "features": [
             "建造年份: 未提供",
             "商业面积: 6,650平方英尺",
@@ -311,9 +321,14 @@
     {
       "id": "main-100030",
       "reference": "100030",
-      "name": "Hôtel / Motel — Québec (La Cité-Limoilou)",
+      "name": "Hôtel — Québec",
+      "names": {
+        "fr": "Hôtel — Québec",
+        "en": "Hotel — Québec",
+        "zh": "Québec 酒店"
+      },
       "city": "Québec (La Cité-Limoilou)",
-      "region": "Québec",
+      "region": "Capitale-Nationale",
       "type": "hotel",
       "price": 12500000,
       "rooms": 82,
@@ -326,9 +341,9 @@
       "parking": null,
       "tenure": null,
       "season": "unknown",
-      "image": "assets/covers/100030.webp",
+      "image": "assets/main/100030-001.webp",
       "photos": [
-        "assets/covers/100030.webp"
+        "assets/main/100030-001.webp"
       ],
       "facts": [
         {
@@ -383,8 +398,8 @@
       "illustrative": true,
       "copy": {
         "fr": {
-          "short": "Annonce publique de Propriété En Vente.",
-          "description": "Consultez la fiche publiée sur le site principal pour confirmer les renseignements et la disponibilité.",
+          "short": "82 chambres pour cet hôtel à vendre à Québec.",
+          "description": "82 chambres pour cet hôtel à vendre à Québec. Les installations publiées comprennent une piscine intérieure, deux salles de banquet et deux bars avec 15 appareils de vidéo poker au total. L’adresse, l’année de construction et les superficies ne sont pas publiées. Demandez au courtier l’inventaire des chambres, les renseignements financiers et le détail des installations incluses.",
           "features": [
             "Construction: Non précisée",
             "Activité commerciale: Hôtel",
@@ -393,8 +408,8 @@
           ]
         },
         "en": {
-          "short": "A public Propriété En Vente listing.",
-          "description": "Consult the published listing on the main website to confirm the details and current availability.",
+          "short": "82 guest rooms at this hotel offering in Québec City.",
+          "description": "82 guest rooms at this hotel offering in Québec City. Published facilities include an indoor pool, two banquet rooms and two bars with 15 video-poker machines in total. The address, construction year and floor areas are not published. Ask the broker for the room inventory, financial information and details of the included facilities.",
           "features": [
             "Year built: Not specified",
             "Business type: Hotel",
@@ -403,8 +418,8 @@
           ]
         },
         "zh": {
-          "short": "来自 Propriété En Vente 的公开房源。",
-          "description": "请查看主站已发布的房源，核对详细资料及当前挂牌状态。",
+          "short": "魁北克城酒店项目，设 82 间客房。挂牌列有室内泳池、两个宴会厅、两个酒吧及共 15 台视频扑克机。",
+          "description": "魁北克城酒店项目，设 82 间客房。挂牌列有室内泳池、两个宴会厅、两个酒吧及共 15 台视频扑克机。具体地址、建造年份及面积未公开。可向经纪索取客房清单、财务资料及设施包含明细。",
           "features": [
             "建造年份: 未提供",
             "商业类型: 酒店",
@@ -418,9 +433,14 @@
     {
       "id": "main-100013",
       "reference": "100013",
-      "name": "Hôtel / Motel — Sainte-Adèle",
+      "name": "Motel — Sainte-Adèle",
+      "names": {
+        "fr": "Motel — Sainte-Adèle",
+        "en": "Motel — Sainte-Adèle",
+        "zh": "Sainte-Adèle 汽车旅馆"
+      },
       "city": "Sainte-Adèle",
-      "region": "Sainte-Adèle",
+      "region": "Laurentides",
       "type": "motel",
       "price": 1590000,
       "rooms": null,
@@ -433,9 +453,9 @@
       "parking": null,
       "tenure": null,
       "season": "unknown",
-      "image": "assets/covers/100013.webp",
+      "image": "assets/main/100013-001.webp",
       "photos": [
-        "assets/covers/100013.webp"
+        "assets/main/100013-001.webp"
       ],
       "facts": [
         {
@@ -514,8 +534,8 @@
       "illustrative": true,
       "copy": {
         "fr": {
-          "short": "Annonce publique de Propriété En Vente.",
-          "description": "Consultez la fiche publiée sur le site principal pour confirmer les renseignements et la disponibilité.",
+          "short": "Motel à vendre à Sainte-Adèle, dans les Laurentides.",
+          "description": "Motel à vendre à Sainte-Adèle, dans les Laurentides. La fiche détaillée du courtier indique une construction de 1959 et un terrain de 45 000 pi², avec chauffage par plinthes électriques, aqueduc et égouts municipaux. Le nombre de chambres n’est pas publié et l’adresse reste à vérifier. Demandez au courtier l’inventaire des chambres, les renseignements d’exploitation et les inclusions.",
           "features": [
             "Nombre de chambres: Non publié; à confirmer auprès du courtier",
             "Activité commerciale: Motel",
@@ -525,8 +545,8 @@
           ]
         },
         "en": {
-          "short": "A public Propriété En Vente listing.",
-          "description": "Consult the published listing on the main website to confirm the details and current availability.",
+          "short": "Motel offering in Sainte-Adèle, in the Laurentides.",
+          "description": "Motel offering in Sainte-Adèle, in the Laurentides. The broker’s detailed listing gives a 1959 construction year and a 45,000 sq. ft. lot, with electric baseboard heating and municipal water and sewer. The guest-room count is not published, and the address remains to be verified. Ask the broker for the room inventory, operating information and inclusions.",
           "features": [
             "Guest-room count: Not published; confirm with the broker",
             "Business type: Motel",
@@ -536,8 +556,8 @@
           ]
         },
         "zh": {
-          "short": "来自 Propriété En Vente 的公开房源。",
-          "description": "请查看主站已发布的房源，核对详细资料及当前挂牌状态。",
+          "short": "Sainte-Adèle 汽车旅馆，位于 Laurentides 地区。",
+          "description": "Sainte-Adèle 汽车旅馆，位于 Laurentides 地区。经纪详细挂牌注明：1959 年建造，土地 45,000 平方英尺，电暖踢脚线采暖，市政供水及排污。客房数量未公开，具体地址仍待核实。可向经纪索取客房清单、经营资料及交易包含项目。",
           "features": [
             "客房数量: 未公开，待经纪确认",
             "商业类型: 汽车旅馆",
@@ -552,9 +572,14 @@
     {
       "id": "main-100024",
       "reference": "100024",
-      "name": "Hôtel / Motel — Saint-Sauveur",
+      "name": "Hôtel — Saint-Sauveur",
+      "names": {
+        "fr": "Hôtel — Saint-Sauveur",
+        "en": "Hotel — Saint-Sauveur",
+        "zh": "Saint-Sauveur 酒店"
+      },
       "city": "Saint-Sauveur",
-      "region": "Saint-Sauveur",
+      "region": "Laurentides",
       "type": "hotel",
       "price": 4890000,
       "rooms": null,
@@ -567,9 +592,9 @@
       "parking": null,
       "tenure": null,
       "season": "unknown",
-      "image": "assets/covers/100024.webp",
+      "image": "assets/main/100024-001.webp",
       "photos": [
-        "assets/covers/100024.webp"
+        "assets/main/100024-001.webp"
       ],
       "facts": [
         {
@@ -648,8 +673,8 @@
       "illustrative": true,
       "copy": {
         "fr": {
-          "short": "Annonce publique de Propriété En Vente.",
-          "description": "Consultez la fiche publiée sur le site principal pour confirmer les renseignements et la disponibilité.",
+          "short": "Hôtel à vendre à Saint-Sauveur, dans les Laurentides, à usage commercial et dont l’année de construction indiquée est 2003.",
+          "description": "Hôtel à vendre à Saint-Sauveur, dans les Laurentides, à usage commercial et dont l’année de construction indiquée est 2003. La fiche détaillée du courtier précise l’aqueduc et les égouts municipaux ainsi qu’un transfert d’actions. L’adresse et le nombre de chambres ne sont pas publiés. L’inventaire des chambres, les renseignements d’exploitation et les inclusions sont à confirmer auprès du courtier.",
           "features": [
             "Nombre de chambres: Non publié; à confirmer auprès du courtier",
             "Construction: 2003",
@@ -659,8 +684,8 @@
           ]
         },
         "en": {
-          "short": "A public Propriété En Vente listing.",
-          "description": "Consult the published listing on the main website to confirm the details and current availability.",
+          "short": "Hotel offering in Saint-Sauveur, in the Laurentides, with commercial use and a listed construction year of 2003.",
+          "description": "Hotel offering in Saint-Sauveur, in the Laurentides, with commercial use and a listed construction year of 2003. The broker’s detailed listing specifies municipal water and sewer and describes a share transfer. The address and guest-room count are not published. Ask the broker to confirm the room inventory, operating information and transaction inclusions.",
           "features": [
             "Guest-room count: Not published; confirm with the broker",
             "Year built: 2003",
@@ -670,8 +695,8 @@
           ]
         },
         "zh": {
-          "short": "来自 Propriété En Vente 的公开房源。",
-          "description": "请查看主站已发布的房源，核对详细资料及当前挂牌状态。",
+          "short": "Saint-Sauveur 酒店项目，位于 Laurentides 地区，用途为商业，挂牌建造年份为 2003 年。",
+          "description": "Saint-Sauveur 酒店项目，位于 Laurentides 地区，用途为商业，挂牌建造年份为 2003 年。经纪详细挂牌注明市政供水及排污，交易形式为股份转让。具体地址和客房数量未公开；客房清单、经营资料及交易包含项目需向经纪确认。",
           "features": [
             "客房数量: 未公开，待经纪确认",
             "建造年份: 2003",

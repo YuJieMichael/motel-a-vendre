@@ -44,3 +44,13 @@ test('sharing removes original query strings and embedded URL credentials',()=>{
 test('hospitality subtype filters use only an explicitly published business-kind feature',()=>{for(const [value,expected]of [['Motel','motel'],['Hôtel','hotel'],['Auberge','inn'],['Bar et motel','hotel-motel']])assert.equal(C.importMainRows([exported([{key:'Genre de commerce',value:{fr:value}}])],'2026-10-30').items[0].type,expected);assert.equal(C.importMainRows([exported([],{description:'A motel with 17 rooms'})],'2026-10-30').items[0].type,'hotel-motel');});
 test('unambiguous localized room units preserve exact capacity without accepting approximate text',()=>{const value={en:'18 rooms',fr:'18 chambres',zh:'18间'};assert.equal(C.importMainRows([exported([{key:'guestRooms',value}])],'2026-10-30').items[0].rooms,18);for(const zh of ['约18间','18–20间','19间',''])assert.equal(C.importMainRows([exported([{key:'guestRooms',value:{...value,zh}}])],'2026-10-30').items[0].rooms,null);});
 test('public illustration flags do not turn a real listing into a fictional property or leak raw source data',()=>{for(const flag of [true,false]){const p=C.importMainRows([exported([],{source:{placeholder:flag,originalAddress:'PRIVATE ADDRESS'}})],'2026-10-30').items[0];assert.equal(p.illustrative,flag);assert.equal(p.real,true);assert.ok(!JSON.stringify(p).includes('PRIVATE'));}});
+test('main-site import keeps public descriptions, localized names and administrative regions',()=>{
+ const features=[{key:'Genre de commerce',label:{fr:'Activité',en:'Business',zh:'类型'},value:{fr:'Motel',en:'Motel',zh:'汽车旅馆'}}];
+ const description='Environ 17 chambres pour ce motel à Laurier-Station. Données publiées sur demande.';
+ const [p]=C.importMainRows([{listing_number:7,property:{type:'hotel-motel',city:'Laurier-Station',price:1,features,description,descriptionTranslations:{en:'About 17 rooms at this Laurier-Station motel. Figures on request.',zh:'约 17 间客房的 Laurier-Station 汽车旅馆。财务资料可申请索取。'}}}],'2026-11-03T00:00:00Z').items;
+ assert.deepEqual(p.names,{fr:'Motel — Laurier-Station',en:'Motel — Laurier-Station',zh:'Laurier-Station 汽车旅馆'});
+ assert.equal(p.region,'Chaudière-Appalaches');assert.equal(p.copy.fr.description,description);
+ assert.equal(p.copy.fr.short,'Environ 17 chambres pour ce motel à Laurier-Station.');assert.equal(p.copy.zh.short,'约 17 间客房的 Laurier-Station 汽车旅馆。');
+ const [q]=C.importMainRows([{listing_number:8,property:{type:'hotel-motel',city:'Ville Inconnue (Secteur)',description:'court'}}],'2026-11-03T00:00:00Z').items;
+ assert.equal(q.region,'Ville Inconnue');assert.equal(q.copy.fr.short,'Annonce publique de Propriété En Vente.');assert.equal(C.nameOf(q,'en'),'Hotel / motel — Ville Inconnue');
+});
