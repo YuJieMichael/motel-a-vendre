@@ -5,11 +5,11 @@ const root=path.resolve(__dirname,'..');
 async function sync(config,{apply=false}={}){
  if(!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(config.url)||!/^sb_publishable_[A-Za-z0-9_-]+$/.test(config.key))throw Error('Expected a browser-public project URL and publishable key');
  const url=new URL(config.url+'/rest/v1/published_listings');
- url.searchParams.set('select','listing_number,type:property->>type,city:property->>city,region:property->>region,price:property->price,lotArea:property->lotArea,parkingSpaces:property->parkingSpaces,features:property->features,photoIllustrative:property->source->placeholder,photo_paths,published_at');
+ url.searchParams.set('select','listing_number,type:property->>type,city:property->>city,region:property->>region,price:property->price,lotArea:property->lotArea,parkingSpaces:property->parkingSpaces,features:property->features,photoIllustrative:property->source->placeholder,description:property->description,descriptionTranslations:property->descriptionTranslations,photo_paths,published_at');
  url.searchParams.set('property->>type','eq.hotel-motel');url.searchParams.set('order','published_at.desc');url.searchParams.set('limit','1000');
  const response=await fetch(url,{headers:{apikey:config.key},signal:AbortSignal.timeout(20000)});if(!response.ok)throw Error('Public read failed: '+response.status);
  const rows=await response.json();if(!Array.isArray(rows))throw Error('Invalid public response');
- const catalogue=Core.importMainRows(rows.map(r=>({listing_number:r.listing_number,property:{type:r.type,city:r.city,region:r.region,price:r.price,lotArea:r.lotArea,parkingSpaces:r.parkingSpaces,features:r.features,photoIllustrative:r.photoIllustrative}})),new Date().toISOString());
+ const catalogue=Core.importMainRows(rows.map(r=>({listing_number:r.listing_number,property:{type:r.type,city:r.city,region:r.region,price:r.price,lotArea:r.lotArea,parkingSpaces:r.parkingSpaces,features:r.features,photoIllustrative:r.photoIllustrative,description:r.description,descriptionTranslations:r.descriptionTranslations}})),new Date().toISOString());
  const manifest=[];fs.mkdirSync(path.join(root,'assets/main'),{recursive:true});
  for(const item of catalogue.items){
   const row=rows.find(r=>String(r.listing_number)===item.reference);item.photos=[];

@@ -5,7 +5,7 @@ if(path.relative(root,dist)!=='dist'||path.basename(dist)!=='dist')throw Error('
 // This verified project-local directory contains generated public assets only.
 if(fs.existsSync(dist))fs.rmSync(dist,{recursive:true,force:true});
 const pages=JSON.parse(fs.readFileSync(path.join(root,'data/page-manifest.json'),'utf8'));
-const files=[...pages.map(p=>p.file),'styles.css','responsive.css','property.css','direction.css','app.js','i18n.js','lib/catalogue-core.js','lib/enquiry-core.js','lib/property-view.js','data/catalogue-data.js','data/site-config.js','robots.txt','sitemap.xml'];
+const files=[...pages.map(p=>p.file),'styles.css','responsive.css','property.css','direction.css','app.js','i18n.js','lib/catalogue-core.js','lib/enquiry-core.js','lib/property-view.js','data/catalogue-data.js','data/site-config.js','robots.txt','sitemap.xml','favicon.ico','apple-touch-icon.png','manifest.webmanifest'];
 function assets(dir){for(const entry of fs.readdirSync(path.join(root,dir),{withFileTypes:true})){const file=dir+'/'+entry.name;if(entry.isDirectory())assets(file);else if(/^[\w-]+\.(png|jpe?g|webp|svg)$/.test(entry.name))files.push(file);}}assets('assets');
 for(const file of files){const target=path.join(dist,file);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(root,file),target);}
 console.log('Public build prepared:',files.length,'files in',dist);

@@ -30,7 +30,7 @@ function pageURL(lang=language,kind='home',reference=''){
  return new URL(route+(location.protocol==='file:'?'index.html':''),SITE_ROOT).href;
 }
 function notify(message){clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,3500);}
-function updateMetadata(){const title=activeProperty?activeProperty.name+' | '+BRAND.name:page==='guide'?t('guideTitle'):page==='team'?t('teamPage')+' | '+BRAND.name:page==='seller'?t('ownerPage')+' | '+BRAND.name:t('pageTitle');document.title=title;}
+function updateMetadata(){const title=activeProperty?Core.nameOf(activeProperty,language)+' | '+BRAND.name:page==='guide'?t('guideTitle'):page==='team'?t('teamPage')+' | '+BRAND.name:page==='seller'?t('ownerPage')+' | '+BRAND.name:t('pageTitle');document.title=title;}
 function applyLanguage(next){
  language=next;state.lang=next;document.documentElement.lang={fr:'fr-CA',en:'en-CA',zh:'zh-Hans'}[next];
  $$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));$$('[data-placeholder]').forEach(el=>el.placeholder=t(el.dataset.placeholder));$$('[data-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.aria)));
@@ -49,8 +49,8 @@ function applyLanguage(next){
 function renderHero(){
  const p=properties[0],img=$('.hero-photo'),button=$('.hero-property');
  if(!button)return;
- if(img){img.src=asset(p?.image||'assets/property-unavailable.svg');img.alt=p?p.name:t('catalogueError');}
- button.disabled=!p;if(p){button.dataset.detail=p.id;$('.hero-property-main small').textContent=p.region+', QC';$('.hero-property-main strong').textContent=p.name;$('.hero-property-main>span').textContent=t('rooms')+': '+roomSummary(p)+' · '+t(p.type);}
+ if(img){img.src=asset(p?.image||'assets/property-unavailable.svg');img.alt=p?Core.nameOf(p,language):t('catalogueError');}
+ button.disabled=!p;if(p){button.dataset.detail=p.id;$('.hero-property-main small').textContent=p.region+', QC';$('.hero-property-main strong').textContent=Core.nameOf(p,language);$('.hero-property-main>span').textContent=t('rooms')+': '+roomSummary(p)+' · '+t(p.type);}
  else{$('.hero-property-main strong').textContent=t('catalogueError');$('.hero-property-main small').textContent='';$('.hero-property-main>span').textContent='';}
  $('.hero-metric-price').textContent=p?money(p.price):t('toConfirm');$('.hero-metric-reference').textContent=p?Core.reference(p):'—';
  $('.photo-counter').textContent=`${p?'01':'00'} / ${String(properties.length).padStart(2,'0')}`;
@@ -86,7 +86,7 @@ function toggleSave(id){const restoreFocus=isHome&&document.activeElement?.datas
 function showCompare(){
  const list=properties.filter(p=>saved.has(p.id));if(list.length<2){notify(t('compareMinimum'));return;}
  const row=(label,fn)=>`<tr><th scope="row">${e(label)}</th>${list.map(p=>`<td>${fn(p)}</td>`).join('')}</tr>`;
- $('#compare-content').innerHTML=`<div class="compare-scroll"><table class="compare-table"><thead><tr><th scope="col">${e(t('propertyType'))}</th>${list.map(p=>`<th scope="col"><img src="${e(asset(p.image))}" alt="${e(p.name)}">${e(p.name)}</th>`).join('')}</tr></thead><tbody>${row(t('price'),p=>e(money(p.price)))}${row(t('location'),p=>e(p.city))}${row(t('rooms'),p=>e(roomSummary(p)))}${row(t('land'),p=>e(area(p.acres)))}${row(t('seasonLabel'),p=>e(seasonLabel(p)))}${row(t('details'),p=>`<a class="text-link" href="${e(pageURL(language,'property',Core.reference(p)))}">${e(t('details'))} ↗</a>`)}</tbody></table></div><p class="privacy-note">${e(t('detailNote'))}</p>`;
+ $('#compare-content').innerHTML=`<div class="compare-scroll"><table class="compare-table"><thead><tr><th scope="col">${e(t('propertyType'))}</th>${list.map(p=>`<th scope="col"><img src="${e(asset(p.image))}" alt="${e(Core.nameOf(p,language))}">${e(Core.nameOf(p,language))}</th>`).join('')}</tr></thead><tbody>${row(t('price'),p=>e(money(p.price)))}${row(t('location'),p=>e(p.city))}${row(t('rooms'),p=>e(roomSummary(p)))}${row(t('land'),p=>e(area(p.acres)))}${row(t('seasonLabel'),p=>e(seasonLabel(p)))}${row(t('details'),p=>`<a class="text-link" href="${e(pageURL(language,'property',Core.reference(p)))}">${e(t('details'))} ↗</a>`)}</tbody></table></div><p class="privacy-note">${e(t('detailNote'))}</p>`;
  installImageFallbacks();$('#compare-dialog').showModal();
 }
 function showShare(p=null){
@@ -99,7 +99,7 @@ function showEnquiry(kind,id='',purpose='info'){
  if(busy)return;
  const next=kind+':'+id;
  enquiryKind=kind;enquiryProperty=properties.find(p=>p.id===id)||null;enquiryPurpose=purpose;sent=false;
- $('#enquiry-title').textContent=t(kind==='seller'?'sellerFormTitle':'buyerTitle');$('#enquiry-kicker').textContent=enquiryProperty?enquiryProperty.name:BRAND.name;
+ $('#enquiry-title').textContent=t(kind==='seller'?'sellerFormTitle':'buyerTitle');$('#enquiry-kicker').textContent=enquiryProperty?Core.nameOf(enquiryProperty,language):BRAND.name;
  if(formKey!==next){
   $('#enquiry-form').reset();const draft=readLocal(storageKeys.draft,null);
   if(draft&&draft.kind===kind&&draft.propertyId===id){for(const key of ['name','email','phone','message'])$('#enquiry-'+key).value=typeof draft[key]==='string'?draft[key]:'';$('#enquiry-region').value=typeof draft.region==='string'?draft.region:'';$('#enquiry-owner-city').value=typeof draft.region==='string'?draft.region:'';$('#enquiry-budget').value=Number.isFinite(draft.budget)?draft.budget:'';$('#enquiry-timeline').value=['exploring','0-3','3-6','6+'].includes(draft.timeline)?draft.timeline:'';$('#enquiry-service').value=['broker','hybrid'].includes(draft.service)?draft.service:'';$('#enquiry-contact-time').value=draft.contactTime||'';}
@@ -134,7 +134,7 @@ async function submitEnquiry(event){
 }
 function downloadDraft(){
  if(!latestDraft)return;const d=latestDraft,p=properties.find(p=>p.id===d.propertyId);
- const lines=[BRAND.name,BRAND.domain,t('notSent'),'',`${t('propertyId')}: ${p?Core.reference(p):'—'}`];if(p)lines.push(`${t('propertyContext')}: ${p.name} | ${p.city} | ${money(p.price)}`);
+ const lines=[BRAND.name,BRAND.domain,t('notSent'),'',`${t('propertyId')}: ${p?Core.reference(p):'—'}`];if(p)lines.push(`${t('propertyContext')}: ${Core.nameOf(p,language)} | ${p.city} | ${money(p.price)}`);
  const timeframe={exploring:'exploring','0-3':'months3','3-6':'months6','6+':'monthsLater'},purposes={info:'purposeInfo',viewing:'purposeViewing',documents:'purposeDocuments'};
  lines.push(t('purposeLabel')+': '+t(purposes[d.purpose]||'purposeInfo'));
  for(const [key,label]of [['name','name'],['email','email'],['phone','phone'],['budget','buyerBudget'],['region',d.kind==='seller'?'ownerCity':'buyerRegion'],['timeline','buyerTimeline'],['contactTime','contactTime'],['service','serviceLabel']]){let value=d[key];if(key==='budget'&&value!==null&&value!==undefined)value=money(value)+' CAD';else if(key==='timeline'&&timeframe[value])value=t(timeframe[value]);else if(key==='service'&&value)value=t(value==='broker'?'serviceBroker':'serviceHybrid');lines.push(t(label)+': '+(value===null||value===undefined||value===''?'—':value));}
@@ -142,7 +142,7 @@ function downloadDraft(){
 }
 function renderGallery(){
  const photos=galleryProperty.photos.length?galleryProperty.photos:[galleryProperty.image];galleryIndex=(galleryIndex+photos.length)%photos.length;
- $('#gallery-image').src=asset(photos[galleryIndex]);$('#gallery-image').alt=galleryProperty.name+' — '+t('photoNumber',{index:galleryIndex+1});$('#gallery-title').textContent=galleryProperty.name;$('#gallery-counter').textContent=(galleryIndex+1)+' / '+photos.length;
+ $('#gallery-image').src=asset(photos[galleryIndex]);$('#gallery-image').alt=Core.nameOf(galleryProperty,language)+' — '+t('photoNumber',{index:galleryIndex+1});$('#gallery-title').textContent=Core.nameOf(galleryProperty,language);$('#gallery-counter').textContent=(galleryIndex+1)+' / '+photos.length;
  let note=$('#gallery-illustration-note');if(!note){note=document.createElement('p');note.id='gallery-illustration-note';note.className='gallery-source-note';$('#gallery-counter').after(note);}note.hidden=!galleryProperty.illustrative;note.textContent=galleryProperty.illustrative?t('illustrativePhoto'):'';
  $('#gallery-previous').disabled=photos.length<2;$('#gallery-next').disabled=photos.length<2;
  $('#gallery-thumbnails').innerHTML=photos.map((src,i)=>`<button data-gallery-index="${i}" aria-label="${e(t('photoNumber',{index:i+1}))}" aria-pressed="${i===galleryIndex}"><img src="${e(asset(src))}" alt="" loading="lazy"></button>`).join('');installImageFallbacks();
