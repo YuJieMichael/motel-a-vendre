@@ -3,11 +3,15 @@ import {loadCatalogue} from './live-catalogue.mjs';
 import {template,translations,site,fallback} from './runtime-inputs.mjs';
 import {responseHeaders} from './worker.mjs';
 import {createAccountApi} from './account-api.mjs';
+import {runAlerts} from './account-alerts.mjs';
 
 const locales={fr:'fr-CA',en:'en-CA',zh:'zh-Hans'};
 const sections={fr:{equipe:'team',vendre:'seller','guide-achat':'guide',compte:'account'},en:{team:'team',sell:'seller','buying-guide':'guide',account:'account'},zh:{team:'team',sell:'seller','buying-guide':'guide',account:'account'}};
 const accountsEnabled=!!(site.account&&site.account.enabled===true);
 const accountApi=createAccountApi({siteOrigin:site.siteOrigin});
+// Turnstile (sign-up and password reset) is the only third-party script, loaded on the account page only.
+const turnstile=accountsEnabled&&/^0x[A-Za-z0-9_-]{10,}$/.test(site.account.turnstileSiteKey||'');
+const turnstileOrigin='https://challenges.cloudflare.com';
 const checkedDay=c=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Toronto',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(c.updatedAt));
 const notices={fr:'La mise à jour du catalogue est momentanément indisponible. Dernière vérification : ',en:'The catalogue update is temporarily unavailable. Last checked: ',zh:'目录更新暂时不可用。上次核验：'};
 export async function handleLiveRequest(request,env){
@@ -62,7 +66,14 @@ export async function handleLiveRequest(request,env){
  if(status!=='live')html=html.replace('<main ',`<aside class="catalogue-status" role="status">${notices[lang]+checkedDay(catalogue)}</aside><main `);
  const json=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
  const hash=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(json)))));
- const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
+
+ const third=kind==='account'&&turnstile?' '+turnstileOrigin:'';
+ const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'"+third+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca"+(third?'; frame-src'+third:'');
  return wrapped(new Response(request.method==='HEAD'?null:html,{headers:{'Content-Type':'text/html; charset=utf-8','X-Catalogue-Status':status,'X-Catalogue-Checked-At':catalogue.updatedAt,...(kind==='account'?{'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'}:{})}}),csp);
 }
-export default {fetch:handleLiveRequest};
+// Daily saved-search alerts (Cron Trigger in wrangler.jsonc).
+export async function handleScheduled(event,env,ctx){
+ if(!accountsEnabled||!env.ACCOUNTS)return;
+ ctx.waitUntil((async()=>{const {catalogue,status}=await loadCatalogue(site,fallback);if(status!=='live'){console.log('account-alerts skipped: catalogue',status);return;}await runAlerts(env,{site,catalogue});})());
+}
+export default {fetch:handleLiveRequest,scheduled:handleScheduled};

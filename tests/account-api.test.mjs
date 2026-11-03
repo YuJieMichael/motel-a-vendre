@@ -122,3 +122,56 @@ test('raising PASSWORD_ITERATIONS upgrades a stored hash at the next sign-in',as
  t.env.PASSWORD_ITERATIONS='5';assert.equal((await t.client().call('POST','login',{email:'buyer@example.com',password:'harbour-lights-42'})).status,200,'out-of-range values fall back to the default');
  assert.match(t.db.prepare("SELECT password_hash h FROM users").get().h,/\$20000\$/);
 });
+
+import {runAlerts,matchingReferences} from '../deployment/account-alerts.mjs';
+import fsAlerts from 'node:fs';
+import C from '../lib/catalogue-core.js';
+const realCatalogue=C.validateCatalogue(JSON.parse(fsAlerts.readFileSync(new URL('../data/catalogue.json',import.meta.url))));
+const alertSite={siteOrigin:ORIGIN};
+
+test('saved-search alerts: baseline first, then one email per search with only new listings',async()=>{
+ const t=setup(),a=await t.verified(t.client(),'a@example.com');
+ await a.call('PUT','profile',{preferred_language:'en'});
+ assert.equal((await a.call('POST','searches',{name:'Under 2M',criteria:{budget:'under2'},alerts:true})).status,201);
+ await a.call('POST','searches',{name:'Quiet',criteria:{budget:'under2'},alerts:false});
+ const under2=matchingReferences(realCatalogue,{budget:'under2'},'en');assert.ok(under2.length>=2);
+ const older={...realCatalogue,items:realCatalogue.items.filter(p=>C.reference(p)!==under2[0])};
+ const before=t.mails.length;
+ let s=await runAlerts(t.env,{site:alertSite,catalogue:older,log:()=>{}});assert.deepEqual([s.sent,s.baselined],[0,1]);assert.equal(t.mails.length,before,'baseline sends nothing');
+ s=await runAlerts(t.env,{site:alertSite,catalogue:older,log:()=>{}});assert.equal(s.sent,0,'nothing new, nothing sent');
+ s=await runAlerts(t.env,{site:alertSite,catalogue:realCatalogue,log:()=>{}});assert.equal(s.sent,1);
+ const mail=t.mails.at(-1);assert.equal(mail.to,'a@example.com');assert.match(mail.subject,/Under 2M/);assert.ok(mail.text.includes(`/en/proprietes/${under2[0]}/`));
+ for(const ref of under2.slice(1))assert.ok(!mail.text.includes(`/proprietes/${ref}/`),'already-seen listings are not repeated');
+ assert.match(mail.headers['List-Unsubscribe'],/\/api\/account\/unsubscribe\?t=[\w-]{43}>$/);assert.equal(mail.headers['List-Unsubscribe-Post'],'List-Unsubscribe=One-Click');
+ s=await runAlerts(t.env,{site:alertSite,catalogue:realCatalogue,log:()=>{}});assert.equal(s.sent,0,'never sent twice');
+});
+
+test('a region that disappeared matches nothing instead of every listing',()=>{
+ assert.deepEqual(matchingReferences(realCatalogue,{region:'Nunavik'},'fr'),[]);
+ assert.ok(matchingReferences(realCatalogue,{},'fr').length===realCatalogue.items.length);
+});
+
+test('one-click unsubscribe works without the site header, and switching back on re-baselines',async()=>{
+ const t=setup(),a=await t.verified(t.client(),'a@example.com');
+ await a.call('POST','searches',{name:'All',criteria:{},alerts:true});
+ const token=t.db.prepare('SELECT unsubscribe_token t FROM saved_searches').get().t;assert.match(token,/^[\w-]{43}$/);
+ const api=createAccountApi({siteOrigin:ORIGIN});
+ const oneClick=await api(new Request(ORIGIN+'/api/account/unsubscribe?t='+token,{method:'POST',headers:{'content-type':'application/x-www-form-urlencoded'},body:'List-Unsubscribe=One-Click'}),t.env);
+ assert.equal(oneClick.status,200);assert.equal((await oneClick.json()).name,'All');
+ const [row]=(await a.call('GET','searches')).body.searches;assert.equal(row.alerts,false);
+ assert.equal((await api(new Request(ORIGIN+'/api/account/unsubscribe?t='+'x'.repeat(43),{method:'POST'}),t.env)).status,400);
+ await runAlerts(t.env,{site:alertSite,catalogue:realCatalogue,log:()=>{}});
+ const on=await a.call('PATCH','searches/'+row.id,{alerts:true});assert.deepEqual(on.body,{ok:true,alerts:true});
+ assert.equal(t.db.prepare('SELECT alert_checked_at c FROM saved_searches').get().c,null,'fresh baseline after re-enabling');
+ const other=await t.verified(t.client(),'b@example.com');assert.equal((await other.call('PATCH','searches/'+row.id,{alerts:false})).status,404,'cannot touch another user’s search');
+});
+
+test('Turnstile is enforced on sign-up and recovery once its secret is set',async()=>{
+ const t=setup();t.env.TURNSTILE_SECRET='test-secret';t.env.TURNSTILE_VERIFY=async token=>token==='good-token';
+ const c=t.client();
+ assert.equal((await c.call('POST','signup',{email:'x@example.com',password:'harbour-lights-42',consent:true})).body.error,'captcha');
+ assert.equal((await c.call('POST','signup',{email:'x@example.com',password:'harbour-lights-42',consent:true,turnstile:'bad'})).body.error,'captcha');
+ assert.equal((await c.call('POST','signup',{email:'x@example.com',password:'harbour-lights-42',consent:true,turnstile:'good-token'})).status,200);
+ assert.equal((await t.client('192.0.2.9').call('POST','recover',{email:'x@example.com'})).body.error,'captcha');
+ assert.equal((await t.client('192.0.2.9').call('POST','recover',{email:'x@example.com',turnstile:'good-token'})).status,200);
+});

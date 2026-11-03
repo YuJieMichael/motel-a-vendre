@@ -9,7 +9,9 @@ async function prepare({direct=false}={}){
  if(accounts&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(config.account.d1DatabaseId||''))throw Error('Set account.d1DatabaseId (wrangler d1 create motel-a-vendre-accounts) before enabling accounts');
  if(accounts&&!String(config.account.privacyContact||'').trim())throw Error('Québec Law 25: set account.privacyContact (person in charge of personal information) before enabling accounts');
  let intakeCheck={enabled:false,reason:'Main-site enquiry hand-off is available; direct sending is gated.'};
- if(direct){
+ // Offline sandboxes cannot reach the intake; CI (Workers Builds) always runs the real check.
+ if(direct&&process.env.MAV_INTAKE_CHECK==='offline'){intakeCheck={enabled:true,offlineSkipped:true,productionEnquiriesSent:0};}
+ else if(direct){
   const preflight=await fetch(config.endpoint,{method:'OPTIONS',headers:{Origin:config.siteOrigin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type,apikey'},signal:AbortSignal.timeout(12000)});
   if(preflight.status!==204||preflight.headers.get('access-control-allow-origin')!==config.siteOrigin)throw Error('Production enquiry origin is not yet allowed. Keep the hand-off release or deploy and verify the reviewed backend change first.');
   const validation=await fetch(config.endpoint,{method:'POST',headers:{Origin:config.siteOrigin,'Content-Type':'application/json',apikey:config.publishableKey},body:'{}',signal:AbortSignal.timeout(12000)});
@@ -48,13 +50,15 @@ async function prepare({direct=false}={}){
  for(const file of ['catalogue-core.js','property-view.js','account-view.js','page-renderer.cjs','guide-content.js'])fs.copyFileSync(path.join(root,'lib',file),path.join(runtime,file));
  const inputs='export const template='+JSON.stringify(fs.readFileSync(path.join(root,'templates/site.html'),'utf8'))+';\nexport const translations='+JSON.stringify(translations)+';\nexport const site='+JSON.stringify(config)+';\nexport const fallback='+JSON.stringify(catalogue)+';\n';
  fs.writeFileSync(path.join(release,'runtime-inputs.mjs'),inputs);
- for(const file of ['live-catalogue.mjs','live-worker.mjs','account-api.mjs'])fs.writeFileSync(path.join(release,file),fs.readFileSync(path.join(root,'deployment',file),'utf8').replaceAll('../lib/','./runtime/'));
+ for(const file of ['live-catalogue.mjs','live-worker.mjs','account-api.mjs','account-alerts.mjs'])fs.writeFileSync(path.join(release,file),fs.readFileSync(path.join(root,'deployment',file),'utf8').replaceAll('../lib/','./runtime/'));
  const wrangler={name:'motel-a-vendre',main:'./entry.mjs',compatibility_date:'2026-10-19',workers_dev:false,preview_urls:false,routes:[{pattern:'motelavendre.ca',custom_domain:true},{pattern:'www.motelavendre.ca',custom_domain:true}],assets:{directory:'./public',binding:'ASSETS',run_worker_first:['/','/index.html','/fr*','/en*','/zh*','/data/catalogue-data.js','/api/*','/sitemap.xml','/assets/centris/*','/googleb6173475a8eadbeb.html'],html_handling:'auto-trailing-slash',not_found_handling:'404-page'}};
  if(accounts){
   if(!/^[^<>@\s]+(?: [^<>@]+)* <[^<>@\s]+@mail\.motelavendre\.ca>$/.test(config.account.mailFrom||''))throw Error('Set account.mailFrom to an address on the verified Resend domain mail.motelavendre.ca');
   wrangler.d1_databases=[{binding:'ACCOUNTS',database_name:'motel-a-vendre-accounts',database_id:config.account.d1DatabaseId,migrations_dir:'../d1/migrations'}];
   // MAIL_FROM is public configuration; RESEND_API_KEY stays a Worker secret set in the dashboard.
   wrangler.vars={MAIL_FROM:config.account.mailFrom};
+  // 13:17 UTC = 8:17 (winter) / 9:17 (summer) in Québec.
+  wrangler.triggers={crons:['17 13 * * *']};
  }
  fs.writeFileSync(path.join(release,'wrangler.jsonc'),JSON.stringify(wrangler,null,2)+'\n');
  function walk(dir,prefix=''){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(f=>f.isDirectory()?walk(path.join(dir,f.name),prefix+f.name+'/'):[prefix+f.name]);}
@@ -64,5 +68,5 @@ async function prepare({direct=false}={}){
  fs.writeFileSync(path.join(release,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
  console.log(JSON.stringify({version:manifest.version,pages:pages.length,publicFiles:files.length,bytes:files.reduce((n,f)=>n+f.bytes,0),directEnquiries:direct,deployed:false}));return manifest;
 }
-if(require.main===module)prepare({direct:process.argv.includes('--direct-enquiries')}).catch(e=>{console.error(e.message);process.exitCode=1});
+if(require.main===module)prepare({direct:process.argv.includes('--direct-enquiries')||vm.runInNewContext(fs.readFileSync(path.join(root,'data/site-config.js'),'utf8')+';MAV_SITE').directEnquiries===true}).catch(e=>{console.error(e.message);process.exitCode=1});
 module.exports={prepare};

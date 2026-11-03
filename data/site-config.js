@@ -9,9 +9,11 @@ const MAV_SITE = {
     "enabled": true,
     "d1DatabaseId": "def96fbe-c980-43db-8349-1900180990df",
     "privacyContact": "Propriétaire — achat.vente.garderie@gmail.com",
-    "mailFrom": "Motel à vendre <compte@mail.motelavendre.ca>"
+    "mailFrom": "Motel à vendre <compte@mail.motelavendre.ca>",
+    "turnstileSiteKey": "0x4AAAAAAFyRNFa_q4G6kz_j"
   },
   "siteOrigin": "https://motelavendre.ca",
+  "directEnquiries": true,
   "metricsEndpoint": "https://usngcexxobcpjncuwaxo.supabase.co/functions/v1/motel-services/events",
   "coverOverrides": {
     "100013": "assets/covers/100013.webp",
