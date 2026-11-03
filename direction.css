@@ -91,3 +91,4 @@ body{font-variant-emoji:text}
 .account-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:1.25rem}.account-danger{color:#9a2f22;border-color:#d8b4ad}.button-dark.account-danger{background:#9a2f22;color:#fff;border-color:#9a2f22}.account-contact{font-size:14px}
 @media (max-width:640px){.account-form .form-row{grid-template-columns:1fr;gap:0}.account-tabs button{padding-inline:12px;font-size:14px}}
 body[data-page=account] .compare-tray{display:none}
+.account-sent{width:460px;max-width:calc(100vw - 22px)}.account-sent .dialog-heading{margin-bottom:8px;align-items:center}.account-sent h2{font-family:var(--serif);font-weight:400;font-size:1.45rem}.account-sent-icon{font-size:1.75rem;line-height:1;margin:0 0 .75rem;color:var(--brass)}.account-sent p{line-height:1.7;overflow-wrap:anywhere;margin:0}.account-sent .request-note{color:var(--muted);font-size:14px;margin:.75rem 0 1.25rem}.account-sent .button{width:100%}

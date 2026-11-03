@@ -5,7 +5,14 @@
  const App=window.MAVApp,account=App.account,t=App.t,$=s=>document.querySelector(s),e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const status=$('#account-status');
  if(!account){$('#account-unavailable').hidden=false;return;}
- const say=(message,error=false)=>{status.textContent=message;status.classList.toggle('is-error',error);};
+ const say=(message,error=false)=>{status.textContent=message;status.classList.toggle('is-error',error);if(message)status.scrollIntoView({block:'nearest',behavior:'smooth'});};
+ // A clear panel in place of the form, so a successful sign-up or reset request is never missed.
+ function showSent(key,email){
+  status.textContent='';$('#account-sent-text').textContent=t(key).replace('{email}',email);
+  selectTab('signin');$('#signin-email').value=email;$('#account-sent').showModal();$('#account-sent-back').focus();
+ }
+ $('#account-sent-back').addEventListener('click',()=>$('#account-sent').close());
+ $('#account-sent').addEventListener('close',()=>$('#signin-password').focus());
  const fail=error=>{say(App.accountMessage(error),true);if(error?.code==='session')show();};
  let busy=false,resetToken='';
  async function guarded(form,fn){
@@ -51,8 +58,8 @@
  $('.account-tabs').addEventListener('click',event=>{const tab=event.target.closest('[data-account-tab]');if(tab){selectTab(tab.dataset.accountTab);say('');}});
  $('.account-tabs').addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight'].includes(event.key))return;const tabs=['signin','signup','recover'],current=tabs.findIndex(x=>$('#tab-'+x).getAttribute('aria-selected')==='true'),next=tabs[(current+(event.key==='ArrowRight'?1:2))%3];selectTab(next);$('#tab-'+next).focus();});
  $('#form-signin').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.signIn($('#signin-email').value.trim(),$('#signin-password').value);f.reset();say('');show();});});
- $('#form-signup').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.signUp($('#signup-email').value.trim(),$('#signup-password').value,App.language());f.reset();say(t('acctCheckEmail'));});});
- $('#form-recover').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.recover($('#recover-email').value.trim(),App.language());f.reset();say(t('acctResetSent'));});});
+ $('#form-signup').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#signup-email').value.trim();await account.signUp(email,$('#signup-password').value,App.language());f.reset();showSent('acctCheckEmailText',email);});});
+ $('#form-recover').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#recover-email').value.trim();await account.recover(email,App.language());f.reset();showSent('acctResetSentText',email);});});
  $('#form-new-password').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.resetPassword(resetToken,$('#new-password').value);resetToken='';f.reset();say(t('acctPasswordSaved'));show();});});
  $('#form-profile').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const p=await account.updateProfile({full_name:$('#profile-name').value,phone:$('#profile-phone').value,preferred_language:$('#profile-language').value,buyer_budget:$('#profile-budget').value,buyer_regions:$('#profile-regions').value,buyer_timeline:$('#profile-timeline').value});App.dropProfileCache();fillProfile(p||{});say(t('acctProfileSaved'));});});
  $('#account-signout').addEventListener('click',async()=>{await account.signOut();App.clearPersonalData();say(t('acctSignedOut'));show();});

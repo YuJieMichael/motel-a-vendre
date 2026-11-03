@@ -62,7 +62,7 @@ test('account page markup is escaped, has a delete confirmation and shows the pr
  const copy=new Proxy({},{get:(_,k)=>k==='acctTitle'?'<b>x</b>':String(k)});
  const html=V.page({copy,configured:true,privacyContact:'Jane <privacy@example.com>'});
  assert.ok(html.includes('&lt;b&gt;x&lt;/b&gt;'));assert.ok(html.includes('Jane &lt;privacy@example.com&gt;'));
- for(const id of ['form-signin','form-signup','form-recover','form-new-password','form-profile','account-delete-dialog','delete-password','account-export'])assert.ok(html.includes(`id="${id}"`),id);
+ for(const id of ['form-signin','form-signup','form-recover','form-new-password','form-profile','account-sent','account-delete-dialog','delete-password','account-export'])assert.ok(html.includes(`id="${id}"`),id);
  assert.match(html,/id="account-unavailable" class="data-note" hidden/);
  assert.doesNotMatch(V.page({copy,configured:false}),/id="account-unavailable" class="data-note" hidden/);
 });
