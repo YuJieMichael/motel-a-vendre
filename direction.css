@@ -77,3 +77,6 @@ body.has-saved,body[data-page=property].has-saved{padding-bottom:calc(112px + en
 /* Readability floor for navigation, actions and listing data. */
 .main-nav a,.library-tabs button,.filter-tabs button,.button,.quiet-button,.card-detail-button,.footer-link,#results-count,.property-breadcrumb a{font-size:14px}
 .dossier-facts dt,.hero-property dt,.card-photo-count,.card-type,.search-field>span,.property-facts dt,.published-facts dt{font-size:13px}
+/* Keep arrows as text glyphs: iOS otherwise swaps U+2197 for a coloured emoji. */
+body{font-variant-emoji:text}
+.hero-project{text-decoration:none;gap:.45rem}.hero-project>[data-i18n]{text-decoration:underline;text-decoration-color:#b1a08c;text-underline-offset:6px}
