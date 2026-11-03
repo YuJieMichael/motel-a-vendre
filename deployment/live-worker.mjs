@@ -4,7 +4,7 @@ import {template,translations,site,fallback} from './runtime-inputs.mjs';
 import {responseHeaders} from './worker.mjs';
 
 const locales={fr:'fr-CA',en:'en-CA',zh:'zh-Hans'};
-const sections={fr:{equipe:'team',vendre:'seller','guide-achat':'guide'},en:{team:'team',sell:'seller','buying-guide':'guide'},zh:{team:'team',sell:'seller','buying-guide':'guide'}};
+const sections={fr:{equipe:'team',vendre:'seller','guide-achat':'guide','espace-client':'account'},en:{team:'team',sell:'seller','buying-guide':'guide',account:'account'},zh:{team:'team',sell:'seller','buying-guide':'guide',account:'account'}};
 const checkedDay=c=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Toronto',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(c.updatedAt));
 const notices={fr:'La mise à jour du catalogue est momentanément indisponible. Dernière vérification : ',en:'The catalogue update is temporarily unavailable. Last checked: ',zh:'目录更新暂时不可用。上次核验：'};
 export async function handleLiveRequest(request,env){
@@ -54,6 +54,6 @@ export async function handleLiveRequest(request,env){
  const json=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
  const hash=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(json)))));
  const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
- return wrapped(new Response(request.method==='HEAD'?null:html,{headers:{'Content-Type':'text/html; charset=utf-8','X-Catalogue-Status':status,'X-Catalogue-Checked-At':catalogue.updatedAt}}),csp);
+ return wrapped(new Response(request.method==='HEAD'?null:html,{headers:{'Content-Type':'text/html; charset=utf-8','X-Catalogue-Status':status,'X-Catalogue-Checked-At':catalogue.updatedAt,...(kind==='account'?{'X-Robots-Tag':'noindex, nofollow'}:{})}}),csp);
 }
 export default {fetch:handleLiveRequest};
