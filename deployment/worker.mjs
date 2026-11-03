@@ -1,3 +1,4 @@
+import Routes from '../lib/site-routes.cjs';
 // Bounded routing and response headers only. Enquiries go to the existing service.
 export const canonicalOrigin='https://motelavendre.ca';
 export const intakeOrigin='https://usngcexxobcpjncuwaxo.supabase.co';
@@ -21,6 +22,7 @@ export async function handleRequest(request,env){
  if(!['GET','HEAD'].includes(request.method))return responseHeaders(new Response('Method not allowed',{status:405,headers:{Allow:'GET, HEAD'}}),request);
  if(!isLocal&&(url.hostname==='www.motelavendre.ca'||url.protocol!=='https:'))return responseHeaders(Response.redirect(canonicalOrigin+url.pathname+url.search,308),request);
  if(url.pathname==='/'||url.pathname==='/index.html')return responseHeaders(Response.redirect(new URL('/fr/'+url.search,isLocal?url.origin:canonicalOrigin).href,301),request);
+ const oldTarget=Routes.legacyTarget(url.pathname);if(oldTarget){const target=new URL(oldTarget,isLocal?url.origin:canonicalOrigin);target.search=url.search;return responseHeaders(Response.redirect(target.href,301),request);}
  const response=await env.ASSETS.fetch(request);
  return responseHeaders(response,request);
 }

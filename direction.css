@@ -91,4 +91,55 @@ body{font-variant-emoji:text}
 .account-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:1.25rem}.account-danger{color:#9a2f22;border-color:#d8b4ad}.button-dark.account-danger{background:#9a2f22;color:#fff;border-color:#9a2f22}.account-contact{font-size:14px}
 @media (max-width:640px){.account-form .form-row{grid-template-columns:1fr;gap:0}.account-tabs button{padding-inline:12px;font-size:14px}}
 body[data-page=account] .compare-tray{display:none}
+/* Catalogue-first layout: quiet navigation, useful content, one account entry. */
+html{scroll-padding-top:112px}
+.site-header.wrap{gap:clamp(16px,2vw,30px);min-height:88px;padding-block:12px}
+.site-header .brand{min-width:0;flex-shrink:0}
+.site-header .main-nav{display:flex;gap:24px;flex-shrink:0;margin-left:auto}
+.site-header .main-nav a,.site-header .nav-saved,.header-sell,.nav-account{white-space:nowrap;font-size:14px}
+.site-header .header-actions{display:flex;align-items:center;gap:18px;margin-left:0;flex-shrink:0}
+.site-header .header-sell{display:inline-flex;min-height:44px;padding:10px 16px}
+.nav-account{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:44px;min-height:44px;padding:8px 0 8px 18px;border-left:1px solid var(--line)}
+.nav-account svg{width:19px;height:19px;stroke-width:1.5}
+.nav-account[aria-current=page]{color:var(--brass)}
+.search-section{padding-block:20px 18px;border-top:1px solid var(--line)}
+.search-bar{margin-top:0}
+.advanced-filters{margin-top:12px}
+.search-under{padding-top:10px;font-size:13px}
+.listings-section{padding-top:24px;padding-bottom:32px}
+.listings-section .section-heading{margin-bottom:22px;align-items:center}
+.listings-section .section-heading h2,html[lang=zh-Hans] .listings-section .section-heading h2{font-size:clamp(27px,3vw,38px);line-height:1.25;margin:6px 0 0}
+.seller-strip{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:28px;border-top:1px solid var(--line)}
+.seller-strip h2{font-size:clamp(23px,2.3vw,29px);line-height:1.3}
+.seller-strip p{margin-top:8px;max-width:65ch;font-size:14px;color:var(--muted)}
+.seller-strip .button{flex-shrink:0}
+.site-footer .footer-extra{gap:12px 28px;padding-block:20px 0}
+.site-footer .footer-top{padding-block:24px;gap:24px}
+.site-footer .footer-link{margin-left:auto}
+.buying-guide{padding-block:36px 48px}
+.buying-guide h1{font-size:clamp(32px,4vw,46px);margin-block:16px}
+.guide-lead{font-size:16px;max-width:65ch}
+.guide-steps{margin-top:28px;gap:24px}
+.guide-steps h2{font-size:24px;line-height:1.3}
+.guide-seller{margin-top:36px;padding-top:28px;border-top:1px solid var(--line);scroll-margin-top:112px}
+.guide-seller h2{font-size:28px;line-height:1.3}
+.guide-seller ul{padding-left:22px;margin-block:18px;line-height:1.85}
+.guide-seller p{max-width:72ch;color:var(--muted);font-size:14px}
+.guide-seller .button{margin-top:18px}
+.guide-faq{margin-top:32px}
+@media(max-width:1000px){.site-header.wrap{display:grid;grid-template-columns:minmax(0,1fr) auto auto;column-gap:18px;row-gap:4px;padding-block:10px}.site-header>.brand{grid-column:1;grid-row:1}.site-header .header-actions{display:contents}.site-header .language-switch{grid-column:2;grid-row:1}.site-header .nav-account{grid-column:3;grid-row:1}.site-header .main-nav{grid-column:1/3;grid-row:2;justify-content:flex-start;margin-left:0}.site-header .header-sell{grid-column:3;grid-row:2;justify-self:end}}
+@media(max-width:640px){html{scroll-padding-top:130px}.site-header.wrap{grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:4px;padding:8px max(16px,env(safe-area-inset-right)) 8px max(16px,env(safe-area-inset-left))}.site-header .brand{grid-column:1;grid-row:1;gap:8px}.site-header .brand-mark{width:28px;height:34px}.site-header .brand-wordmark strong,.site-header .brand-wordmark strong em{font:400 22px/1.15 var(--serif);letter-spacing:-.035em;display:inline;margin:0}.site-header .brand-wordmark strong{display:flex;gap:4px}.site-header .brand-wordmark small{font-size:10px;letter-spacing:.15em;margin-top:4px}.site-header .main-nav{display:none}.site-header .language-switch{grid-column:1;grid-row:2;justify-self:start}.site-header .language-switch [data-lang]{min-width:44px;min-height:44px;font-size:12px}.site-header .nav-account{grid-column:2;grid-row:1;padding:10px;border-left:0}.nav-account .account-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.site-header .header-sell{grid-column:2;grid-row:2;min-width:76px;font-size:13px;padding:9px 12px}.search-section{padding-block:16px}.advanced-filters{gap:12px}.listings-section{padding-block:22px}.listings-section .section-heading{margin-bottom:18px}.seller-strip{align-items:flex-start;flex-direction:column;gap:18px;padding-block:24px}.seller-strip h2{font-size:24px}.site-footer .footer-top{flex-wrap:wrap;gap:18px}.site-footer .footer-link{margin-left:0}.buying-guide{padding-block:26px 36px}.guide-steps{gap:20px}.guide-steps h2{font-size:22px}.guide-seller{scroll-margin-top:130px}.guide-seller h2{font-size:25px}}
 .account-sent{width:380px;max-width:calc(100vw - 32px);padding:22px 24px 24px}.account-sent .dialog-heading{margin-bottom:10px;align-items:center;gap:12px}.account-sent h2{font-family:var(--serif);font-weight:400;font-size:1.25rem;line-height:1.3;display:flex;align-items:center;gap:10px}.account-sent-icon{font-size:1.2rem;color:var(--brass)}.account-sent .close-dialog{width:34px;height:34px;min-width:34px;font-size:18px}.account-sent p{font-size:15px;line-height:1.6;overflow-wrap:anywhere;margin:0}.account-sent .request-note{color:var(--muted);font-size:13px;line-height:1.55;margin:10px 0 18px}.account-sent .button{width:100%;min-height:42px;padding-block:10px;margin:0}
+
+.catalogue-intro{display:flex;justify-content:space-between;align-items:center;gap:32px;padding-block:32px 24px}.catalogue-intro h1,html[lang=zh-Hans] .catalogue-intro h1{font-size:clamp(28px,3.3vw,42px);line-height:1.2;letter-spacing:-.025em;margin:0 0 12px}.catalogue-intro p{font-size:15px;line-height:1.75;color:var(--muted);max-width:78ch}.catalogue-intro .text-link{flex-shrink:0;margin-top:0;white-space:nowrap;min-height:44px}.more-filters{margin-top:8px}.more-filters>summary{width:max-content;min-height:44px;line-height:44px;font-size:14px;cursor:pointer}.more-filters .advanced-filters{margin-top:4px;margin-bottom:10px}.listings-toolbar{justify-content:flex-end}.listings-section .section-heading h2{font-size:32px}@media(max-width:640px){.catalogue-intro{padding-block:24px 18px;flex-direction:column;align-items:flex-start;gap:10px}.catalogue-intro h1,html[lang=zh-Hans] .catalogue-intro h1{font-size:29px;line-height:1.3;letter-spacing:0}.catalogue-intro p{font-size:14px}.catalogue-intro .text-link{margin:0;padding-block:8px}.listings-section .section-heading h2,html[lang=zh-Hans] .listings-section .section-heading h2{font-size:27px}}
+.catalogue-intro h1,html[lang=zh-Hans] .catalogue-intro h1{font-family:var(--serif);font-weight:400}
+.search-section{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px}
+.search-section .search-bar{grid-column:1/-1}
+.search-section .more-filters{grid-column:1;grid-row:2;margin:0}
+.search-section .search-under{grid-column:2;grid-row:2;align-self:start;margin:0;padding:0;min-height:44px;border:0;justify-content:flex-end}
+.search-section .search-under .quiet-button{min-height:44px;margin:0}
+.catalogue-controls{display:flex;justify-content:space-between;align-items:center;gap:12px 24px;flex-wrap:wrap}
+.catalogue-controls .library-tabs{margin:0;padding-block:0}
+.catalogue-controls .listings-toolbar{margin:0;padding:0;border:0}
+.results-line{margin-top:14px}
+.catalogue-error .button{margin-right:14px}

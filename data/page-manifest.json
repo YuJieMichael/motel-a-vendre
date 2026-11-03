@@ -14,20 +14,6 @@
     "reference": ""
   },
   {
-    "file": "fr/equipe/index.html",
-    "route": "fr/equipe/",
-    "lang": "fr",
-    "kind": "team",
-    "reference": ""
-  },
-  {
-    "file": "fr/vendre/index.html",
-    "route": "fr/vendre/",
-    "lang": "fr",
-    "kind": "seller",
-    "reference": ""
-  },
-  {
     "file": "fr/guide-achat/index.html",
     "route": "fr/guide-achat/",
     "lang": "fr",
@@ -84,20 +70,6 @@
     "reference": ""
   },
   {
-    "file": "en/team/index.html",
-    "route": "en/team/",
-    "lang": "en",
-    "kind": "team",
-    "reference": ""
-  },
-  {
-    "file": "en/sell/index.html",
-    "route": "en/sell/",
-    "lang": "en",
-    "kind": "seller",
-    "reference": ""
-  },
-  {
     "file": "en/buying-guide/index.html",
     "route": "en/buying-guide/",
     "lang": "en",
@@ -151,20 +123,6 @@
     "route": "zh/",
     "lang": "zh",
     "kind": "home",
-    "reference": ""
-  },
-  {
-    "file": "zh/team/index.html",
-    "route": "zh/team/",
-    "lang": "zh",
-    "kind": "team",
-    "reference": ""
-  },
-  {
-    "file": "zh/sell/index.html",
-    "route": "zh/sell/",
-    "lang": "zh",
-    "kind": "seller",
     "reference": ""
   },
   {

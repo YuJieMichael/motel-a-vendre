@@ -1,11 +1,12 @@
 import createRenderer from '../lib/page-renderer.cjs';
+import Routes from '../lib/site-routes.cjs';
 import {loadCatalogue} from './live-catalogue.mjs';
 import {template,translations,site,fallback} from './runtime-inputs.mjs';
 import {responseHeaders} from './worker.mjs';
 import {createAccountApi} from './account-api.mjs';
 
 const locales={fr:'fr-CA',en:'en-CA',zh:'zh-Hans'};
-const sections={fr:{equipe:'team',vendre:'seller','guide-achat':'guide',compte:'account'},en:{team:'team',sell:'seller','buying-guide':'guide',account:'account'},zh:{team:'team',sell:'seller','buying-guide':'guide',account:'account'}};
+const sections={fr:{'guide-achat':'guide',compte:'account'},en:{'buying-guide':'guide',account:'account'},zh:{'buying-guide':'guide',account:'account'}};
 const accountsEnabled=!!(site.account&&site.account.enabled===true);
 const accountApi=createAccountApi({siteOrigin:site.siteOrigin});
 const checkedDay=c=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Toronto',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(c.updatedAt));
@@ -24,6 +25,7 @@ export async function handleLiveRequest(request,env){
  if(!local&&(url.hostname==='www.motelavendre.ca'||url.protocol!=='https:'))return wrapped(Response.redirect(site.siteOrigin+url.pathname+url.search,308));
  if(['/','/index.html'].includes(url.pathname))return wrapped(Response.redirect(new URL('/fr/'+url.search,local?url.origin:site.siteOrigin).href,301));
  if(url.pathname==='/googleb6173475a8eadbeb.html')return wrapped(new Response(request.method==='HEAD'?null:'google-site-verification: googleb6173475a8eadbeb.html',{headers:{'Content-Type':'text/html; charset=utf-8'}}));
+ const oldTarget=Routes.legacyTarget(url.pathname);if(oldTarget){const target=new URL(oldTarget,local?url.origin:site.siteOrigin);target.search=url.search;return wrapped(Response.redirect(target.href,301));}
  const route=/^\/(fr|en|zh)(?:\/(.*))?$/.exec(url.pathname);
  const dynamic=['/data/catalogue-data.js','/api/catalogue','/sitemap.xml'].includes(url.pathname)||url.pathname.startsWith('/assets/centris/');
  if(!route&&!dynamic)return wrapped(await env.ASSETS.fetch(request));
@@ -42,7 +44,7 @@ export async function handleLiveRequest(request,env){
  const renderer=createRenderer({template,translations,catalogue,site,indexable:true});
  if(url.pathname==='/sitemap.xml'){
   const urls=[];
-  for(const lang of ['fr','en','zh'])for(const [kind,reference]of [['home',''],['team',''],['seller',''],['guide',''],...catalogue.items.map(p=>['property',p.reference])]){
+  for(const lang of ['fr','en','zh'])for(const [kind,reference]of [['home',''],['guide',''],...catalogue.items.map(p=>['property',p.reference])]){
    urls.push(`<url><loc>${site.siteOrigin+'/'+renderer.publicPath(lang,kind,reference)}</loc>${['fr','en','zh'].map(l=>`<xhtml:link rel="alternate" hreflang="${locales[l]}" href="${site.siteOrigin+'/'+renderer.publicPath(l,kind,reference)}"/>`).join('')}</url>`);
   }
   return wrapped(new Response(request.method==='HEAD'?null:'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'+urls.join('')+'</urlset>',{headers:{'Content-Type':'application/xml; charset=utf-8'}}));

@@ -36,6 +36,8 @@ For an approved production update, review the generated release manifest, routes
 
 ## Catalogue, images and indexing
 
+Public navigation has four page types: catalogue home, property details, a practical document/FAQ guide, and the private buyer account. Former localized team URLs redirect permanently to the catalogue; former seller URLs redirect to the seller checklist in the guide. The shared mappings in `lib/site-routes.cjs` run before catalogue refresh and preserve query parameters. Local preview uses the same redirects. These retired pages are excluded from both static and dynamic sitemaps.
+
 The Worker reads only `published_listings` with the public browser key and a restricted field selection. Normal live-cache freshness is five minutes. On a source failure it uses the dated validated fallback, backs off for one minute and reports its state through `/api/catalogue`. Withdrawn listings return 404; uncertain unknown references during an outage return 503.
 
 The sitemap is dynamic. Root requests redirect to French. Page canonical URLs, language alternates, structured data and security headers are generated per route. Keep the public Google verification HTML file available during rebuilds.

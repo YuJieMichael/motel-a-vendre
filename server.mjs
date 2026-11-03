@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import Routes from './lib/site-routes.cjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const port=Number(process.env.PORT||5173);
 const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8','.ico':'image/x-icon','.webmanifest':'application/manifest+json; charset=utf-8'};
@@ -30,6 +31,9 @@ async function handleAccount(req,res){
 const server=http.createServer((req,res)=>{
   if(accountApi&&req.url.startsWith('/api/account/')){handleAccount(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
   if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);res.end('Method not allowed');return;}
+  let requestURL;try{requestURL=new URL(req.url,'http://127.0.0.1:'+port);}catch{res.writeHead(400);res.end('Bad request');return;}
+  const oldTarget=Routes.legacyTarget(requestURL.pathname);
+  if(oldTarget){const target=new URL(oldTarget,requestURL);target.search=requestURL.search;res.writeHead(301,{Location:target.pathname+target.search+target.hash,'Cache-Control':'no-cache','X-Robots-Tag':'noindex, nofollow'});res.end();return;}
   let file;
   try{const url=new URL(req.url,'http://localhost');let pathname=decodeURIComponent(url.pathname);if(pathname.endsWith('/'))pathname+='index.html';file=path.resolve(root,'.'+pathname);}catch{res.writeHead(400);res.end('Bad request');return;}
   const relative=path.relative(root,file);
