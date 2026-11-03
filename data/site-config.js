@@ -7,7 +7,7 @@ const MAV_SITE = {
   "mainOrigin": "https://proprieteenvente.ca",
   "account": {
     "enabled": false,
-    "d1DatabaseId": "",
+    "d1DatabaseId": "def96fbe-c980-43db-8349-1900180990df",
     "privacyContact": ""
   },
   "siteOrigin": "https://motelavendre.ca",

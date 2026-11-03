@@ -2,7 +2,7 @@
 -- Binding: ACCOUNTS. Fully separate from the main Propriété En Vente database.
 -- Apply with: npx wrangler d1 migrations apply motel-a-vendre-accounts --remote
 
-PRAGMA foreign_keys = ON;
+-- D1 enforces foreign keys by default; deletes are also explicit in the API.
 
 CREATE TABLE users (
   id TEXT PRIMARY KEY,
