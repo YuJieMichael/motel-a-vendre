@@ -28,7 +28,7 @@ const area=value=>value===null?t('toConfirm'):new Intl.NumberFormat(locale(),{ma
 const roomSummary=p=>p.rooms===null?p.roomsText[language]||t('toConfirm'):t('roomCount',{count:p.rooms});
 const seasonLabel=p=>t(p.season==='year-round'?'yearRound':p.season==='seasonal'?'seasonal':'unknownSeason');
 const icons={bookmark:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',pin:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10" r="2"/></svg>',bed:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19V6m18 13V9H3m0 7h18M6 9V5h5v4m2 0V5h5v4"/></svg>'};
-const paths={fr:{team:'equipe',seller:'vendre',guide:'guide-achat'},en:{team:'team',seller:'sell',guide:'buying-guide'},zh:{team:'team',seller:'sell',guide:'buying-guide'}};
+const paths={fr:{team:'equipe',seller:'vendre',guide:'guide-achat',account:'compte'},en:{team:'team',seller:'sell',guide:'buying-guide',account:'account'},zh:{team:'team',seller:'sell',guide:'buying-guide',account:'account'}};
 function pageURL(lang=language,kind='home',reference=''){
  const route=lang+'/'+(kind==='property'?'proprietes/'+reference+'/':kind==='home'?'':paths[lang][kind]+'/');
  return new URL(route+(location.protocol==='file:'?'index.html':''),SITE_ROOT).href;
@@ -97,7 +97,6 @@ function showShare(p=null){
  const url=p?location.protocol==='file:'?Core.routeHash({lang:language,property:Core.reference(p)},regions):pageURL(language,'property',Core.reference(p)):Core.shareURL(pageURL(language),{...state,property:'',tab:'all'},regions);
  $('#share-url').value=url;$('#share-feedback').textContent='';$('#share-dialog').showModal();
 }
-function mainEnquiryURL(kind,p,purpose){const url=new URL(language+'/',config.mainOrigin+'/');url.hash=kind==='seller'?'vendre':p?'acheter?listing='+encodeURIComponent(Core.reference(p))+(purpose==='documents'?'&intent=nda':''):'acheter?propertyType=hotel-motel&intent=hotel-acquisition';return url.href;}
 function setFormError(message){const error=$('#form-error');error.textContent=message;error.hidden=!message;if(message)error.scrollIntoView({block:'nearest'});}
 function showEnquiry(kind,id='',purpose='info'){
  if(busy)return;
@@ -114,7 +113,7 @@ function showEnquiry(kind,id='',purpose='info'){
  $('#enquiry-consent').setCustomValidity('');$('#enquiry-service').setCustomValidity('');
  const available=Enquiry.canSubmit(config,location.origin)&&(!enquiryProperty||enquiryProperty.real);
  $('#enquiry-consent').closest('label').hidden=!available;
- $('#intake-unavailable').hidden=available;$('#main-enquiry-link').href=mainEnquiryURL(kind,enquiryProperty,purpose);$('#send-enquiry').disabled=!available;$('#send-enquiry').hidden=config.publicationMode==='production'&&!available;$('#main-enquiry-link').classList.toggle('button',config.publicationMode==='production');$('#main-enquiry-link').classList.toggle('button-dark',config.publicationMode==='production');
+ $('#intake-unavailable').hidden=available;$('#send-enquiry').disabled=!available;$('#send-enquiry').hidden=config.publicationMode==='production'&&!available;
  recordMetric('enquiry_open',enquiryProperty?.reference||'');$('#enquiry-form').hidden=false;$('#enquiry-success').hidden=true;setFormError('');$('#enquiry-dialog').showModal();
 }
 function collectDraft(){

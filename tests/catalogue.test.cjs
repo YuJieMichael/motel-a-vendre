@@ -52,5 +52,5 @@ test('main-site import keeps public descriptions, localized names and administra
  assert.equal(p.region,'Chaudière-Appalaches');assert.equal(p.copy.fr.description,description);
  assert.equal(p.copy.fr.short,'Environ 17 chambres pour ce motel à Laurier-Station.');assert.equal(p.copy.zh.short,'约 17 间客房的 Laurier-Station 汽车旅馆。');
  const [q]=C.importMainRows([{listing_number:8,property:{type:'hotel-motel',city:'Ville Inconnue (Secteur)',description:'court'}}],'2026-11-03T00:00:00Z').items;
- assert.equal(q.region,'Ville Inconnue');assert.equal(q.copy.fr.short,'Annonce publique de Propriété En Vente.');assert.equal(C.nameOf(q,'en'),'Hotel / motel — Ville Inconnue');
+ assert.equal(q.region,'Ville Inconnue');assert.equal(q.copy.fr.short,'Annonce publique de motel ou hôtel.');assert.equal(C.nameOf(q,'en'),'Hotel / motel — Ville Inconnue');
 });

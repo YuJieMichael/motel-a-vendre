@@ -8,13 +8,14 @@ async function prepare({direct=false}={}){
  const accounts=!!(config.account&&config.account.enabled===true);
  if(accounts&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(config.account.d1DatabaseId||''))throw Error('Set account.d1DatabaseId (wrangler d1 create motel-a-vendre-accounts) before enabling accounts');
  if(accounts&&!String(config.account.privacyContact||'').trim())throw Error('Québec Law 25: set account.privacyContact (person in charge of personal information) before enabling accounts');
- let intakeCheck={enabled:false,reason:'Main-site enquiry hand-off is available; direct sending is gated.'};
+ const directEnabled=direct||config.enquiryMode==='direct';
+ let intakeCheck={enabled:directEnabled,verification:'not-run',reason:directEnabled?'Existing enquiry endpoint enabled by site configuration; no live request made during this build.':'Direct sending is disabled; local drafts remain available.'};
  if(direct){
   const preflight=await fetch(config.endpoint,{method:'OPTIONS',headers:{Origin:config.siteOrigin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type,apikey'},signal:AbortSignal.timeout(12000)});
-  if(preflight.status!==204||preflight.headers.get('access-control-allow-origin')!==config.siteOrigin)throw Error('Production enquiry origin is not yet allowed. Keep the hand-off release or deploy and verify the reviewed backend change first.');
+  if(preflight.status!==204||preflight.headers.get('access-control-allow-origin')!==config.siteOrigin)throw Error('Production enquiry origin is not yet allowed. Verify the existing enquiry backend before enabling direct sending.');
   const validation=await fetch(config.endpoint,{method:'POST',headers:{Origin:config.siteOrigin,'Content-Type':'application/json',apikey:config.publishableKey},body:'{}',signal:AbortSignal.timeout(12000)});
   if(validation.status!==400||validation.headers.get('access-control-allow-origin')!==config.siteOrigin)throw Error('Non-writing enquiry validation did not pass');
-  intakeCheck={enabled:true,preflight:preflight.status,rejectedInvalidBody:validation.status,productionEnquiriesSent:0};
+  intakeCheck={enabled:true,verification:'non-writing-live-check',preflight:preflight.status,rejectedInvalidBody:validation.status,productionEnquiriesSent:0};
  }
  cleanOwned(stage);cleanOwned(publicDir);
  for(const dir of ['templates','data'])fs.mkdirSync(path.join(stage,dir),{recursive:true});
@@ -23,9 +24,9 @@ async function prepare({direct=false}={}){
  const translations=vm.runInNewContext(fs.readFileSync(path.join(root,'i18n.js'),'utf8')+';translations');
  const copy=require('../deployment/publication-copy.cjs');
  for(const lang of ['fr','en','zh'])Object.assign(translations[lang],copy[lang]);
- if(direct){for(const lang of ['fr','en','zh'])translations[lang].realFormNote=vm.runInNewContext(fs.readFileSync(path.join(root,'i18n.js'),'utf8')+';translations')[lang].realFormNote;}
+ if(directEnabled){for(const lang of ['fr','en','zh'])translations[lang].realFormNote=vm.runInNewContext(fs.readFileSync(path.join(root,'i18n.js'),'utf8')+';translations')[lang].realFormNote;}
  fs.writeFileSync(path.join(stage,'i18n.js'),'const translations = '+JSON.stringify(translations,null,2)+';\n');
- config.publicationMode='production';if(direct)config.allowedOrigins=[...new Set([...config.allowedOrigins,config.siteOrigin,'https://www.motelavendre.ca'])];
+ config.publicationMode='production';if(directEnabled)config.allowedOrigins=[...new Set([...config.allowedOrigins,config.siteOrigin,'https://www.motelavendre.ca'])];
  fs.writeFileSync(path.join(stage,'data/site-config.js'),'const MAV_SITE = '+JSON.stringify(config,null,2)+';\n');
  const generated=spawnSync(process.execPath,[path.join(root,'scripts/generate-pages.cjs'),'--indexable'],{env:{...process.env,MAV_RELEASE_ROOT:stage},encoding:'utf8'});
  if(generated.status!==0)throw Error(generated.stderr||generated.stdout);
@@ -41,7 +42,7 @@ async function prepare({direct=false}={}){
  const workerSource=fs.readFileSync(path.join(root,'deployment/worker.mjs'),'utf8').replace('/* RELEASE_JSON_LD_HASHES */[]',JSON.stringify(hashes));
  fs.writeFileSync(path.join(release,'worker.mjs'),workerSource);
  fs.copyFileSync(path.join(root,'deployment/entry.mjs'),path.join(release,'entry.mjs'));
- const policy="default-src 'self'; script-src 'self' "+hashes.join(' ')+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(config.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
+ const policy="default-src 'self'; script-src 'self' "+hashes.join(' ')+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(config.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
  const headerLines=['/*','  X-Content-Type-Options: nosniff','  X-Frame-Options: DENY','  Referrer-Policy: strict-origin-when-cross-origin','  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()','  Cache-Control: public, max-age=0, must-revalidate','  Content-Security-Policy: '+policy];
  if(headerLines.some(line=>line.length>2000))throw Error('Review CSP header size before publishing');fs.writeFileSync(path.join(publicDir,'_headers'),headerLines.join('\n')+'\n');
  const runtime=path.join(release,'runtime');fs.mkdirSync(runtime,{recursive:true});
@@ -62,7 +63,7 @@ async function prepare({direct=false}={}){
  const digest=file=>crypto.createHash('sha256').update(fs.readFileSync(path.join(release,file))).digest('hex');
  const manifest={version:JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8')).version,preparedAt:new Date().toISOString(),deployed:false,canonicalOrigin:config.siteOrigin,worker:wrangler.name,entrySha256:digest('entry.mjs'),workerSha256:digest('worker.mjs'),configSha256:digest('wrangler.jsonc'),intake:intakeCheck,accounts,propertySnapshot:catalogue.updatedAt,pages:pages.length,files};
  fs.writeFileSync(path.join(release,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
- console.log(JSON.stringify({version:manifest.version,pages:pages.length,publicFiles:files.length,bytes:files.reduce((n,f)=>n+f.bytes,0),directEnquiries:direct,deployed:false}));return manifest;
+ console.log(JSON.stringify({version:manifest.version,pages:pages.length,publicFiles:files.length,bytes:files.reduce((n,f)=>n+f.bytes,0),directEnquiries:directEnabled,deployed:false}));return manifest;
 }
 if(require.main===module)prepare({direct:process.argv.includes('--direct-enquiries')}).catch(e=>{console.error(e.message);process.exitCode=1});
 module.exports={prepare};

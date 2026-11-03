@@ -62,7 +62,7 @@ export async function handleLiveRequest(request,env){
  if(status!=='live')html=html.replace('<main ',`<aside class="catalogue-status" role="status">${notices[lang]+checkedDay(catalogue)}</aside><main `);
  const json=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
  const hash=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(json)))));
- const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
+ const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
  return wrapped(new Response(request.method==='HEAD'?null:html,{headers:{'Content-Type':'text/html; charset=utf-8','X-Catalogue-Status':status,'X-Catalogue-Checked-At':catalogue.updatedAt,...(kind==='account'?{'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'}:{})}}),csp);
 }
 export default {fetch:handleLiveRequest};

@@ -1,15 +1,42 @@
-// Release copy only. Normal local previews retain their explicit local status.
+// Publication copy. Enquiries stay on Motel à vendre.
 module.exports={
- fr:{demo:'QUÉBEC / IMMOBILIER HÔTELIER',snapshotBanner:'QUÉBEC / IMMOBILIER HÔTELIER',footerLocal:'Motels et hôtels au Québec · CAD',privacy:'Confidentialité et données',snapshotNote:'Catalogue public vérifié le {date}. Prix, renseignements et disponibilité à confirmer avec l’équipe Propriété En Vente.',shareHelp:'Le lien inclut uniquement la propriété ou les critères publics de la recherche. Les coordonnées du formulaire ne sont jamais ajoutées au lien.',sendUnavailable:'Les demandes sont recueillies sur le site Propriété En Vente. Ouvrez son formulaire pour envoyer votre demande, ou conservez un brouillon sur cet appareil.',realFormNote:'Votre demande est destinée à Propriété En Vente. Le brouillon reste sur cet appareil; son enregistrement ne transmet rien.',privacyLimit:'Consultez la politique du site principal avant de lui transmettre une demande. Les favoris et brouillons restent dans ce navigateur; leur suppression ne retire pas une demande déjà envoyée.'},
- en:{demo:'QUÉBEC / HOSPITALITY PROPERTY',snapshotBanner:'QUÉBEC / HOSPITALITY PROPERTY',footerLocal:'Québec motels and hotels · CAD',privacy:'Privacy and data',snapshotNote:'Public catalogue checked {date}. Confirm prices, details and availability with the Propriété En Vente team.',shareHelp:'The link includes only a property or public search criteria. Contact details from the form are never added to it.',sendUnavailable:'Enquiries are collected on the Propriété En Vente website. Open its form to send your request, or keep a draft on this device.',realFormNote:'Your request is intended for Propriété En Vente. A draft stays on this device and saving it does not send anything.',privacyLimit:'Read the main website’s privacy policy before sending it an enquiry. Favourites and drafts stay in this browser; clearing them does not withdraw an enquiry already sent.'},
- zh:{demo:'魁北克 / 酒店物业',snapshotBanner:'魁北克 / 酒店物业',footerLocal:'魁北克 Motel 与酒店物业 · 加元',privacy:'隐私与数据',snapshotNote:'公开目录核验于{date}。报价、资料与在售状态请与 Propriété En Vente 团队确认。',shareHelp:'链接只包含房源或公开筛选条件，不会包含表单中的联系方式。',sendUnavailable:'咨询由 Propriété En Vente 主站收集。请打开主站表单发送，或仅在本机保存草稿。',realFormNote:'咨询将由 Propriété En Vente 团队跟进；保存草稿只保留在本机，不会发送。',privacyLimit:'向主站发送资料前请阅读其隐私说明。收藏与草稿仅保存在当前浏览器；清除它们不会撤回已经发送的咨询。'}
+  "fr": {
+    "demo": "QUÉBEC / IMMOBILIER HÔTELIER",
+    "snapshotBanner": "QUÉBEC / IMMOBILIER HÔTELIER",
+    "footerLocal": "Motels et hôtels au Québec · CAD",
+    "privacy": "Confidentialité et données",
+    "snapshotNote": "Catalogue public vérifié le {date}. Prix, renseignements et disponibilité à confirmer auprès de l’équipe Motel à vendre.",
+    "shareHelp": "Le lien contient uniquement les renseignements publics de l’annonce et de la recherche. Les liens de l’aperçu local fonctionnent sur cet ordinateur; après publication, ils utiliseront l’adresse du site.",
+    "sendUnavailable": "L’envoi est indisponible depuis cette adresse. Vous pouvez conserver un brouillon sur cet appareil et réessayer plus tard sur motelavendre.ca.",
+    "realFormNote": "Envoyez votre demande ici à l’équipe Motel à vendre. Le brouillon local reste une option distincte.",
+    "privacyLimit": "Effacer les données de ce navigateur ne supprime ni les données du compte ni les demandes déjà envoyées. Gérez votre compte dans « Mon compte »; pour une demande envoyée, contactez la personne responsable des renseignements personnels.",
+    "teamOneText": "Chaque propriété conserve une référence publique. Le catalogue est daté; confirmez la disponibilité auprès de l’équipe avant d’avancer.",
+    "draftSavedText": "Aucun message n’a été envoyé. Téléchargez ce brouillon ou reprenez le formulaire pour envoyer votre demande lorsque vous serez prêt."
+  },
+  "en": {
+    "demo": "QUÉBEC / HOSPITALITY PROPERTY",
+    "snapshotBanner": "QUÉBEC / HOSPITALITY PROPERTY",
+    "footerLocal": "Québec motels and hotels · CAD",
+    "privacy": "Privacy and data",
+    "snapshotNote": "Public catalogue checked {date}. Confirm prices, details and availability with the Motel à vendre team.",
+    "shareHelp": "The link includes only public listing and search information. Local preview links work on this computer; published links will use your website address.",
+    "sendUnavailable": "Sending is unavailable from this address. Keep a draft on this device and try again later on motelavendre.ca.",
+    "realFormNote": "Send your enquiry here to the Motel à vendre team. Saving a local draft is a separate option.",
+    "privacyLimit": "Clearing this browser does not delete account data or enquiries already sent. Manage your account in “My account”; for a sent enquiry, contact the person in charge of personal information.",
+    "teamOneText": "Each property keeps a public reference. This catalogue is dated; confirm availability with the team before proceeding.",
+    "draftSavedText": "Nothing has been sent. Download this draft or return to the form to send your enquiry when you are ready."
+  },
+  "zh": {
+    "demo": "魁北克 / 酒店物业",
+    "snapshotBanner": "魁北克 / 酒店物业",
+    "footerLocal": "魁北克 Motel 与酒店物业 · 加元",
+    "privacy": "隐私与数据",
+    "snapshotNote": "公开目录核验于{date}。报价、资料与在售状态请与 Motel à vendre 团队确认。",
+    "shareHelp": "链接仅包含公开房源和搜索条件。本地预览链接只能在这台电脑上使用；上线后会使用正式网站地址。",
+    "sendUnavailable": "当前地址暂不支持发送。您可以在本机保存草稿，稍后在 motelavendre.ca 重试。",
+    "realFormNote": "在此发送咨询，由 Motel à vendre 团队跟进。保存本地草稿是单独的选项。",
+    "privacyLimit": "清除当前浏览器的数据不会删除账户资料或已经发送的咨询。账户资料可在“我的账户”中管理；已发送的咨询请联系个人信息保护负责人处理。",
+    "teamOneText": "每套物业保留公开编号，方便查询和后续沟通。目录注明核验日期，推进前请与团队确认在售状态。",
+    "draftSavedText": "尚未发送任何信息。您可以下载草稿，或返回表单，在准备好后发送咨询。"
+  }
 };
-Object.assign(module.exports.fr,{teamOneText:'Chaque fiche conserve le numéro public du site principal. Le catalogue est daté; confirmez la disponibilité auprès de l’équipe avant d’avancer.'});
-Object.assign(module.exports.en,{teamOneText:'Each property keeps its public reference from the main website. This catalogue is dated; confirm availability with the team before proceeding.'});
-Object.assign(module.exports.zh,{teamOneText:'每套物业沿用主站的公开编号。目录注明核验日期，推进前请与团队确认在售状态。'});
-Object.assign(module.exports.fr,{realFormNote:'Envoyez votre demande dans le formulaire principal. Les coordonnées saisies ci-dessous restent dans un brouillon sur cet appareil; elles ne sont pas recopiées dans le formulaire principal.'});
-Object.assign(module.exports.en,{realFormNote:'Send your enquiry through the main website’s form. Details entered below are for a draft on this device and are not copied into the main form.'});
-Object.assign(module.exports.zh,{realFormNote:'请在主站表单发送咨询。以下内容仅用于保存本机草稿，不会自动带入主站表单。'});
-Object.assign(module.exports.fr,{draftSavedText:'Aucun renseignement n’a été envoyé. Téléchargez ou modifiez votre brouillon; envoyez votre demande dans le formulaire du site principal.'});
-Object.assign(module.exports.en,{draftSavedText:'Nothing has been sent. Download or edit your draft; use the main website’s form to send your enquiry.'});
-Object.assign(module.exports.zh,{draftSavedText:'尚未发送任何信息。可下载或继续编辑草稿；发送咨询请使用主站表单。'});

@@ -24,13 +24,13 @@ npm run prepare:release
 
 `dist/` is the static local-preview build and remains non-indexable. `release/` is a separate indexable Cloudflare candidate with generated hashes, headers, asset manifest, dynamic rendering code and `wrangler.jsonc`. Both directories are ignored by Git.
 
-The default release candidate uses main-site enquiry hand-off. To prepare a candidate with the deployed Motel direct intake, explicitly run:
+With `enquiryMode: "direct"` in `data/site-config.js`, the default release candidate enables the existing Motel intake on the canonical origin. Enquiries stay on this site; the endpoint and internal notification pipeline are unchanged. Default builds make no live intake request and record `intake.verification: "not-run"` in the manifest. To also verify the deployed intake without submitting an enquiry, run:
 
 ```sh
 npm run prepare:release -- --direct-enquiries
 ```
 
-That option makes only an `OPTIONS` preflight and a deliberately invalid `{}` validation request to the configured intake. It must receive 204 and 400 with the canonical CORS origin. It sends no valid enquiry or email. Release preparation does not deploy.
+That option makes only an `OPTIONS` preflight and a deliberately invalid `{}` validation request to the configured intake. It must receive 204 and 400 with the canonical CORS origin and records `intake.verification: "non-writing-live-check"`. It sends no valid enquiry or email. Release preparation does not deploy. If direct intake is disabled, visitors can keep a local draft; there is no external enquiry or account redirect.
 
 For an approved production update, review the generated release manifest, routes and intake mode first, then use the official Wrangler CLI with `release/wrangler.jsonc`. The deployed build used Wrangler **4.151.1**, with compatibility date **2026-10-19**. Authentication belongs to the operator's credential store, never this repository.
 

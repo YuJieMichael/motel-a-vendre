@@ -2,7 +2,7 @@
 export const canonicalOrigin='https://motelavendre.ca';
 export const intakeOrigin='https://usngcexxobcpjncuwaxo.supabase.co';
 const structuredDataHashes=/* RELEASE_JSON_LD_HASHES */[];
-export const policy="default-src 'self'; script-src 'self' "+structuredDataHashes.join(' ')+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+intakeOrigin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
+export const policy="default-src 'self'; script-src 'self' "+structuredDataHashes.join(' ')+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+intakeOrigin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
 export function responseHeaders(response,request,policyOverride){
  const headers=new Headers(response.headers);
  headers.set('X-Content-Type-Options','nosniff');headers.set('X-Frame-Options','DENY');

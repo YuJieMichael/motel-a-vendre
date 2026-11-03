@@ -4,7 +4,6 @@ const MAV_SITE = {
   "allowedOrigins": [
     "http://127.0.0.1:5173"
   ],
-  "mainOrigin": "https://proprieteenvente.ca",
   "account": {
     "enabled": true,
     "d1DatabaseId": "def96fbe-c980-43db-8349-1900180990df",
@@ -18,5 +17,6 @@ const MAV_SITE = {
     "100024": "assets/covers/100024.webp",
     "100028": "assets/covers/100028.webp",
     "100030": "assets/covers/100030.webp"
-  }
+  },
+  "enquiryMode": "direct"
 };
