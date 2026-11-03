@@ -5,7 +5,7 @@ const SITE_ROOT=new URL('.',document.querySelector('script[src$="app.js"]').src)
 const page=document.body.dataset.page||'home',isHome=page==='home',pageReference=document.body.dataset.reference||'';
 let catalogue;try{catalogue=Core.validateCatalogue(MAV_CATALOGUE);}catch{catalogue={mode:'demo',items:[],error:true,updatedAt:''};}
 const properties=catalogue.items,ids=properties.map(p=>p.id),regions=[...new Set(properties.map(p=>p.region))].sort((a,b)=>a.localeCompare(b,'fr'));
-const storageKeys={language:'nord-language',saved:'nord-saved',draft:'nord-draft',recent:'mav-recent',view:'mav-view'};
+const storageKeys={language:'nord-language',saved:'nord-saved',draft:'nord-draft',recent:'mav-recent',view:'mav-view',accountDraft:'mav-account-draft-v1',accountServices:'mav-account-services-v1'};
 function readLocal(key,fallback){try{const value=localStorage.getItem(key);return value===null?fallback:JSON.parse(value);}catch{return fallback;}}
 function writeLocal(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch{return false;}}
 function storedIds(key){const value=readLocal(key,[]);return Array.isArray(value)?[...new Set(value.filter(id=>ids.includes(id)))]:[];}
@@ -24,7 +24,7 @@ const area=value=>value===null?t('toConfirm'):new Intl.NumberFormat(locale(),{ma
 const roomSummary=p=>p.rooms===null?p.roomsText[language]||t('toConfirm'):t('roomCount',{count:p.rooms});
 const seasonLabel=p=>t(p.season==='year-round'?'yearRound':p.season==='seasonal'?'seasonal':'unknownSeason');
 const icons={bookmark:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',pin:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z"/><circle cx="12" cy="10" r="2"/></svg>',bed:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19V6m18 13V9H3m0 7h18M6 9V5h5v4m2 0V5h5v4"/></svg>'};
-const paths={fr:{team:'equipe',seller:'vendre',guide:'guide-achat'},en:{team:'team',seller:'sell',guide:'buying-guide'},zh:{team:'team',seller:'sell',guide:'buying-guide'}};
+const paths={fr:{team:'equipe',seller:'vendre',guide:'guide-achat',account:'espace-client'},en:{team:'team',seller:'sell',guide:'buying-guide',account:'account'},zh:{team:'team',seller:'sell',guide:'buying-guide',account:'account'}};
 function pageURL(lang=language,kind='home',reference=''){
  const route=lang+'/'+(kind==='property'?'proprietes/'+reference+'/':kind==='home'?'':paths[lang][kind]+'/');
  return new URL(route+(location.protocol==='file:'?'index.html':''),SITE_ROOT).href;

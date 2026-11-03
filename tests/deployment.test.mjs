@@ -34,7 +34,7 @@ test('publication candidate is separate from the local noindex review and exclud
 });
 test('language links work without JavaScript and keep the property reference',()=>{
  const pages=JSON.parse(fs.readFileSync(path.join(root,'data/page-manifest.json'),'utf8'));
- for(const p of pages){const html=fs.readFileSync(path.join(root,p.file),'utf8');for(const target of ['fr','en','zh']){const match=html.match(new RegExp('<a href="([^"]+)" data-lang="'+target+'"'));assert.ok(match,p.file+' '+target);assert.notEqual(match[1],'#');assert.ok(fs.existsSync(path.resolve(path.dirname(path.join(root,p.file)),match[1])));if(p.reference)assert.ok(match[1].includes('/proprietes/'+p.reference+'/'));}assert.equal((html.match(/aria-current="page"/g)||[]).length,1);}
+ for(const p of pages){const html=fs.readFileSync(path.join(root,p.file),'utf8');for(const target of ['fr','en','zh']){const match=html.match(new RegExp('<a href="([^"]+)" data-lang="'+target+'"'));assert.ok(match,p.file+' '+target);assert.notEqual(match[1],'#');assert.ok(fs.existsSync(path.resolve(path.dirname(path.join(root,p.file)),match[1])));if(p.reference)assert.ok(match[1].includes('/proprietes/'+p.reference+'/'));}assert.equal((html.match(/data-lang="(?:fr|en|zh)"[^>]*aria-current="page"/g)||[]).length,1);}
 });
 test('release enquiry capability is explicit and CSP hashes match structured data',()=>{
  const manifest=JSON.parse(fs.readFileSync(path.join(release,'manifest.json'),'utf8'));

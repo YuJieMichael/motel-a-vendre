@@ -1,5 +1,6 @@
 const translations = {
   "zh": {
+    "accountSpace": "用户中心",
     "pageTitle": "魁北克 Motel 与酒店收购项目 | Motel à vendre",
     "metaDescription": "专注魁北克 Motel 与酒店收购：查看挂牌售价、客房数量、公开资料与照片，准备经营和接手计划。支持法语、英语与中文。",
     "skip": "跳至房源",
@@ -277,6 +278,7 @@ const translations = {
     "noScript": "关闭 JavaScript 时仍可查看房源并切换语言。筛选与收藏需要启用 JavaScript；发送咨询可使用主站入口。"
   },
   "en": {
+    "accountSpace": "My workspace",
     "pageTitle": "Québec motel & hotel acquisitions | Motel à vendre",
     "metaDescription": "Explore Québec motel and hotel acquisition dossiers. Review asking prices, guest-room counts, photos and published facts, then prepare your business takeover.",
     "skip": "Skip to properties",
@@ -554,6 +556,7 @@ const translations = {
     "noScript": "Property pages and language links work without JavaScript. Enable it to filter or save favourites. Use the main website to send an enquiry."
   },
   "fr": {
+    "accountSpace": "Mon espace",
     "pageTitle": "Motel à vendre | Acquisitions hôtelières au Québec",
     "metaDescription": "Motels et hôtels à vendre au Québec. Examinez les prix demandés, le nombre de chambres, les photos et les renseignements publiés, puis préparez votre projet de reprise.",
     "skip": "Aller aux propriétés",

@@ -29,7 +29,7 @@ async function prepare({direct=false}={}){
  const pages=JSON.parse(fs.readFileSync(path.join(stage,'data/page-manifest.json'),'utf8'));
  for(const p of pages){const dest=path.join(publicDir,p.file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(stage,p.file),dest);}
  for(const file of ['i18n.js','data/site-config.js','robots.txt','sitemap.xml']){const dest=path.join(publicDir,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(stage,file),dest);}
- for(const file of ['styles.css','responsive.css','property.css','direction.css','app.js','lib/catalogue-core.js','lib/enquiry-core.js','lib/property-view.js','data/catalogue-data.js']){const dest=path.join(publicDir,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,file),dest);}
+ for(const file of ['styles.css','responsive.css','property.css','direction.css','account.css','account.js','lib/account-core.js','lib/account-copy.js','app.js','lib/catalogue-core.js','lib/enquiry-core.js','lib/property-view.js','data/catalogue-data.js']){const dest=path.join(publicDir,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,file),dest);}
  const catalogue=JSON.parse(fs.readFileSync(path.join(root,'data/catalogue.json'),'utf8'));
  const images=new Set(['assets/logo.svg','assets/brand-mark.svg','assets/favicon.svg','assets/property-unavailable.svg','assets/icon-192.png','assets/icon-512.png','assets/icon-maskable-512.png','favicon.ico','apple-touch-icon.png','manifest.webmanifest','googleb6173475a8eadbeb.html',...catalogue.items.flatMap(p=>[p.image,...p.photos]),...Object.values(config.coverOverrides||{})]);
  for(const file of images){const dest=path.join(publicDir,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,file),dest);}
@@ -42,7 +42,7 @@ async function prepare({direct=false}={}){
  const headerLines=['/*','  X-Content-Type-Options: nosniff','  X-Frame-Options: DENY','  Referrer-Policy: strict-origin-when-cross-origin','  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()','  Cache-Control: public, max-age=0, must-revalidate','  Content-Security-Policy: '+policy];
  if(headerLines.some(line=>line.length>2000))throw Error('Review CSP header size before publishing');fs.writeFileSync(path.join(publicDir,'_headers'),headerLines.join('\n')+'\n');
  const runtime=path.join(release,'runtime');fs.mkdirSync(runtime,{recursive:true});
- for(const file of ['catalogue-core.js','property-view.js','page-renderer.cjs','guide-content.js'])fs.copyFileSync(path.join(root,'lib',file),path.join(runtime,file));
+ for(const file of ['catalogue-core.js','property-view.js','page-renderer.cjs','guide-content.js','account-view.cjs','account-core.js','account-copy.js'])fs.copyFileSync(path.join(root,'lib',file),path.join(runtime,file));
  const inputs='export const template='+JSON.stringify(fs.readFileSync(path.join(root,'templates/site.html'),'utf8'))+';\nexport const translations='+JSON.stringify(translations)+';\nexport const site='+JSON.stringify(config)+';\nexport const fallback='+JSON.stringify(catalogue)+';\n';
  fs.writeFileSync(path.join(release,'runtime-inputs.mjs'),inputs);
  for(const file of ['live-catalogue.mjs','live-worker.mjs'])fs.writeFileSync(path.join(release,file),fs.readFileSync(path.join(root,'deployment',file),'utf8').replaceAll('../lib/','./runtime/'));

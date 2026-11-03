@@ -17,6 +17,16 @@ Ouvrir `http://127.0.0.1:5173/fr/`, `/en/` ou `/zh/`. Aucune installation npm n�
 
 Les formulaires de l’aperçu autorisé sur le port 5173 valident les données sans enregistrer de demandes en production. L’aperçu porte une directive `noindex`.
 
+## Espace client / Client workspace / 用户中心
+
+Le modèle d’espace client se trouve à `/fr/espace-client/`, `/en/account/` et `/zh/account/`. Il reprend les groupes du site principal : propriété, services, acheteurs, visites, offres et documents, avec les favoris du site Motel. Le brouillon de propriété nécessite un accord explicite pour le stockage local. Les préférences de services et les favoris restent dans le même navigateur.
+
+This frontend template does not create accounts or connect private project data. The calendar browses dates without making bookings. Buyer, offer and confidential-document states are intentionally empty or locked. Existing main-site accounts remain accessible through an explicit link to Propriété En Vente. Account routes are always `noindex` and excluded from both sitemaps. Publishing the source does not deploy it.
+
+用户中心模板包括项目总览、物业草稿、可选服务、买家、看房、报价、保密文件和收藏。可保存本地草稿、下载 JSON、与网站收藏互通；Motel 独立登录、跨设备数据、真实买家与文件权限尚未接入。这里不会创建预约、签署保密协议或发送资料。
+
+Frontend sources: `account.js`, `account.css`, `lib/account-core.js`, `lib/account-copy.js`, and `lib/account-view.cjs`. The shared renderer, static build, local server and Worker candidate include the routes. No authentication package or database migration is added by this template.
+
 ## Vérification
 
 ```sh
