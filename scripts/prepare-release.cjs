@@ -5,6 +5,11 @@ function cleanOwned(dir){if(fs.existsSync(release)&&fs.lstatSync(release).isSymb
 async function prepare({direct=false}={}){
  const config=vm.runInNewContext(fs.readFileSync(path.join(root,'data/site-config.js'),'utf8')+';MAV_SITE');
  if(config.siteOrigin!=='https://motelavendre.ca')throw Error('Verify the canonical domain before preparing a release');
+ const accountCore=require('../lib/account-core.js'),account=accountCore.settings(config);
+ if(config.account&&(config.account.url||config.account.publishableKey)&&!account)throw Error('Account project must be a separate https Supabase origin with a publishable key');
+ if(account&&!String(config.account.privacyContact||'').trim())throw Error('Québec Law 25: set account.privacyContact (person in charge of personal information) before enabling accounts');
+ if(account&&!/^sb_publishable_/.test(account.key))throw Error('Use the account project publishable key, never a secret or service key');
+ const connectSrc="'self' "+new URL(config.endpoint).origin+(account?' '+account.origin:'');
  let intakeCheck={enabled:false,reason:'Main-site enquiry hand-off is available; direct sending is gated.'};
  if(direct){
   const preflight=await fetch(config.endpoint,{method:'OPTIONS',headers:{Origin:config.siteOrigin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type,apikey'},signal:AbortSignal.timeout(12000)});
@@ -29,20 +34,20 @@ async function prepare({direct=false}={}){
  const pages=JSON.parse(fs.readFileSync(path.join(stage,'data/page-manifest.json'),'utf8'));
  for(const p of pages){const dest=path.join(publicDir,p.file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(stage,p.file),dest);}
  for(const file of ['i18n.js','data/site-config.js','robots.txt','sitemap.xml']){const dest=path.join(publicDir,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(stage,file),dest);}
- for(const file of ['styles.css','responsive.css','property.css','direction.css','app.js','lib/catalogue-core.js','lib/enquiry-core.js','lib/property-view.js','data/catalogue-data.js']){const dest=path.join(publicDir,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,file),dest);}
+ for(const file of ['styles.css','responsive.css','property.css','direction.css','app.js','account.js','lib/catalogue-core.js','lib/enquiry-core.js','lib/property-view.js','lib/account-core.js','lib/account-view.js','data/catalogue-data.js']){const dest=path.join(publicDir,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,file),dest);}
  const catalogue=JSON.parse(fs.readFileSync(path.join(root,'data/catalogue.json'),'utf8'));
  const images=new Set(['assets/logo.svg','assets/brand-mark.svg','assets/favicon.svg','assets/property-unavailable.svg','assets/icon-192.png','assets/icon-512.png','assets/icon-maskable-512.png','favicon.ico','apple-touch-icon.png','manifest.webmanifest','googleb6173475a8eadbeb.html',...catalogue.items.flatMap(p=>[p.image,...p.photos]),...Object.values(config.coverOverrides||{})]);
  for(const file of images){const dest=path.join(publicDir,file);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(path.join(root,file),dest);}
  fs.writeFileSync(path.join(publicDir,'404.html'),'<!doctype html><html lang="fr-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Page introuvable | Motel à vendre</title><link rel="icon" href="/favicon.ico" sizes="32x32"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/direction.css"></head><body class="not-found-page"><main><a class="not-found-brand" href="/fr/">Motel à vendre</a><p class="eyebrow">404</p><h1>Cette adresse reste à trouver.</h1><p>Page introuvable. Retrouvez les propriétés disponibles.</p><nav aria-label="Language"><a class="button button-dark" href="/fr/">Voir les propriétés · FR</a><a class="button button-outline" href="/en/">View properties · EN</a><a class="button button-outline" href="/zh/">查看在售物业 · 中文</a></nav></main></body></html>');
  const hashes=[...new Set(pages.map(p=>fs.readFileSync(path.join(publicDir,p.file),'utf8').match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]).map(json=>"'sha256-"+crypto.createHash('sha256').update(json).digest('base64')+"'"))];
- const workerSource=fs.readFileSync(path.join(root,'deployment/worker.mjs'),'utf8').replace('/* RELEASE_JSON_LD_HASHES */[]',JSON.stringify(hashes));
+ const workerSource=fs.readFileSync(path.join(root,'deployment/worker.mjs'),'utf8').replace('/* RELEASE_JSON_LD_HASHES */[]',JSON.stringify(hashes)).replace("/* RELEASE_ACCOUNT_ORIGIN */''",JSON.stringify(account?account.origin:''));
  fs.writeFileSync(path.join(release,'worker.mjs'),workerSource);
  fs.copyFileSync(path.join(root,'deployment/entry.mjs'),path.join(release,'entry.mjs'));
- const policy="default-src 'self'; script-src 'self' "+hashes.join(' ')+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(config.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
+ const policy="default-src 'self'; script-src 'self' "+hashes.join(' ')+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src "+connectSrc+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
  const headerLines=['/*','  X-Content-Type-Options: nosniff','  X-Frame-Options: DENY','  Referrer-Policy: strict-origin-when-cross-origin','  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()','  Cache-Control: public, max-age=0, must-revalidate','  Content-Security-Policy: '+policy];
  if(headerLines.some(line=>line.length>2000))throw Error('Review CSP header size before publishing');fs.writeFileSync(path.join(publicDir,'_headers'),headerLines.join('\n')+'\n');
  const runtime=path.join(release,'runtime');fs.mkdirSync(runtime,{recursive:true});
- for(const file of ['catalogue-core.js','property-view.js','page-renderer.cjs','guide-content.js'])fs.copyFileSync(path.join(root,'lib',file),path.join(runtime,file));
+ for(const file of ['catalogue-core.js','property-view.js','account-view.js','page-renderer.cjs','guide-content.js'])fs.copyFileSync(path.join(root,'lib',file),path.join(runtime,file));
  const inputs='export const template='+JSON.stringify(fs.readFileSync(path.join(root,'templates/site.html'),'utf8'))+';\nexport const translations='+JSON.stringify(translations)+';\nexport const site='+JSON.stringify(config)+';\nexport const fallback='+JSON.stringify(catalogue)+';\n';
  fs.writeFileSync(path.join(release,'runtime-inputs.mjs'),inputs);
  for(const file of ['live-catalogue.mjs','live-worker.mjs'])fs.writeFileSync(path.join(release,file),fs.readFileSync(path.join(root,'deployment',file),'utf8').replaceAll('../lib/','./runtime/'));

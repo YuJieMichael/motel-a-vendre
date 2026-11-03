@@ -63,3 +63,20 @@ The existing platform notification job sends enquiry emails. No recipient mailbo
 ## Read-only production checks
 
 Check HTTPS, root/www redirects, `/api/catalogue` live status and freshness, all language homepages, a current property, the guides and the sitemap. Intake checks use only `OPTIONS` and invalid `{}` requests. Never submit a valid production enquiry or analytics event just to test availability. Do not repeatedly resubmit the sitemap or change account access during routine monitoring.
+
+## Account centre (separate Supabase project)
+
+The optional buyer account centre (`/fr/compte/`, `/en/account/`, `/zh/account/`) uses its **own** Supabase project. It never shares users, tables or keys with the main Propriété En Vente project. Until `data/site-config.js` → `account.url` and `account.publishableKey` are filled, the page shows "coming soon" and the menu link is hidden.
+
+One-time setup, done by the operator in the Supabase dashboard of the new project:
+
+1. Create the project (Canadian region if available) and apply `supabase-account/migrations/20261103000000_account_center.sql` once. Never apply it to the main project.
+2. Authentication → URL Configuration: Site URL `https://motelavendre.ca`; Redirect URLs `https://motelavendre.ca/fr/compte/`, `https://motelavendre.ca/en/account/`, `https://motelavendre.ca/zh/account/` (add `http://127.0.0.1:5173/**` only for local testing).
+3. Authentication → Email: keep "Confirm email" on, set minimum password length 8, enable leaked-password protection if the plan allows it, and configure a custom SMTP sender for motelavendre.ca. Write the Confirm signup and Reset password templates in FR/EN/ZH (one template, three paragraphs).
+4. Copy the project URL and the **publishable** key (`sb_publishable_…`) into `account.url` / `account.publishableKey`, and set `account.privacyContact` to the name and email of the person in charge of personal information (Québec Law 25). `prepare:release` refuses to build without it, and refuses a secret key or the main project URL.
+
+The browser talks to Supabase Auth and PostgREST directly with `lib/account-core.js`; no external script is loaded. The release adds the account origin to `connect-src`. Account pages are `noindex`, `Cache-Control: no-store`, excluded from the sitemap and disallowed in `robots.txt`.
+
+Stored per user (all under row level security, owner-only): profile, favourite references (max 200), saved searches (max 20) and an enquiry log (type, purpose, reference, date, receipt id — never the message or contact details; max 500). Users can export everything as JSON and delete their account (`delete_my_account()` cascades all rows). Signing out clears favourites, recent views and drafts on the device.
+
+Not included yet: saved-search email alerts (needs a scheduled job and unsubscribe links) and CAPTCHA on sign-up (Supabase supports Turnstile; enabling it requires adding `https://challenges.cloudflare.com` to `script-src` and `frame-src`).

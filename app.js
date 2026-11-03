@@ -11,6 +11,10 @@ function writeLocal(key,value){try{localStorage.setItem(key,JSON.stringify(value
 function storedIds(key){const value=readLocal(key,[]);return Array.isArray(value)?[...new Set(value.filter(id=>ids.includes(id)))]:[];}
 const byReference=ref=>properties.find(p=>Core.reference(p).toUpperCase()===String(ref).toUpperCase());
 let saved=new Set(storedIds(storageKeys.saved)),recent=storedIds(storageKeys.recent).slice(0,12);
+// Optional account centre (separate Supabase project). Null when not configured.
+const account=(()=>{try{return typeof MAVAccount!=='undefined'&&MAVAccount.configured(config)?MAVAccount.createClient(config,{storage:localStorage}):null;}catch{return null;}})();
+const refOf=id=>{const p=properties.find(p=>p.id===id);return p?Core.reference(p):'';},idOfRef=ref=>byReference(ref)?.id;
+let profileCache=null;
 const preferred=readLocal(storageKeys.language,'fr'),isRoot=location.pathname===SITE_ROOT.pathname||location.pathname===SITE_ROOT.pathname+'index.html';
 const initialLanguage=isRoot&&Core.languages.includes(preferred)?preferred:document.body.dataset.lang||'fr';
 let state=Core.readRoute(location.hash,regions,initialLanguage),language=state.lang,activeProperty=pageReference?byReference(pageReference):null;
@@ -30,7 +34,7 @@ function pageURL(lang=language,kind='home',reference=''){
  return new URL(route+(location.protocol==='file:'?'index.html':''),SITE_ROOT).href;
 }
 function notify(message){clearTimeout(toastTimer);$('#toast').textContent=message;$('#toast').hidden=false;toastTimer=setTimeout(()=>$('#toast').hidden=true,3500);}
-function updateMetadata(){const title=activeProperty?Core.nameOf(activeProperty,language)+' | '+BRAND.name:page==='guide'?t('guideTitle'):page==='team'?t('teamPage')+' | '+BRAND.name:page==='seller'?t('ownerPage')+' | '+BRAND.name:t('pageTitle');document.title=title;}
+function updateMetadata(){const title=activeProperty?Core.nameOf(activeProperty,language)+' | '+BRAND.name:page==='guide'?t('guideTitle'):page==='team'?t('teamPage')+' | '+BRAND.name:page==='seller'?t('ownerPage')+' | '+BRAND.name:page==='account'?t('accountPage')+' | '+BRAND.name:t('pageTitle');document.title=title;}
 function applyLanguage(next){
  language=next;state.lang=next;document.documentElement.lang={fr:'fr-CA',en:'en-CA',zh:'zh-Hans'}[next];
  $$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));$$('[data-placeholder]').forEach(el=>el.placeholder=t(el.dataset.placeholder));$$('[data-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.aria)));
@@ -82,7 +86,7 @@ function renderSaved(){
 function installImageFallbacks(){
  $$('img:not(.brand-mark)').forEach(img=>{img.onerror=()=>{if(img.id==='gallery-image'){img.src=asset('assets/property-unavailable.svg');img.alt=t('partialImage');return;}if(img.closest('.hero-image-panel'))$('.image-caption').textContent=t('partialImage');const fallback=document.createElement('span');fallback.className='photo-fallback';fallback.textContent=t('partialImage');fallback.setAttribute('role','img');fallback.setAttribute('aria-label',img.alt);img.replaceWith(fallback);};});
 }
-function toggleSave(id){const restoreFocus=isHome&&document.activeElement?.dataset.save===id,was=saved.has(id);was?saved.delete(id):saved.add(id);const ok=writeLocal(storageKeys.saved,[...saved]);renderListings();if(restoreFocus)($(`[data-save="${id}"]`)||$('#listing-grid [data-save]')||$('#empty-reset')).focus({preventScroll:true});notify(t(ok?(was?'removedToast':'savedToast'):'storageError'));}
+function toggleSave(id){const restoreFocus=isHome&&document.activeElement?.dataset.save===id,was=saved.has(id);was?saved.delete(id):saved.add(id);const ok=writeLocal(storageKeys.saved,[...saved]);renderListings();if(account?.user){const ref=refOf(id);if(ref)(was?account.removeSaved(ref):account.addSaved(ref)).catch(error=>notify(accountMessage(error)));}if(restoreFocus)($(`[data-save="${id}"]`)||$('#listing-grid [data-save]')||$('#empty-reset')).focus({preventScroll:true});notify(t(ok?(was?'removedToast':'savedToast'):'storageError'));}
 function showCompare(){
  const list=properties.filter(p=>saved.has(p.id));if(list.length<2){notify(t('compareMinimum'));return;}
  const row=(label,fn)=>`<tr><th scope="row">${e(label)}</th>${list.map(p=>`<td>${fn(p)}</td>`).join('')}</tr>`;
@@ -104,6 +108,7 @@ function showEnquiry(kind,id='',purpose='info'){
   $('#enquiry-form').reset();const draft=readLocal(storageKeys.draft,null);
   if(draft&&draft.kind===kind&&draft.propertyId===id){for(const key of ['name','email','phone','message'])$('#enquiry-'+key).value=typeof draft[key]==='string'?draft[key]:'';$('#enquiry-region').value=typeof draft.region==='string'?draft.region:'';$('#enquiry-owner-city').value=typeof draft.region==='string'?draft.region:'';$('#enquiry-budget').value=Number.isFinite(draft.budget)?draft.budget:'';$('#enquiry-timeline').value=['exploring','0-3','3-6','6+'].includes(draft.timeline)?draft.timeline:'';$('#enquiry-service').value=['broker','hybrid'].includes(draft.service)?draft.service:'';$('#enquiry-contact-time').value=draft.contactTime||'';}
  }
+ if(formKey!==next&&account?.user)prefillFromAccount();
  formKey=next;$('#enquiry-property').value=id;$('#enquiry-purpose').value=purpose;
  $('#buyer-criteria').hidden=kind!=='buyer';$('#buyer-criteria').disabled=kind!=='buyer';$('#seller-criteria').hidden=kind!=='seller';$('#seller-criteria').disabled=kind!=='seller';$('.enquiry-purpose').hidden=kind==='seller';$('#enquiry-message').placeholder=t(kind==='seller'?'sellerMessage':'buyerMessage');
  $('#enquiry-consent').setCustomValidity('');$('#enquiry-service').setCustomValidity('');
@@ -129,7 +134,7 @@ async function submitEnquiry(event){
  draft.analyticsSource=analyticsSource();const signature=JSON.stringify({...draft,savedAt:''});if(signature!==attempt.body)attempt={body:signature,id:crypto.randomUUID()};
  let payload;try{payload=Enquiry.buildPayload(draft,{property:enquiryProperty,language,requestId:attempt.id,purpose:draft.purpose,service:draft.service});}catch(error){setFormError(t(error.code==='service'?'serviceError':'sendError'));return;}
  busy=true;setFormError('');$('#send-enquiry').disabled=true;$('#save-local-draft').disabled=true;$('#enquiry-form').querySelectorAll('input,textarea,select').forEach(el=>el.disabled=true);$('#send-enquiry span').textContent=t('sending');$('#enquiry-form').setAttribute('aria-busy','true');
- try{const result=await Enquiry.send(config,payload,{origin:location.origin,signal:AbortSignal.timeout(20000)});showSuccess(!result.preview);if(result.preview){$('#enquiry-success-title').textContent=t('previewChecked');$('#enquiry-success-note').textContent=t('previewCheckedText');$('#download-draft').hidden=true;}}catch(error){setFormError(t(error.code==='rate'?'sendRate':error.code==='unavailable'?'sendUnavailable':'sendError'));}
+ try{const result=await Enquiry.send(config,payload,{origin:location.origin,signal:AbortSignal.timeout(20000)});showSuccess(!result.preview);if(!result.preview&&account?.user)account.addHistory({id:attempt.id,kind:enquiryKind,purpose:draft.purpose,listing_reference:enquiryProperty?Core.reference(enquiryProperty):'',language}).catch(()=>{});if(result.preview){$('#enquiry-success-title').textContent=t('previewChecked');$('#enquiry-success-note').textContent=t('previewCheckedText');$('#download-draft').hidden=true;}}catch(error){setFormError(t(error.code==='rate'?'sendRate':error.code==='unavailable'?'sendUnavailable':'sendError'));}
  finally{busy=false;$('#send-enquiry').disabled=!Enquiry.canSubmit(config,location.origin);$('#save-local-draft').disabled=false;$('#enquiry-form').querySelectorAll('input,textarea,select').forEach(el=>el.disabled=false);$('#send-enquiry span').textContent=t('send');$('#enquiry-form').removeAttribute('aria-busy');}
 }
 function downloadDraft(){
@@ -179,7 +184,7 @@ document.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const mo
 $$('dialog').forEach(dialog=>{dialog.addEventListener('click',event=>{if(event.target!==dialog||busy)return;const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)dialog.close();});dialog.addEventListener('cancel',event=>{if(busy)event.preventDefault();});});
 $('#enquiry-form').addEventListener('submit',submitEnquiry);$('#save-local-draft').addEventListener('click',saveDraft);$('#download-draft').addEventListener('click',downloadDraft);$('#new-enquiry').addEventListener('click',()=>{if(sent){$('#enquiry-dialog').close();return;}$('#enquiry-success').hidden=true;$('#enquiry-form').hidden=false;$('#enquiry-name').focus();});
 for(const id of ['enquiry-name','enquiry-consent','enquiry-service'])$('#'+id).addEventListener('input',event=>event.target.setCustomValidity(''));
-$('#privacy-trigger').addEventListener('click',()=>$('#privacy-dialog').showModal());$('#clear-data').addEventListener('click',()=>{if(!confirm(t('clearDrafts')))return;try{Object.values(storageKeys).forEach(key=>localStorage.removeItem(key));saved=new Set();recent=[];latestDraft=null;if(isHome)resetFilters();else renderSaved();notify(t('dataCleared'));}catch{notify(t('storageError'));}});
+$('#privacy-trigger').addEventListener('click',()=>$('#privacy-dialog').showModal());$('#clear-data').addEventListener('click',()=>{if(!confirm(t('clearDrafts')))return;try{Object.values(storageKeys).forEach(key=>localStorage.removeItem(key));account?.signOut();saved=new Set();recent=[];latestDraft=null;if(isHome)resetFilters();else renderSaved();notify(t('dataCleared'));}catch{notify(t('storageError'));}});
 $('#copy-share-url').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('#share-url').value);$('#share-feedback').textContent=t('linkCopied');}catch{$('#share-url').focus();$('#share-url').select();$('#share-feedback').textContent=t('linkReady');}});
 window.addEventListener('popstate',restoreRoute);window.addEventListener('hashchange',restoreRoute);
 const metricNote=document.createElement('p');metricNote.dataset.i18n='privacyMetrics';$('#privacy-dialog').append(metricNote);
@@ -187,6 +192,32 @@ applyLanguage(language);syncControls();renderListings();installImageFallbacks();
 if(activeProperty){recent=Core.addRecent(recent,activeProperty.id,ids);writeLocal(storageKeys.recent,recent);renderSaved();}
 if(page==='property'&&!activeProperty){const notice=document.createElement('div');notice.className='catalogue-error';notice.setAttribute('role','alert');notice.innerHTML=`<h2>${e(t('catalogueError'))}</h2><p>${e(t('catalogueErrorText'))}</p><button type="button" class="button button-outline">${e(t('reload'))}</button>`;notice.querySelector('button').addEventListener('click',()=>location.reload());$('#property-page').prepend(notice);$$('#property-page button').forEach(button=>{if(!notice.contains(button))button.disabled=true;});$$('#property-page a[data-gallery-open]').forEach(link=>delete link.dataset.galleryOpen);}
 if(isHome)restoreRoute();
+// Account centre integration: favourites sync, saved searches, enquiry prefill.
+function accountMessage(error){return t({invalid_credentials:'acctErrInvalid',email_not_confirmed:'acctErrNotConfirmed',weak_password:'acctErrWeak',same_password:'acctErrSame',rate:'acctErrRate',network:'acctErrNetwork',session:'acctErrSession',quota:'acctErrQuota',link_invalid:'acctErrLink',invalid_input:'acctErrInvalid'}[error?.code]||'acctErrGeneric');}
+function setSavedReferences(refs){saved=new Set(refs.map(idOfRef).filter(Boolean));writeLocal(storageKeys.saved,[...saved]);renderListings();}
+async function prefillFromAccount(){
+ const fill=(id,value)=>{const el=$('#'+id);if(el&&!el.value&&value)el.value=value;};
+ fill('enquiry-email',account.user.email);
+ try{profileCache=profileCache||await account.profile();}catch{return;}
+ if(!profileCache)return;fill('enquiry-name',profileCache.full_name);fill('enquiry-phone',profileCache.phone);
+ if(enquiryKind==='buyer'){fill('enquiry-region',profileCache.buyer_regions);if(profileCache.buyer_budget!==null)fill('enquiry-budget',String(profileCache.buyer_budget));fill('enquiry-timeline',profileCache.buyer_timeline);}
+}
+function searchName(){const label=id=>{const el=$('#'+id);return el&&el.value!=='all'?el.selectedOptions[0]?.textContent.trim():'';};return [label('region'),label('type'),label('budget'),label('rooms-filter'),label('season-filter'),$('#keyword').value.trim()].filter(Boolean).join(' · ')||t('acctAllListings');}
+async function saveSearch(){
+ if(!account?.user){notify(t('acctSearchNeedsLogin'));return;}
+ const {region,type,budget,rooms,season,q,sort}=state;
+ try{await account.addSearch(searchName(),{region,type,budget,rooms,season,q,sort});notify(t('acctSearchSaved'));}catch(error){notify(accountMessage(error));}
+}
+function clearPersonalData(){for(const key of [storageKeys.saved,storageKeys.recent,storageKeys.draft])try{localStorage.removeItem(key);}catch{}saved=new Set();recent=[];latestDraft=null;profileCache=null;renderListings();}
+function refreshAccountControls(){const on=!!account?.user;if($('#save-search'))$('#save-search').hidden=!on;document.body.classList.toggle('signed-in',on);}
+if(account){
+ $('#save-search')?.addEventListener('click',saveSearch);
+ account.events.addEventListener('change',refreshAccountControls);refreshAccountControls();
+ // The account page runs its own sync so the first-sync merge happens exactly once.
+ if(account.user&&page!=='account')account.syncSaved([...saved].map(refOf).filter(Boolean)).then(setSavedReferences).catch(()=>{});
+}
+// Shared with account.js (account page UI). Read-only helpers plus two state hooks.
+window.MAVApp={account,properties,language:()=>language,t,money,notify,accountMessage,pageURL,asset,regions,setSavedReferences,localSavedReferences:()=>[...saved].map(refOf).filter(Boolean),clearPersonalData,dropProfileCache:()=>{profileCache=null;},nameOf:p=>Core.nameOf(p,language),byReference,shareURL:criteria=>Core.shareURL(pageURL(language),{...Core.normalizeRoute({...criteria,lang:language},regions,language),property:'',tab:'all'},regions)};
 document.body.dataset.ready='true';
 
 // Only bounded aggregate events; never send names, email, messages, URLs or query strings.

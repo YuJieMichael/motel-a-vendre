@@ -39,6 +39,8 @@ Les tests du Worker et du catalogue simulent les appels externes. Les tests du b
 | `scripts/` | Construction, import public et préparation de publication |
 | `supabase/functions/` | Interface de consultation et statistiques séparées |
 | `supabase/migrations/` | Extension SQL Motel de la plateforme existante |
+| `supabase-account/migrations/` | Espace compte : projet Supabase séparé (voir OPERATIONS.md) |
+| `lib/account-core.js`, `account.js` | Client et page « Mon compte » |
 | `tests/`, `supabase/tests/` | Tests du site, du Worker et de l’interface serveur |
 
 Les pages HTML et les fichiers de données générés sont conservés pour permettre l’aperçu immédiat d’un téléchargement. Après une modification de contenu ou de modèle, exécuter `npm run build` et inclure les fichiers générés mis à jour dans le commit. `dist/` et `release/` restent des résultats de construction ignorés par Git.

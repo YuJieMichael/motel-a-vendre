@@ -5,6 +5,11 @@ const MAV_SITE = {
     "http://127.0.0.1:5173"
   ],
   "mainOrigin": "https://proprieteenvente.ca",
+  "account": {
+    "url": "",
+    "publishableKey": "",
+    "privacyContact": ""
+  },
   "siteOrigin": "https://motelavendre.ca",
   "metricsEndpoint": "https://usngcexxobcpjncuwaxo.supabase.co/functions/v1/motel-services/events",
   "coverOverrides": {

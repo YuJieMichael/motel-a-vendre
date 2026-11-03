@@ -35,6 +35,13 @@
     "reference": ""
   },
   {
+    "file": "fr/compte/index.html",
+    "route": "fr/compte/",
+    "lang": "fr",
+    "kind": "account",
+    "reference": ""
+  },
+  {
     "file": "fr/proprietes/100021/index.html",
     "route": "fr/proprietes/100021/",
     "lang": "fr",
@@ -98,6 +105,13 @@
     "reference": ""
   },
   {
+    "file": "en/account/index.html",
+    "route": "en/account/",
+    "lang": "en",
+    "kind": "account",
+    "reference": ""
+  },
+  {
     "file": "en/proprietes/100021/index.html",
     "route": "en/proprietes/100021/",
     "lang": "en",
@@ -158,6 +172,13 @@
     "route": "zh/buying-guide/",
     "lang": "zh",
     "kind": "guide",
+    "reference": ""
+  },
+  {
+    "file": "zh/account/index.html",
+    "route": "zh/account/",
+    "lang": "zh",
+    "kind": "account",
     "reference": ""
   },
   {
