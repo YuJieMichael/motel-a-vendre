@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "mode": "demo",
+  "updatedAt": "2026-10-29",
+  "items": [
+    {
+      "id": "nord-001",
+      "name": "Motel du Lac",
+      "city": "Sainte-Agathe-des-Monts",
+      "region": "Laurentides",
+      "type": "motel",
+      "price": 2450000,
+      "rooms": 24,
+      "acres": 1.8,
+      "parking": 32,
+      "image": "assets/lakeside.png",
+      "copy": {
+        "zh": {
+          "short": "湖光与山色之间，一份四季经营的事业。",
+          "description": "坐落于 Laurentides 的示例湖畔汽车旅馆，包含 24 间客房、独立停车空间与面向湖景的公共区域。适合探索休闲旅宿、家庭经营或小型酒店投资的买家。",
+          "features": [
+            "湖畔环境",
+            "四季经营概念",
+            "业主居住空间",
+            "户外休闲区域"
+          ]
+        },
+        "en": {
+          "short": "Lakeside character. A setting for every season.",
+          "description": "An illustrative 24-room motel in the Laurentides, with dedicated parking and shared spaces overlooking the lake. A setting for buyers exploring leisure hospitality, owner-operated accommodation or a small hotel portfolio.",
+          "features": [
+            "Lakeside setting",
+            "Four-season concept",
+            "Owner’s accommodation",
+            "Outdoor guest spaces"
+          ]
+        },
+        "fr": {
+          "short": "Le charme du lac, au fil des quatre saisons.",
+          "description": "Un motel fictif de 24 chambres dans les Laurentides, avec stationnement et espaces communs ouverts sur le lac. Une propriété pour explorer un projet de villégiature, une exploitation familiale ou un petit portefeuille hôtelier.",
+          "features": [
+            "Environnement au bord du lac",
+            "Concept quatre saisons",
+            "Logement du propriétaire",
+            "Espaces extérieurs pour les clients"
+          ]
+        }
+      },
+      "tenure": "freehold",
+      "season": "year-round"
+    },
+    {
+      "id": "nord-002",
+      "name": "Hôtel Maison Saint-Paul",
+      "city": "Montréal",
+      "region": "Montréal",
+      "type": "hotel",
+      "price": 6850000,
+      "rooms": 42,
+      "acres": 0.32,
+      "parking": 12,
+      "image": "assets/montreal.png",
+      "copy": {
+        "zh": {
+          "short": "历史街区的建筑韵味，城市旅宿的新视角。",
+          "description": "这家示例精品酒店以 Montréal 的历史建筑为灵感，设有 42 间客房和独立接待区。紧凑的城市地块与鲜明的建筑个性，展现适合城市旅宿经营的空间概念。",
+          "features": [
+            "城市精品酒店概念",
+            "42 间客房",
+            "独立接待大厅",
+            "历史建筑风格"
+          ]
+        },
+        "en": {
+          "short": "An urban address with a distinct architectural character.",
+          "description": "This illustrative boutique hotel is inspired by Montréal’s historic architecture, with 42 rooms and an independent reception area. A compact urban parcel and a distinct facade set the scene for a city hospitality concept.",
+          "features": [
+            "Urban boutique concept",
+            "42 guest rooms",
+            "Dedicated reception lobby",
+            "Historic architectural character"
+          ]
+        },
+        "fr": {
+          "short": "Une adresse urbaine au caractère singulier.",
+          "description": "Cet hôtel-boutique fictif s’inspire de l’architecture historique de Montréal, avec 42 chambres et une réception indépendante. Un terrain urbain compact et une façade de caractère dessinent un projet hôtelier citadin.",
+          "features": [
+            "Concept hôtel-boutique urbain",
+            "42 chambres",
+            "Hall de réception indépendant",
+            "Caractère architectural historique"
+          ]
+        }
+      },
+      "tenure": "freehold",
+      "season": "year-round"
+    },
+    {
+      "id": "nord-003",
+      "name": "Auberge des Érables",
+      "city": "Sutton",
+      "region": "Estrie",
+      "type": "inn",
+      "price": 1895000,
+      "rooms": 18,
+      "acres": 3.2,
+      "parking": 26,
+      "image": "assets/townships.png",
+      "copy": {
+        "zh": {
+          "short": "枫林深处的乡村旅馆，与自然相邻。",
+          "description": "位于 Sutton 的示例乡村旅馆，设有 18 间客房、宽阔庭园和环绕式露台。以 Cantons-de-l’Est 的山野风景为背景，呈现适合精品旅宿与休闲度假的物业概念。",
+          "features": [
+            "Cantons-de-l’Est 环境",
+            "环绕式露台",
+            "宽阔庭园",
+            "18 间客房"
+          ]
+        },
+        "en": {
+          "short": "A country retreat framed by maple trees and open skies.",
+          "description": "An illustrative 18-room country inn in Sutton, with a generous garden and wraparound veranda. The Eastern Townships landscape provides a setting for a boutique accommodation or leisure retreat concept.",
+          "features": [
+            "Eastern Townships setting",
+            "Wraparound veranda",
+            "Generous garden grounds",
+            "18 guest rooms"
+          ]
+        },
+        "fr": {
+          "short": "Une auberge de campagne à l’ombre des érables.",
+          "description": "Une auberge fictive de 18 chambres à Sutton, avec un grand jardin et une galerie enveloppante. Le paysage des Cantons-de-l’Est offre un cadre pour un projet d’hébergement de charme ou de séjour au vert.",
+          "features": [
+            "Cadre des Cantons-de-l’Est",
+            "Galerie enveloppante",
+            "Vaste jardin",
+            "18 chambres"
+          ]
+        }
+      },
+      "tenure": "freehold",
+      "season": "seasonal"
+    }
+  ]
+}

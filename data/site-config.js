@@ -1,0 +1,16 @@
+const MAV_SITE = {
+  "endpoint": "https://usngcexxobcpjncuwaxo.supabase.co/functions/v1/motel-services/enquiry",
+  "publishableKey": "sb_publishable_Quq_K2nrFpk5Iva1AhqlDA_dbSsgZsd",
+  "allowedOrigins": [
+    "http://127.0.0.1:5173"
+  ],
+  "mainOrigin": "https://proprieteenvente.ca",
+  "siteOrigin": "https://motelavendre.ca",
+  "metricsEndpoint": "https://usngcexxobcpjncuwaxo.supabase.co/functions/v1/motel-services/events",
+  "coverOverrides": {
+    "100013": "assets/covers/100013.webp",
+    "100024": "assets/covers/100024.webp",
+    "100028": "assets/covers/100028.webp",
+    "100030": "assets/covers/100030.webp"
+  }
+};

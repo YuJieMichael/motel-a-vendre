@@ -1,0 +1,198 @@
+[
+  {
+    "file": "index.html",
+    "route": "fr/",
+    "lang": "fr",
+    "kind": "home",
+    "reference": ""
+  },
+  {
+    "file": "fr/index.html",
+    "route": "fr/",
+    "lang": "fr",
+    "kind": "home",
+    "reference": ""
+  },
+  {
+    "file": "fr/equipe/index.html",
+    "route": "fr/equipe/",
+    "lang": "fr",
+    "kind": "team",
+    "reference": ""
+  },
+  {
+    "file": "fr/vendre/index.html",
+    "route": "fr/vendre/",
+    "lang": "fr",
+    "kind": "seller",
+    "reference": ""
+  },
+  {
+    "file": "fr/guide-achat/index.html",
+    "route": "fr/guide-achat/",
+    "lang": "fr",
+    "kind": "guide",
+    "reference": ""
+  },
+  {
+    "file": "fr/proprietes/100021/index.html",
+    "route": "fr/proprietes/100021/",
+    "lang": "fr",
+    "kind": "property",
+    "reference": "100021"
+  },
+  {
+    "file": "fr/proprietes/100028/index.html",
+    "route": "fr/proprietes/100028/",
+    "lang": "fr",
+    "kind": "property",
+    "reference": "100028"
+  },
+  {
+    "file": "fr/proprietes/100030/index.html",
+    "route": "fr/proprietes/100030/",
+    "lang": "fr",
+    "kind": "property",
+    "reference": "100030"
+  },
+  {
+    "file": "fr/proprietes/100013/index.html",
+    "route": "fr/proprietes/100013/",
+    "lang": "fr",
+    "kind": "property",
+    "reference": "100013"
+  },
+  {
+    "file": "fr/proprietes/100024/index.html",
+    "route": "fr/proprietes/100024/",
+    "lang": "fr",
+    "kind": "property",
+    "reference": "100024"
+  },
+  {
+    "file": "en/index.html",
+    "route": "en/",
+    "lang": "en",
+    "kind": "home",
+    "reference": ""
+  },
+  {
+    "file": "en/team/index.html",
+    "route": "en/team/",
+    "lang": "en",
+    "kind": "team",
+    "reference": ""
+  },
+  {
+    "file": "en/sell/index.html",
+    "route": "en/sell/",
+    "lang": "en",
+    "kind": "seller",
+    "reference": ""
+  },
+  {
+    "file": "en/buying-guide/index.html",
+    "route": "en/buying-guide/",
+    "lang": "en",
+    "kind": "guide",
+    "reference": ""
+  },
+  {
+    "file": "en/proprietes/100021/index.html",
+    "route": "en/proprietes/100021/",
+    "lang": "en",
+    "kind": "property",
+    "reference": "100021"
+  },
+  {
+    "file": "en/proprietes/100028/index.html",
+    "route": "en/proprietes/100028/",
+    "lang": "en",
+    "kind": "property",
+    "reference": "100028"
+  },
+  {
+    "file": "en/proprietes/100030/index.html",
+    "route": "en/proprietes/100030/",
+    "lang": "en",
+    "kind": "property",
+    "reference": "100030"
+  },
+  {
+    "file": "en/proprietes/100013/index.html",
+    "route": "en/proprietes/100013/",
+    "lang": "en",
+    "kind": "property",
+    "reference": "100013"
+  },
+  {
+    "file": "en/proprietes/100024/index.html",
+    "route": "en/proprietes/100024/",
+    "lang": "en",
+    "kind": "property",
+    "reference": "100024"
+  },
+  {
+    "file": "zh/index.html",
+    "route": "zh/",
+    "lang": "zh",
+    "kind": "home",
+    "reference": ""
+  },
+  {
+    "file": "zh/team/index.html",
+    "route": "zh/team/",
+    "lang": "zh",
+    "kind": "team",
+    "reference": ""
+  },
+  {
+    "file": "zh/sell/index.html",
+    "route": "zh/sell/",
+    "lang": "zh",
+    "kind": "seller",
+    "reference": ""
+  },
+  {
+    "file": "zh/buying-guide/index.html",
+    "route": "zh/buying-guide/",
+    "lang": "zh",
+    "kind": "guide",
+    "reference": ""
+  },
+  {
+    "file": "zh/proprietes/100021/index.html",
+    "route": "zh/proprietes/100021/",
+    "lang": "zh",
+    "kind": "property",
+    "reference": "100021"
+  },
+  {
+    "file": "zh/proprietes/100028/index.html",
+    "route": "zh/proprietes/100028/",
+    "lang": "zh",
+    "kind": "property",
+    "reference": "100028"
+  },
+  {
+    "file": "zh/proprietes/100030/index.html",
+    "route": "zh/proprietes/100030/",
+    "lang": "zh",
+    "kind": "property",
+    "reference": "100030"
+  },
+  {
+    "file": "zh/proprietes/100013/index.html",
+    "route": "zh/proprietes/100013/",
+    "lang": "zh",
+    "kind": "property",
+    "reference": "100013"
+  },
+  {
+    "file": "zh/proprietes/100024/index.html",
+    "route": "zh/proprietes/100024/",
+    "lang": "zh",
+    "kind": "property",
+    "reference": "100024"
+  }
+]

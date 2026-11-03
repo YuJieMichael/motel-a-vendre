@@ -1,0 +1,5 @@
+project_id = "motel-a-vendre"
+
+[functions.motel-services]
+# Anonymous public intake; handler validates the application key, origin and body.
+verify_jwt = false

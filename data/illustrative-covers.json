@@ -1,0 +1,30 @@
+{
+  "100013": {
+    "image": "assets/covers/100013.webp",
+    "source": "https://entreprisesavendre.quebec/entreprises/vente-confidentielle-motel-avec-immeuble-a-sainte-adele",
+    "sourceImage": "https://pbnscmdfudknggxgiuov.supabase.co/storage/v1/object/public/entreprises/d46a2824-fa67-469e-84a9-6926aea85735/c8916685-0faa-4e17-9a77-3824d10dc945/thumbnails/thumb_main_mvsbmkyllkmq32d.webp",
+    "sha256": "b0ab6f19edfd2901540f09310099a5f104f39916fc2217cf630278ca48fe4bcf",
+    "label": "AI-generated illustrative cover; user confirmed illustrative use"
+  },
+  "100024": {
+    "image": "assets/covers/100024.webp",
+    "source": "https://entreprisesavendre.quebec/entreprises/vente-confidentielle-hotel-a-saint-sauveur",
+    "sourceImage": "https://pbnscmdfudknggxgiuov.supabase.co/storage/v1/object/public/entreprises/d46a2824-fa67-469e-84a9-6926aea85735/22820018-175e-4e66-bc97-cc78916ae2c6/thumbnails/thumb_main_mvscnde4uf8imzv.webp",
+    "sha256": "5a47a7c6df45434dfd68891c43017d94f3bf8201092b3ad3995e6bcad9383e49",
+    "label": "AI-generated illustrative cover; user confirmed illustrative use"
+  },
+  "100028": {
+    "image": "assets/covers/100028.webp",
+    "source": "https://entreprisesavendre.quebec/entreprises/vente-confidentielle-motel-de-15-a-20-chambres-a-sherbrooke",
+    "sourceImage": "https://pbnscmdfudknggxgiuov.supabase.co/storage/v1/object/public/entreprises/d46a2824-fa67-469e-84a9-6926aea85735/87cac0d5-7ae0-4ae2-aa54-7661120fcefa/thumbnails/thumb_main_mvsc3t35i7m16p0.webp",
+    "sha256": "dc711b9f6d6abb309856a0b6809efa047e43f03e1928d4c001952ef6751f109b",
+    "label": "AI-generated illustrative cover; user confirmed illustrative use"
+  },
+  "100030": {
+    "image": "assets/covers/100030.webp",
+    "source": "https://entreprisesavendre.quebec/entreprises/vente-confidentielle-hotel-de-plus-de-80-chambres-a-quebec",
+    "sourceImage": "https://pbnscmdfudknggxgiuov.supabase.co/storage/v1/object/public/entreprises/d46a2824-fa67-469e-84a9-6926aea85735/66cebed3-5909-4688-9f90-4c2526b05543/thumbnails/thumb_main_mvscx2pzkqz7svx.webp",
+    "sha256": "cf0c0b123124483387e0289657cdbd7dc4ccd2e1440be88a6d2bb109488cfa3a",
+    "label": "AI-generated illustrative cover; user confirmed illustrative use"
+  }
+}
