@@ -55,7 +55,7 @@ Les identifiants de compte, clés serveur, fichiers `.env`, courriels et preuves
 
 ## English
 
-Independent FR/EN/ZH Québec motel and hotel website, with French as the default language. Use Node.js 24+, then `npm run build` and `npm start`. Run `npm test` and `npm run test:backend` to verify the frontend, Worker and mocked backend. No package installation is required. Hosting and database deployment are manual; pushing to this repository does not publish the website.
+Independent FR/EN/ZH Québec motel and hotel website, with French as the default language. Use Node.js 24+, then `npm run build` and `npm start`. Run `npm test` and `npm run test:backend` to verify the frontend, Worker and mocked backend. No package installation is required. Pushing to `main` builds, tests and deploys the website through Cloudflare Workers Builds; other branches are only verified.
 
 The Supabase migration extends the existing main-site schema; it is not a complete standalone database setup. Deployment dependencies and environment variable names are documented in [docs/OPERATIONS.md](docs/OPERATIONS.md).
 
@@ -63,4 +63,4 @@ The Supabase migration extends the existing main-site schema; it is not a comple
 
 Motel à vendre 独立网站源码，法语默认，支持英语和中文。安装 Node.js 24 或以上版本，执行 `npm run build`、`npm start`，即可在本地预览。执行 `npm test` 和 `npm run test:backend` 验证网站、Worker 与后台接口。
 
-本仓库包含前端、图片、Cloudflare 部署源码、Supabase 后台接口与增量数据库迁移。GitHub 只运行验证，上传或推送不会自动更新正式网站。后台沿用主站已有询盘收集和通知服务，详细依赖见运维说明。
+本仓库包含前端、图片、Cloudflare 部署源码、Supabase 后台接口与增量数据库迁移。推送到 `main` 分支会通过 Cloudflare Workers Builds 自动构建、测试并发布正式网站；其他分支只运行 GitHub 验证。后台沿用主站已有询盘收集和通知服务，详细依赖见运维说明。

@@ -2,9 +2,14 @@
 
 ## Scope
 
-This is the source repository for the independent Cloudflare Worker **motel-a-vendre**, serving `motelavendre.ca` and redirecting `www.motelavendre.ca`. The production website has already been published. Repository creation or a Git push is not a deployment.
+This is the source repository for the independent Cloudflare Worker **motel-a-vendre**, serving `motelavendre.ca` and redirecting `www.motelavendre.ca`.
 
-Do not deploy this project to the main site's Worker. No GitHub deployment secrets or automatic deployment workflow are configured here.
+**Deployment is automatic from `main`** through Cloudflare Workers Builds (connected in the Cloudflare dashboard, not GitHub Actions). Every push to `main` runs:
+
+- Build command: `npm run build && npm run prepare:release && npm test`
+- Deploy command: `npx wrangler@4.151.1 deploy -c release/wrangler.jsonc`
+
+A failing build or test stops the deployment. Work on another branch and merge to `main` only when the change should go live. Roll back from Workers → motel-a-vendre → Deployments. No Cloudflare credentials are stored in GitHub. Do not deploy this project to the main site's Worker.
 
 ## Build and release preparation
 
