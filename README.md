@@ -1,6 +1,6 @@
 # Motel à vendre
 
-Site spécialisé dans les motels et hôtels à vendre au Québec, en français, anglais et chinois. Le français est la langue d’entrée. Version source : **1.9.0**.
+Site spécialisé dans les motels et hôtels à vendre au Québec, en français, anglais et chinois. Le français est la langue d’entrée. Version source : **1.10.0**.
 
 Site public : [motelavendre.ca](https://motelavendre.ca/).
 

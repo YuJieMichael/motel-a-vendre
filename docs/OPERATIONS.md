@@ -90,4 +90,8 @@ Stored per user: profile, favourite references (max 200), saved searches (max 20
 
 Local preview: set `account.enabled: true` locally, run `npm run build && npm start`; the preview server runs the same API on a SQLite file in `.local/` (ignored by Git) and prints confirmation and reset emails in the terminal.
 
-Not included yet: saved-search email alerts (needs a Cron Trigger and unsubscribe links) and CAPTCHA on sign-up (Turnstile would need `https://challenges.cloudflare.com` in `script-src` and `frame-src`).
+Saved-search alerts: a daily Cron Trigger (`17 13 * * *` UTC) checks every saved search with alerts on and emails only listings it has not reported before; the first check after alerts are switched on records a baseline and sends nothing. At most 80 alert emails per run (Resend free tier); the rest go out the next day. Each email has a one-click `List-Unsubscribe` header and an unsubscribe link (`#unsubscribe=` on the account page). Migration `0002_search_alerts.sql` must be applied before deploying this code.
+
+Turnstile: widget "motelavendre.ca account" (site key in `account.turnstileSiteKey`) protects sign-up and password-reset requests. The server enforces it only once the Worker secret `TURNSTILE_SECRET` exists. Only the account page allows `https://challenges.cloudflare.com` in `script-src`/`frame-src`.
+
+Direct enquiries: `directEnquiries: true` makes `prepare:release` verify the intake (OPTIONS + invalid `{}` only) and send enquiries straight from motelavendre.ca, so signed-in users get an enquiry log. A failed check stops the build. In an offline sandbox, `MAV_INTAKE_CHECK=offline` skips the network check (never in CI).

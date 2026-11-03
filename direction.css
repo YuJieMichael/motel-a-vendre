@@ -143,3 +143,4 @@ html{scroll-padding-top:112px}
 .catalogue-controls .listings-toolbar{margin:0;padding:0;border:0}
 .results-line{margin-top:14px}
 .catalogue-error .button{margin-right:14px}
+.account-switch{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;min-height:32px}.account-switch input{accent-color:var(--ink);width:16px;height:16px;margin:0}.account-turnstile:empty{display:none}.account-turnstile{margin:4px 0 14px;min-height:0}

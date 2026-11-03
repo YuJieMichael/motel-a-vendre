@@ -79,15 +79,31 @@ const MAIL = {
     zh: ['您已拥有 Motel à vendre 账户', '您好：\n\n有人尝试用此邮箱注册，但该邮箱已有账户。登录或重置密码请打开：\n{link}\n\n如非本人操作，无需处理。']
   }
 };
-async function sendMail(env, to, kind, language, link) {
-  const [subject, body] = MAIL[kind][lang(language)];
-  const message = { to, subject, text: body.replace('{link}', link) };
+export async function deliverMail(env, message) {
   if (typeof env.ACCOUNT_MAIL_LOG === 'function') { await env.ACCOUNT_MAIL_LOG(message); return; }
   if (!env.RESEND_API_KEY || !env.MAIL_FROM) throw new ApiError(503, 'unavailable');
   let r;
-  try { r = await fetch('https://api.resend.com/emails', { method: 'POST', signal: AbortSignal.timeout(10000), headers: { Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: env.MAIL_FROM, to: [to], subject: message.subject, text: message.text }) }); }
+  try { r = await fetch('https://api.resend.com/emails', { method: 'POST', signal: AbortSignal.timeout(10000), headers: { Authorization: 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: env.MAIL_FROM, to: [message.to], subject: message.subject, text: message.text, ...(message.headers ? { headers: message.headers } : {}) }) }); }
   catch { throw new ApiError(503, 'unavailable'); }
   if (!r.ok) throw new ApiError(503, 'unavailable');
+}
+async function sendMail(env, to, kind, language, link) {
+  const [subject, body] = MAIL[kind][lang(language)];
+  await deliverMail(env, { to, subject, text: body.replace('{link}', link) });
+}
+
+// Cloudflare Turnstile. Enforced only once the TURNSTILE_SECRET Worker secret exists,
+// so the site keeps working while the widget is being set up.
+async function checkTurnstile(env, token, ip) {
+  if (!env.TURNSTILE_SECRET) return;
+  if (typeof token !== 'string' || !token || token.length > 2048) throw new ApiError(400, 'captcha');
+  if (typeof env.TURNSTILE_VERIFY === 'function') { if (!(await env.TURNSTILE_VERIFY(token))) throw new ApiError(400, 'captcha'); return; }
+  let outcome;
+  try {
+    const form = new FormData(); form.append('secret', env.TURNSTILE_SECRET); form.append('response', token); if (ip && ip !== 'local') form.append('remoteip', ip);
+    outcome = await (await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form, signal: AbortSignal.timeout(8000) })).json();
+  } catch { throw new ApiError(503, 'unavailable'); }
+  if (!outcome || outcome.success !== true) throw new ApiError(400, 'captcha');
 }
 
 export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
@@ -154,6 +170,18 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
     try {
       const db = env.ACCOUNTS;
       if (!db) throw new ApiError(503, 'unavailable');
+      // One-click unsubscribe (RFC 8058): mail providers POST without our header, so
+      // the random per-search token alone authorises switching that alert off.
+      if (request.method === 'POST' && url.pathname.replace(/\/$/, '') === '/api/account/unsubscribe') {
+        let token = url.searchParams.get('t') || '';
+        if (!token && /^application\/json\b/.test(request.headers.get('content-type') || '')) { try { token = String((JSON.parse((await request.text()).slice(0, 2048)) || {}).token || ''); } catch { token = ''; } }
+        if (!/^[A-Za-z0-9_-]{43}$/.test(token)) throw new ApiError(400, 'link_invalid');
+        const ip0 = request.headers.get('cf-connecting-ip') || 'local';
+        await limit(db, 'unsubscribe-ip', ip0, 60, 3600);
+        const row = await db.prepare('UPDATE saved_searches SET alerts = 0 WHERE unsubscribe_token = ?1 RETURNING name').bind(token).first();
+        if (!row) throw new ApiError(400, 'link_invalid');
+        return reply(200, { ok: true, name: row.name });
+      }
       // Same-origin only: a custom header forces a CORS preflight that is never granted.
       if (request.headers.get('x-mav-account') !== '1') throw new ApiError(403, 'forbidden');
       const origin = request.headers.get('origin');
@@ -161,7 +189,7 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
       const route = url.pathname.replace(/^\/api\/account\//, '').replace(/\/$/, '');
       const ip = request.headers.get('cf-connecting-ip') || 'local';
       let body = {};
-      if (!['GET', 'DELETE'].includes(request.method)) {
+      if (!['GET', 'DELETE', 'HEAD'].includes(request.method)) {
         if (!/^application\/json\b/.test(request.headers.get('content-type') || '')) throw new ApiError(415, 'invalid_input');
         const text = await request.text();
         if (text.length > 8192) throw new ApiError(413, 'invalid_input');
@@ -177,6 +205,7 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
         const problem = passwordProblem(body.password, email);
         if (problem) throw new ApiError(400, problem);
         await limit(db, 'signup-ip', ip, 5, 3600);
+        await checkTurnstile(env, body.turnstile, ip);
         await limit(db, 'mail-to', email, 3, 3600);
         await housekeeping(db);
         const existing = await db.prepare('SELECT id,verified_at,language FROM users WHERE email=?1').bind(email).first();
@@ -217,6 +246,7 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
       if (is('POST', 'recover')) {
         const email = cleanEmail(body.email);
         await limit(db, 'recover-ip', ip, 5, 3600);
+        await checkTurnstile(env, body.turnstile, ip);
         await limit(db, 'mail-to', email, 3, 3600);
         const user = await db.prepare('SELECT id,language FROM users WHERE email=?1').bind(email).first();
         if (user) await sendMail(env, email, 'reset', body.language || user.language, link(body.language || user.language, 'reset', await issueToken(db, user.id, 'reset', RESET_HOURS)));
@@ -262,17 +292,25 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
       const savedMatch = /^saved\/(\d{1,12})$/.exec(route);
       if (request.method === 'DELETE' && savedMatch) { await db.prepare('DELETE FROM saved_listings WHERE user_id=?1 AND listing_reference=?2').bind(user.id, savedMatch[1]).run(); return reply(200, { ok: true }); }
       if (is('GET', 'searches')) {
-        const { results } = await db.prepare('SELECT id,name,criteria,created_at FROM saved_searches WHERE user_id=?1 ORDER BY created_at DESC').bind(user.id).all();
-        return reply(200, { searches: results.map(r => ({ id: r.id, name: r.name, criteria: JSON.parse(r.criteria), created_at: new Date(r.created_at * 1000).toISOString() })) });
+        const { results } = await db.prepare('SELECT id,name,criteria,alerts,created_at FROM saved_searches WHERE user_id=?1 ORDER BY created_at DESC').bind(user.id).all();
+        return reply(200, { searches: results.map(r => ({ id: r.id, name: r.name, criteria: JSON.parse(r.criteria), alerts: r.alerts === 1, created_at: new Date(r.created_at * 1000).toISOString() })) });
       }
       if (is('POST', 'searches')) {
         const name = typeof body.name === 'string' ? body.name.trim().slice(0, 80) : '';
         if (!name) throw new ApiError(400, 'invalid_input');
         await underQuota(db, 'saved_searches', user.id);
-        await db.prepare('INSERT INTO saved_searches(id,user_id,name,criteria,created_at) VALUES(?1,?2,?3,?4,?5)').bind(crypto.randomUUID(), user.id, name, JSON.stringify(cleanCriteria(body.criteria)), sec()).run();
-        return reply(201, { ok: true });
+        const id = crypto.randomUUID();
+        await db.prepare('INSERT INTO saved_searches(id,user_id,name,criteria,alerts,unsubscribe_token,created_at) VALUES(?1,?2,?3,?4,?5,?6,?7)').bind(id, user.id, name, JSON.stringify(cleanCriteria(body.criteria)), body.alerts === true ? 1 : 0, randomToken(), sec()).run();
+        return reply(201, { ok: true, id });
       }
       const searchMatch = /^searches\/([0-9a-f-]{36})$/i.exec(route);
+      if (request.method === 'PATCH' && searchMatch) {
+        if (typeof body.alerts !== 'boolean') throw new ApiError(400, 'invalid_input');
+        // Switching alerts back on records a fresh baseline at the next daily check.
+        const row = await db.prepare('UPDATE saved_searches SET alerts=?1, alert_checked_at=CASE WHEN ?1=1 AND alerts=0 THEN NULL ELSE alert_checked_at END, unsubscribe_token=coalesce(unsubscribe_token,?2) WHERE user_id=?3 AND id=?4 RETURNING alerts').bind(body.alerts ? 1 : 0, randomToken(), user.id, searchMatch[1]).first();
+        if (!row) throw new ApiError(404, 'not_found');
+        return reply(200, { ok: true, alerts: row.alerts === 1 });
+      }
       if (request.method === 'DELETE' && searchMatch) { await db.prepare('DELETE FROM saved_searches WHERE user_id=?1 AND id=?2').bind(user.id, searchMatch[1]).run(); return reply(200, { ok: true }); }
       if (is('GET', 'history')) {
         const { results } = await db.prepare('SELECT id,kind,purpose,listing_reference,language,sent_at FROM enquiry_history WHERE user_id=?1 ORDER BY sent_at DESC LIMIT 100').bind(user.id).all();
@@ -289,7 +327,7 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
         return reply(200, {
           exportedAt: new Date(now()).toISOString(), site: 'motelavendre.ca', account: publicUser(user), profile: await profileOf(db, user.id),
           saved_listings: await all('SELECT listing_reference,created_at FROM saved_listings WHERE user_id=?1'),
-          saved_searches: await all('SELECT id,name,criteria,created_at FROM saved_searches WHERE user_id=?1'),
+          saved_searches: await all('SELECT id,name,criteria,alerts,created_at FROM saved_searches WHERE user_id=?1'),
           enquiry_history: await all('SELECT id,kind,purpose,listing_reference,language,sent_at FROM enquiry_history WHERE user_id=?1')
         });
       }

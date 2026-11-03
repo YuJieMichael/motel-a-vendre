@@ -15,6 +15,20 @@
  $('#account-sent').addEventListener('close',()=>$('#signin-password').focus());
  const fail=error=>{say(App.accountMessage(error),true);if(error?.code==='session')show();};
  let busy=false,resetToken='';
+ // Cloudflare Turnstile, loaded only here and only when a site key is configured.
+ const turnstileKey=$('#account-page').dataset.turnstile||'',widgets={};
+ let turnstileReady=null;
+ function loadTurnstile(){
+  if(!turnstileKey)return Promise.resolve(null);
+  if(!turnstileReady)turnstileReady=new Promise((resolve)=>{const s=document.createElement('script');s.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';s.async=true;s.onload=()=>resolve(window.turnstile||null);s.onerror=()=>resolve(null);document.head.append(s);});
+  return turnstileReady;
+ }
+ async function renderTurnstile(name){
+  const ts=await loadTurnstile();if(!ts||widgets[name]!==undefined)return;
+  widgets[name]=ts.render('#'+name+'-turnstile',{sitekey:turnstileKey,action:name,appearance:'interaction-only',language:{fr:'fr',en:'en',zh:'zh-cn'}[App.language()]||'fr'});
+ }
+ function turnstileToken(name){const ts=window.turnstile;return ts&&widgets[name]!==undefined?ts.getResponse(widgets[name])||'':'';}
+ function resetTurnstile(name){const ts=window.turnstile;if(ts&&widgets[name]!==undefined)ts.reset(widgets[name]);}
  async function guarded(form,fn){
   if(busy)return;busy=true;const controls=[...form.querySelectorAll('input,select,button')];controls.forEach(el=>el.disabled=true);form.setAttribute('aria-busy','true');
   try{await fn();}catch(error){fail(error);}finally{busy=false;controls.forEach(el=>el.disabled=false);form.removeAttribute('aria-busy');}
@@ -22,6 +36,7 @@
 
  function selectTab(name){
   for(const tab of ['signin','signup','recover']){const on=tab===name;$('#tab-'+tab).setAttribute('aria-selected',String(on));$('#tab-'+tab).tabIndex=on?0:-1;$('#form-'+tab).hidden=!on;}
+  if(name==='signup'||name==='recover')renderTurnstile(name);
  }
  function show(mode){
   const user=account.user;
@@ -46,7 +61,7 @@
   $('#account-saved-empty').hidden=items.length>0;
  }
  function renderSearches(rows){
-  $('#account-searches').innerHTML=rows.map(r=>`<li><span><strong>${e(r.name)}</strong><small>${e(new Date(r.created_at).toLocaleDateString(document.documentElement.lang,{dateStyle:'medium',timeZone:'America/Toronto'}))}</small></span><span class="account-row-actions"><a class="text-link" href="${e(App.shareURL(r.criteria||{}))}">${e(t('acctOpen'))}</a><button class="quiet-button" data-remove-search="${e(r.id)}">${e(t('acctRemove'))}</button></span></li>`).join('');
+  $('#account-searches').innerHTML=rows.map(r=>`<li><span><strong>${e(r.name)}</strong><small>${e(new Date(r.created_at).toLocaleDateString(document.documentElement.lang,{dateStyle:'medium',timeZone:'America/Toronto'}))}</small></span><span class="account-row-actions"><label class="account-switch"><input type="checkbox" data-search-alerts="${e(r.id)}"${r.alerts?' checked':''}><span>${e(t('acctAlerts'))}</span></label><a class="text-link" href="${e(App.shareURL(r.criteria||{}))}">${e(t('acctOpen'))}</a><button class="quiet-button" data-remove-search="${e(r.id)}">${e(t('acctRemove'))}</button></span></li>`).join('');
   $('#account-searches-empty').hidden=rows.length>0;
  }
  function renderHistory(rows){
@@ -58,11 +73,15 @@
  $('.account-tabs').addEventListener('click',event=>{const tab=event.target.closest('[data-account-tab]');if(tab){selectTab(tab.dataset.accountTab);say('');}});
  $('.account-tabs').addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight'].includes(event.key))return;const tabs=['signin','signup','recover'],current=tabs.findIndex(x=>$('#tab-'+x).getAttribute('aria-selected')==='true'),next=tabs[(current+(event.key==='ArrowRight'?1:2))%3];selectTab(next);$('#tab-'+next).focus();});
  $('#form-signin').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.signIn($('#signin-email').value.trim(),$('#signin-password').value);f.reset();say('');show();});});
- $('#form-signup').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#signup-email').value.trim();await account.signUp(email,$('#signup-password').value,App.language());f.reset();showSent('acctCheckEmailText',email);});});
- $('#form-recover').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#recover-email').value.trim();await account.recover(email,App.language());f.reset();showSent('acctResetSentText',email);});});
+ $('#form-signup').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#signup-email').value.trim();try{await account.signUp(email,$('#signup-password').value,App.language(),turnstileToken('signup'));}finally{resetTurnstile('signup');}f.reset();showSent('acctCheckEmailText',email);});});
+ $('#form-recover').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#recover-email').value.trim();try{await account.recover(email,App.language(),turnstileToken('recover'));}finally{resetTurnstile('recover');}f.reset();showSent('acctResetSentText',email);});});
  $('#form-new-password').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.resetPassword(resetToken,$('#new-password').value);resetToken='';f.reset();say(t('acctPasswordSaved'));show();});});
  $('#form-profile').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const p=await account.updateProfile({full_name:$('#profile-name').value,phone:$('#profile-phone').value,preferred_language:$('#profile-language').value,buyer_budget:$('#profile-budget').value,buyer_regions:$('#profile-regions').value,buyer_timeline:$('#profile-timeline').value});App.dropProfileCache();fillProfile(p||{});say(t('acctProfileSaved'));});});
  $('#account-signout').addEventListener('click',async()=>{await account.signOut();App.clearPersonalData();say(t('acctSignedOut'));show();});
+ $('#account-member').addEventListener('change',async event=>{
+  const box=event.target.closest('[data-search-alerts]');if(!box)return;
+  box.disabled=true;try{const r=await account.setSearchAlerts(box.dataset.searchAlerts,box.checked);box.checked=r.alerts;say(t(r.alerts?'acctAlertsOn':'acctAlertsOff'));}catch(error){box.checked=!box.checked;fail(error);}finally{box.disabled=false;}
+ });
  $('#account-member').addEventListener('click',async event=>{
   const savedRef=event.target.closest('[data-remove-saved]')?.dataset.removeSaved,searchId=event.target.closest('[data-remove-search]')?.dataset.removeSearch;
   try{
@@ -81,9 +100,10 @@
  // Confirmation and password-recovery links land here with tokens in the fragment.
  (async()=>{
   selectTab('signin');
-  const parsed=MAVAccount.parseAuthHash(location.hash),linkLike=/^#(verify|reset)=/.test(location.hash);
+  const parsed=MAVAccount.parseAuthHash(location.hash),linkLike=/^#(verify|reset|unsubscribe)=/.test(location.hash);
   if(linkLike){try{history.replaceState(null,'',location.pathname+location.search);}catch{location.hash='';}}
   if(linkLike&&!parsed)fail({code:'link_invalid'});
+  if(parsed?.type==='unsubscribe'){try{const r=await account.unsubscribe(parsed.token);say(t('acctUnsubscribed').replace('{name}',r.name||''));}catch(error){fail(error);}try{await account.refresh();}catch{}show();return;}
   if(parsed?.type==='reset'){resetToken=parsed.token;say('');show('recovery');$('#new-password').focus();return;}
   if(parsed?.type==='verify'){try{await account.verify(parsed.token);say(t('acctLinkConfirmed'));}catch(error){fail(error);}}
   else{try{await account.refresh();}catch(error){fail(error);}}

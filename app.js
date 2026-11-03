@@ -183,7 +183,7 @@ if(activeProperty){recent=Core.addRecent(recent,activeProperty.id,ids);writeLoca
 if(page==='property'&&!activeProperty){const notice=document.createElement('div');notice.className='catalogue-error';notice.setAttribute('role','alert');notice.innerHTML=`<h2>${e(t('catalogueError'))}</h2><p>${e(t('catalogueErrorText'))}</p><button type="button" class="button button-outline">${e(t('reload'))}</button>`;notice.querySelector('button').addEventListener('click',()=>location.reload());$('#property-page').prepend(notice);$$('#property-page button').forEach(button=>{if(!notice.contains(button))button.disabled=true;});$$('#property-page a[data-gallery-open]').forEach(link=>delete link.dataset.galleryOpen);}
 if(isHome)restoreRoute();
 // Account centre integration: favourites sync, saved searches, enquiry prefill.
-function accountMessage(error){return t({invalid_credentials:'acctErrInvalid',email_not_confirmed:'acctErrNotConfirmed',weak_password:'acctErrWeak',same_password:'acctErrSame',rate:'acctErrRate',network:'acctErrNetwork',session:'acctErrSession',quota:'acctErrQuota',link_invalid:'acctErrLink',invalid_input:'acctErrInvalid'}[error?.code]||'acctErrGeneric');}
+function accountMessage(error){return t({invalid_credentials:'acctErrInvalid',email_not_confirmed:'acctErrNotConfirmed',weak_password:'acctErrWeak',same_password:'acctErrSame',rate:'acctErrRate',network:'acctErrNetwork',session:'acctErrSession',quota:'acctErrQuota',link_invalid:'acctErrLink',invalid_input:'acctErrInvalid',captcha:'acctErrCaptcha'}[error?.code]||'acctErrGeneric');}
 function setSavedReferences(refs){saved=new Set(refs.map(idOfRef).filter(Boolean));writeLocal(storageKeys.saved,[...saved]);renderListings();}
 async function prefillFromAccount(){
  const fill=(id,value)=>{const el=$('#'+id);if(el&&!el.value&&value)el.value=value;};
@@ -196,7 +196,7 @@ function searchName(){const label=id=>{const el=$('#'+id);return el&&el.value!==
 async function saveSearch(){
  if(!account?.user){notify(t('acctSearchNeedsLogin'));return;}
  const {region,type,budget,rooms,season,q,sort}=state;
- try{await account.addSearch(searchName(),{region,type,budget,rooms,season,q,sort});notify(t('acctSearchSaved'));}catch(error){notify(accountMessage(error));}
+ try{await account.addSearch(searchName(),{region,type,budget,rooms,season,q,sort},true);notify(t('acctSearchSavedAlerts'));}catch(error){notify(accountMessage(error));}
 }
 function clearPersonalData(){for(const key of [storageKeys.saved,storageKeys.recent,storageKeys.draft])try{localStorage.removeItem(key);}catch{}saved=new Set();recent=[];latestDraft=null;profileCache=null;renderListings();}
 function refreshAccountControls(){const on=!!account?.user;if($('#save-search'))$('#save-search').hidden=!on;document.body.classList.toggle('signed-in',on);}
