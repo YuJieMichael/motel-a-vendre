@@ -8,7 +8,7 @@ const MAV_SITE = {
   "account": {
     "enabled": false,
     "d1DatabaseId": "def96fbe-c980-43db-8349-1900180990df",
-    "privacyContact": ""
+    "privacyContact": "Propriétaire — achat.vente.garderie@gmail.com"
   },
   "siteOrigin": "https://motelavendre.ca",
   "metricsEndpoint": "https://usngcexxobcpjncuwaxo.supabase.co/functions/v1/motel-services/events",
