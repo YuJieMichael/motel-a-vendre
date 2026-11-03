@@ -16,7 +16,7 @@ function setup(){
 
 test('passwords use salted PBKDF2 and verify in constant form',async()=>{
  const a=await hashPassword('harbour-lights-42'),b=await hashPassword('harbour-lights-42');
- assert.match(a,/^pbkdf2-sha256\$100000\$/);assert.notEqual(a,b);
+ assert.match(a,/^pbkdf2-sha256\$20000\$/);assert.notEqual(a,b);
  assert.equal(await verifyPassword('harbour-lights-42',a),true);assert.equal(await verifyPassword('harbour-lights-43',a),false);assert.equal(await verifyPassword('x','garbage'),false);
 });
 
@@ -111,4 +111,14 @@ test('unconfirmed accounts expire and plain-HTTP sessions use a non-Secure local
  const api=createAccountApi({siteOrigin:ORIGIN});
  const r=await api(new Request('http://127.0.0.1:5173/api/account/verify',{method:'POST',headers:{'x-mav-account':'1',origin:'http://127.0.0.1:5173','content-type':'application/json'},body:JSON.stringify({token:t.tokenFrom('verify')})}),t.env);
  assert.equal(r.status,200);assert.match(r.headers.get('set-cookie'),/^mav_session=/);assert.doesNotMatch(r.headers.get('set-cookie'),/Secure/);
+});
+
+test('raising PASSWORD_ITERATIONS upgrades a stored hash at the next sign-in',async()=>{
+ const t=setup();await t.verified(t.client());
+ const before=t.db.prepare("SELECT password_hash h FROM users").get().h;assert.match(before,/\$20000\$/);
+ t.env.PASSWORD_ITERATIONS='100000';assert.equal((await t.client().call('POST','login',{email:'buyer@example.com',password:'harbour-lights-42'})).status,200);
+ assert.match(t.db.prepare("SELECT password_hash h FROM users").get().h,/\$100000\$/);
+ assert.equal((await t.client().call('POST','login',{email:'buyer@example.com',password:'harbour-lights-42'})).status,200);
+ t.env.PASSWORD_ITERATIONS='5';assert.equal((await t.client().call('POST','login',{email:'buyer@example.com',password:'harbour-lights-42'})).status,200,'out-of-range values fall back to the default');
+ assert.match(t.db.prepare("SELECT password_hash h FROM users").get().h,/\$20000\$/);
 });

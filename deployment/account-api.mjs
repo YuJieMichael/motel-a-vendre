@@ -1,7 +1,11 @@
 // Account centre API on Cloudflare D1 (binding ACCOUNTS), served at /api/account/*.
 // Self-contained: Web Crypto + D1 + optional Resend for email. No main-site data.
 const enc = new TextEncoder();
-const ITERATIONS = 100000; // Workers' PBKDF2 maximum. Stored per hash so it can change later.
+// 20 000 PBKDF2 rounds keep one hash at ~3-4 ms CPU, inside the Workers Free plan's 10 ms.
+// Set the PASSWORD_ITERATIONS variable (max 100 000, the Workers limit) after moving to
+// Workers Paid; each user's hash is upgraded at their next sign-in.
+const DEFAULT_ITERATIONS = 20000;
+const iterationsFor = env => { const n = Number(env && env.PASSWORD_ITERATIONS); return Number.isInteger(n) && n >= 10000 && n <= 100000 ? n : DEFAULT_ITERATIONS; };
 const SESSION_DAYS = 30, VERIFY_HOURS = 48, RESET_HOURS = 1, UNVERIFIED_DAYS = 7;
 const QUOTA = { saved_listings: 200, saved_searches: 20, enquiry_history: 500 };
 const LANGS = ['fr', 'en', 'zh'], TIMELINES = ['', 'exploring', '0-3', '3-6', '6+'];
@@ -21,17 +25,18 @@ async function derive(password, salt, iterations) {
   const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
   return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations }, key, 256));
 }
-export async function hashPassword(password) {
+export async function hashPassword(password, iterations = DEFAULT_ITERATIONS) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
-  return `pbkdf2-sha256$${ITERATIONS}$${b64u(salt)}$${b64u(await derive(password, salt, ITERATIONS))}`;
+  return `pbkdf2-sha256$${iterations}$${b64u(salt)}$${b64u(await derive(password, salt, iterations))}`;
 }
+const iterationsOf = stored => Number(String(stored || '').split('$')[1]) || 0;
 export async function verifyPassword(password, stored) {
   const [alg, iter, salt, hash] = String(stored || '').split('$');
   if (alg !== 'pbkdf2-sha256' || !/^\d+$/.test(iter)) return false;
   return sameBytes(await derive(password, fromB64u(salt), Number(iter)), fromB64u(hash));
 }
-let dummyHash;
-const dummy = async () => dummyHash || (dummyHash = await hashPassword('timing-equaliser-' + randomToken()));
+const dummyHashes = new Map();
+const dummy = async iterations => dummyHashes.get(iterations) || dummyHashes.set(iterations, await hashPassword('timing-equaliser-' + randomToken(), iterations)).get(iterations);
 
 function passwordProblem(password, email) {
   if (typeof password !== 'string' || password.length < 8 || password.length > 128) return 'weak_password';
@@ -177,7 +182,7 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
         const existing = await db.prepare('SELECT id,verified_at,language FROM users WHERE email=?1').bind(email).first();
         if (existing && existing.verified_at) { await sendMail(env, email, 'exists', language, link(language)); return reply(200, { ok: true }); }
         let userId = existing && existing.id;
-        const hash = await hashPassword(body.password), t = sec();
+        const hash = await hashPassword(body.password, iterationsFor(env)), t = sec();
         if (userId) await db.prepare('UPDATE users SET password_hash=?1, language=?2, consent_at=?3 WHERE id=?4').bind(hash, language, t, userId).run();
         else {
           userId = crypto.randomUUID();
@@ -201,9 +206,11 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
         await limit(db, 'login-ip', ip, 30, 900);
         await limit(db, 'login-email', email, 10, 900);
         const user = await db.prepare('SELECT id,email,password_hash,verified_at,created_at FROM users WHERE email=?1').bind(email).first();
-        const ok = await verifyPassword(String(body.password || ''), user ? user.password_hash : await dummy());
+        const ok = await verifyPassword(String(body.password || ''), user ? user.password_hash : await dummy(iterationsFor(env)));
         if (!user || !ok) throw new ApiError(401, 'invalid_credentials');
         if (!user.verified_at) throw new ApiError(403, 'email_not_confirmed');
+        // Transparent upgrade when PASSWORD_ITERATIONS changes (one extra hash, this sign-in only).
+        if (iterationsOf(user.password_hash) !== iterationsFor(env)) await db.prepare('UPDATE users SET password_hash=?1 WHERE id=?2').bind(await hashPassword(String(body.password), iterationsFor(env)), user.id).run();
         await housekeeping(db);
         return reply(200, { user: publicUser(user) }, await startSession(db, user.id, secure));
       }
@@ -222,7 +229,7 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
         const userId = await consumeToken(db, body.token, 'reset');
         const t = sec();
         await db.batch([
-          db.prepare('UPDATE users SET password_hash=?1, verified_at=coalesce(verified_at,?2) WHERE id=?3').bind(await hashPassword(body.password), t, userId),
+          db.prepare('UPDATE users SET password_hash=?1, verified_at=coalesce(verified_at,?2) WHERE id=?3').bind(await hashPassword(body.password, iterationsFor(env)), t, userId),
           db.prepare('DELETE FROM sessions WHERE user_id=?1').bind(userId)
         ]);
         const user = await db.prepare('SELECT id,email,created_at FROM users WHERE id=?1').bind(userId).first();
