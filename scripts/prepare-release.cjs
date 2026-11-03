@@ -50,7 +50,12 @@ async function prepare({direct=false}={}){
  fs.writeFileSync(path.join(release,'runtime-inputs.mjs'),inputs);
  for(const file of ['live-catalogue.mjs','live-worker.mjs','account-api.mjs'])fs.writeFileSync(path.join(release,file),fs.readFileSync(path.join(root,'deployment',file),'utf8').replaceAll('../lib/','./runtime/'));
  const wrangler={name:'motel-a-vendre',main:'./entry.mjs',compatibility_date:'2026-10-19',workers_dev:false,preview_urls:false,routes:[{pattern:'motelavendre.ca',custom_domain:true},{pattern:'www.motelavendre.ca',custom_domain:true}],assets:{directory:'./public',binding:'ASSETS',run_worker_first:['/','/index.html','/fr*','/en*','/zh*','/data/catalogue-data.js','/api/*','/sitemap.xml','/assets/centris/*','/googleb6173475a8eadbeb.html'],html_handling:'auto-trailing-slash',not_found_handling:'404-page'}};
- if(accounts)wrangler.d1_databases=[{binding:'ACCOUNTS',database_name:'motel-a-vendre-accounts',database_id:config.account.d1DatabaseId,migrations_dir:'../d1/migrations'}];
+ if(accounts){
+  if(!/^[^<>@\s]+(?: [^<>@]+)* <[^<>@\s]+@mail\.motelavendre\.ca>$/.test(config.account.mailFrom||''))throw Error('Set account.mailFrom to an address on the verified Resend domain mail.motelavendre.ca');
+  wrangler.d1_databases=[{binding:'ACCOUNTS',database_name:'motel-a-vendre-accounts',database_id:config.account.d1DatabaseId,migrations_dir:'../d1/migrations'}];
+  // MAIL_FROM is public configuration; RESEND_API_KEY stays a Worker secret set in the dashboard.
+  wrangler.vars={MAIL_FROM:config.account.mailFrom};
+ }
  fs.writeFileSync(path.join(release,'wrangler.jsonc'),JSON.stringify(wrangler,null,2)+'\n');
  function walk(dir,prefix=''){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(f=>f.isDirectory()?walk(path.join(dir,f.name),prefix+f.name+'/'):[prefix+f.name]);}
  const files=walk(publicDir).sort().map(file=>({file,bytes:fs.statSync(path.join(publicDir,file)).size,sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(publicDir,file))).digest('hex')}));
