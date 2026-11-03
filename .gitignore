@@ -20,3 +20,4 @@ public-config.json
 data/main-review.json
 .DS_Store
 Thumbs.db
+.local/

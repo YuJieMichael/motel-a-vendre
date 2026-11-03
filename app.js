@@ -11,7 +11,7 @@ function writeLocal(key,value){try{localStorage.setItem(key,JSON.stringify(value
 function storedIds(key){const value=readLocal(key,[]);return Array.isArray(value)?[...new Set(value.filter(id=>ids.includes(id)))]:[];}
 const byReference=ref=>properties.find(p=>Core.reference(p).toUpperCase()===String(ref).toUpperCase());
 let saved=new Set(storedIds(storageKeys.saved)),recent=storedIds(storageKeys.recent).slice(0,12);
-// Optional account centre (separate Supabase project). Null when not configured.
+// Optional account centre (/api/account on this site, Cloudflare D1). Null when disabled.
 const account=(()=>{try{return typeof MAVAccount!=='undefined'&&MAVAccount.configured(config)?MAVAccount.createClient(config,{storage:localStorage}):null;}catch{return null;}})();
 const refOf=id=>{const p=properties.find(p=>p.id===id);return p?Core.reference(p):'';},idOfRef=ref=>byReference(ref)?.id;
 let profileCache=null;

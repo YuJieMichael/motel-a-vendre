@@ -64,19 +64,23 @@ The existing platform notification job sends enquiry emails. No recipient mailbo
 
 Check HTTPS, root/www redirects, `/api/catalogue` live status and freshness, all language homepages, a current property, the guides and the sitemap. Intake checks use only `OPTIONS` and invalid `{}` requests. Never submit a valid production enquiry or analytics event just to test availability. Do not repeatedly resubmit the sitemap or change account access during routine monitoring.
 
-## Account centre (separate Supabase project)
+## Account centre (Cloudflare D1)
 
-The optional buyer account centre (`/fr/compte/`, `/en/account/`, `/zh/account/`) uses its **own** Supabase project. It never shares users, tables or keys with the main Propriété En Vente project. Until `data/site-config.js` → `account.url` and `account.publishableKey` are filled, the page shows "coming soon" and the menu link is hidden.
+The optional buyer account centre (`/fr/compte/`, `/en/account/`, `/zh/account/`) is served by this Worker at `/api/account/*` and stores its data in a dedicated **Cloudflare D1** database bound as `ACCOUNTS`. It never shares users or tables with the main Propriété En Vente platform. While `data/site-config.js` → `account.enabled` is `false` (the default), the page shows "coming soon", the menu link is hidden and the API answers 404.
 
-One-time setup, done by the operator in the Supabase dashboard of the new project:
+One-time setup by the operator:
 
-1. Create the project (Canadian region if available) and apply `supabase-account/migrations/20261103000000_account_center.sql` once. Never apply it to the main project.
-2. Authentication → URL Configuration: Site URL `https://motelavendre.ca`; Redirect URLs `https://motelavendre.ca/fr/compte/`, `https://motelavendre.ca/en/account/`, `https://motelavendre.ca/zh/account/` (add `http://127.0.0.1:5173/**` only for local testing).
-3. Authentication → Email: keep "Confirm email" on, set minimum password length 8, enable leaked-password protection if the plan allows it, and configure a custom SMTP sender for motelavendre.ca. Write the Confirm signup and Reset password templates in FR/EN/ZH (one template, three paragraphs).
-4. Copy the project URL and the **publishable** key (`sb_publishable_…`) into `account.url` / `account.publishableKey`, and set `account.privacyContact` to the name and email of the person in charge of personal information (Québec Law 25). `prepare:release` refuses to build without it, and refuses a secret key or the main project URL.
+1. `npx wrangler d1 create motel-a-vendre-accounts --location enam` and copy the returned `database_id` into `account.d1DatabaseId`.
+2. `npx wrangler d1 migrations apply motel-a-vendre-accounts --remote` (migrations live in `d1/migrations/`).
+3. Email: create a Resend account, verify the `motelavendre.ca` sending domain (DNS records in Cloudflare), then `npx wrangler secret put RESEND_API_KEY` and `npx wrangler secret put MAIL_FROM` (for example `Motel à vendre <compte@motelavendre.ca>`). Without them sign-up and password reset answer 503; nothing is sent from any other service.
+4. Set `account.privacyContact` (person in charge of personal information, Québec Law 25) and `account.enabled: true`. `prepare:release` refuses to build an enabled release without the database id or the privacy contact, and adds the D1 binding to `release/wrangler.jsonc`.
 
-The browser talks to Supabase Auth and PostgREST directly with `lib/account-core.js`; no external script is loaded. The release adds the account origin to `connect-src`. Account pages are `noindex`, `Cache-Control: no-store`, excluded from the sitemap and disallowed in `robots.txt`.
+Security model: passwords are salted PBKDF2-SHA256 (100 000 iterations); sessions are random 256-bit tokens in an `HttpOnly; Secure; SameSite=Lax` `__Host-` cookie, stored only as SHA-256 hashes (30 days). Every API call needs the `X-MAV-Account: 1` header and a same-origin `Origin`, so cross-site requests fail. Email links carry one-time tokens in the URL fragment (`#verify=` 48 h, `#reset=` 1 h), so mail scanners and logs never spend or record them. Sign-up, sign-in, recovery and link use are rate limited (hashed buckets, no raw IPs). Responses never reveal whether an address is registered. A password reset signs out every other session. Unconfirmed accounts are removed after 7 days. The account API refuses plain HTTP outside local preview.
 
-Stored per user (all under row level security, owner-only): profile, favourite references (max 200), saved searches (max 20) and an enquiry log (type, purpose, reference, date, receipt id — never the message or contact details; max 500). Users can export everything as JSON and delete their account (`delete_my_account()` cascades all rows). Signing out clears favourites, recent views and drafts on the device.
+CPU note: one PBKDF2 hash takes roughly 15–20 ms of CPU. The Workers Free plan allows 10 ms per request, so sign-in and sign-up may be cut off on the Free plan; use Workers Paid (5 USD/month) before enabling accounts.
 
-Not included yet: saved-search email alerts (needs a scheduled job and unsubscribe links) and CAPTCHA on sign-up (Supabase supports Turnstile; enabling it requires adding `https://challenges.cloudflare.com` to `script-src` and `frame-src`).
+Stored per user: profile, favourite references (max 200), saved searches (max 20) and an enquiry log (type, purpose, reference, date, receipt id — never the message or contact details; max 500). Users can export everything as JSON and delete their account after re-entering the password; deletion removes every row explicitly. Signing out clears favourites, recent views and drafts on the device.
+
+Local preview: set `account.enabled: true` locally, run `npm run build && npm start`; the preview server runs the same API on a SQLite file in `.local/` (ignored by Git) and prints confirmation and reset emails in the terminal.
+
+Not included yet: saved-search email alerts (needs a Cron Trigger and unsubscribe links) and CAPTCHA on sign-up (Turnstile would need `https://challenges.cloudflare.com` in `script-src` and `frame-src`).

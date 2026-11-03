@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import vm from 'node:vm';import crypto from 'node:crypto';import {fileURLToPath} from 'node:url';
-import {handleRequest,policy,accountOrigin} from '../deployment/worker.mjs';
+import {handleRequest,policy} from '../deployment/worker.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),release=path.join(root,'release');
 const assets={fetch:async request=>new Response(request.method==='HEAD'?null:'property content',{headers:{'Content-Type':'text/html; charset=utf-8',ETag:'"public-1"'}})};
 test('canonical redirects preserve public paths and query without trusting redirect targets',async()=>{
@@ -42,8 +42,8 @@ test('release enquiry capability is explicit and CSP hashes match structured dat
  const worker=fs.readFileSync(path.join(release,'worker.mjs'),'utf8'),html=fs.readFileSync(path.join(release,'public/fr/proprietes/100021/index.html'),'utf8');const json=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];assert.ok(worker.includes('sha256-'+crypto.createHash('sha256').update(json).digest('base64')));
  const headers=fs.readFileSync(path.join(release,'public/_headers'),'utf8');assert.ok(headers.split('\n').every(l=>l.length<=2000));assert.match(headers,/frame-ancestors 'none'/);
 });
-test('account origin stays out of the source policy until a release enables it, and no-store survives headers',async()=>{
- assert.equal(accountOrigin,'');assert.doesNotMatch(policy,/connect-src[^;]*https:\/\/(?!usngcexxobcpjncuwaxo)/);
+test('account traffic stays same-origin and no-store survives security headers',async()=>{
+ assert.match(policy,/connect-src 'self' https:\/\/usngcexxobcpjncuwaxo\.supabase\.co;/);
  const r=await handleRequest(new Request('https://motelavendre.ca/fr/compte/'),{ASSETS:{fetch:async()=>new Response('x',{headers:{'Cache-Control':'no-store'}})}});assert.equal(r.headers.get('cache-control'),'no-store');
  const pub=await handleRequest(new Request('https://motelavendre.ca/styles.css'),{ASSETS:{fetch:async()=>new Response('x',{headers:{'Cache-Control':'public, max-age=31536000'}})}});assert.equal(pub.headers.get('cache-control'),'public, max-age=0, must-revalidate');
 });

@@ -2,16 +2,24 @@ import createRenderer from '../lib/page-renderer.cjs';
 import {loadCatalogue} from './live-catalogue.mjs';
 import {template,translations,site,fallback} from './runtime-inputs.mjs';
 import {responseHeaders} from './worker.mjs';
+import {createAccountApi} from './account-api.mjs';
 
 const locales={fr:'fr-CA',en:'en-CA',zh:'zh-Hans'};
 const sections={fr:{equipe:'team',vendre:'seller','guide-achat':'guide',compte:'account'},en:{team:'team',sell:'seller','buying-guide':'guide',account:'account'},zh:{team:'team',sell:'seller','buying-guide':'guide',account:'account'}};
-const accountOrigin=(()=>{try{const u=new URL(site.account&&site.account.publishableKey?site.account.url:'');return u.protocol==='https:'&&u.origin!==new URL(site.endpoint).origin?u.origin:'';}catch{return '';}})();
+const accountsEnabled=!!(site.account&&site.account.enabled===true);
+const accountApi=createAccountApi({siteOrigin:site.siteOrigin});
 const checkedDay=c=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Toronto',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(c.updatedAt));
 const notices={fr:'La mise à jour du catalogue est momentanément indisponible. Dernière vérification : ',en:'The catalogue update is temporarily unavailable. Last checked: ',zh:'目录更新暂时不可用。上次核验：'};
 export async function handleLiveRequest(request,env){
  const url=new URL(request.url),local=['127.0.0.1','localhost'].includes(url.hostname);
  const wrapped=(r,policy)=>responseHeaders(r,request,policy);
  if(!local&&!['motelavendre.ca','www.motelavendre.ca'].includes(url.hostname))return wrapped(new Response('Not found',{status:404}));
+ if(url.pathname.startsWith('/api/account/')){
+  // Account API (Cloudflare D1). Plain HTTP is refused rather than redirected so credentials never travel unencrypted.
+  if(!accountsEnabled)return wrapped(Response.json({error:'unavailable'},{status:404,headers:{'Cache-Control':'no-store'}}));
+  if(!local&&(url.hostname!=='motelavendre.ca'||url.protocol!=='https:'))return wrapped(Response.json({error:'forbidden'},{status:403,headers:{'Cache-Control':'no-store'}}));
+  return wrapped(await accountApi(request,env));
+ }
  if(!['GET','HEAD'].includes(request.method))return wrapped(new Response('Method not allowed',{status:405,headers:{Allow:'GET, HEAD'}}));
  if(!local&&(url.hostname==='www.motelavendre.ca'||url.protocol!=='https:'))return wrapped(Response.redirect(site.siteOrigin+url.pathname+url.search,308));
  if(['/','/index.html'].includes(url.pathname))return wrapped(Response.redirect(new URL('/fr/'+url.search,local?url.origin:site.siteOrigin).href,301));
@@ -54,7 +62,7 @@ export async function handleLiveRequest(request,env){
  if(status!=='live')html=html.replace('<main ',`<aside class="catalogue-status" role="status">${notices[lang]+checkedDay(catalogue)}</aside><main `);
  const json=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
  const hash=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(json)))));
- const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+(accountOrigin?' '+accountOrigin:'')+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
+ const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://proprieteenvente.ca";
  return wrapped(new Response(request.method==='HEAD'?null:html,{headers:{'Content-Type':'text/html; charset=utf-8','X-Catalogue-Status':status,'X-Catalogue-Checked-At':catalogue.updatedAt,...(kind==='account'?{'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'}:{})}}),csp);
 }
 export default {fetch:handleLiveRequest};

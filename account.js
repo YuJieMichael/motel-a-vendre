@@ -7,8 +7,7 @@
  if(!account){$('#account-unavailable').hidden=false;return;}
  const say=(message,error=false)=>{status.textContent=message;status.classList.toggle('is-error',error);};
  const fail=error=>{say(App.accountMessage(error),true);if(error?.code==='session')show();};
- const redirectTo=()=>new URL(location.pathname,location.origin).href;
- let busy=false;
+ let busy=false,resetToken='';
  async function guarded(form,fn){
   if(busy)return;busy=true;const controls=[...form.querySelectorAll('input,select,button')];controls.forEach(el=>el.disabled=true);form.setAttribute('aria-busy','true');
   try{await fn();}catch(error){fail(error);}finally{busy=false;controls.forEach(el=>el.disabled=false);form.removeAttribute('aria-busy');}
@@ -25,7 +24,8 @@
 
  async function loadMember(){
   try{
-   const [profile,refs,searches,history]=await Promise.all([account.profile(),account.syncSaved(App.localSavedReferences()),account.searches(),account.history()]);
+   const refs=await account.syncSaved(App.localSavedReferences());
+   const [profile,searches,history]=await Promise.all([account.profile(),account.searches(),account.history()]);
    fillProfile(profile||{});renderSaved(refs);renderSearches(searches);renderHistory(history);App.setSavedReferences(refs);
   }catch(error){fail(error);}
  }
@@ -51,9 +51,9 @@
  $('.account-tabs').addEventListener('click',event=>{const tab=event.target.closest('[data-account-tab]');if(tab){selectTab(tab.dataset.accountTab);say('');}});
  $('.account-tabs').addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight'].includes(event.key))return;const tabs=['signin','signup','recover'],current=tabs.findIndex(x=>$('#tab-'+x).getAttribute('aria-selected')==='true'),next=tabs[(current+(event.key==='ArrowRight'?1:2))%3];selectTab(next);$('#tab-'+next).focus();});
  $('#form-signin').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.signIn($('#signin-email').value.trim(),$('#signin-password').value);f.reset();say('');show();});});
- $('#form-signup').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const r=await account.signUp($('#signup-email').value.trim(),$('#signup-password').value,App.language(),redirectTo());f.reset();if(r.confirmed){say('');show();}else say(t('acctCheckEmail'));});});
- $('#form-recover').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.recover($('#recover-email').value.trim(),redirectTo());f.reset();say(t('acctResetSent'));});});
- $('#form-new-password').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.updatePassword($('#new-password').value);f.reset();say(t('acctPasswordSaved'));show();});});
+ $('#form-signup').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.signUp($('#signup-email').value.trim(),$('#signup-password').value,App.language());f.reset();say(t('acctCheckEmail'));});});
+ $('#form-recover').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.recover($('#recover-email').value.trim(),App.language());f.reset();say(t('acctResetSent'));});});
+ $('#form-new-password').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.resetPassword(resetToken,$('#new-password').value);resetToken='';f.reset();say(t('acctPasswordSaved'));show();});});
  $('#form-profile').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const p=await account.updateProfile({full_name:$('#profile-name').value,phone:$('#profile-phone').value,preferred_language:$('#profile-language').value,buyer_budget:$('#profile-budget').value,buyer_regions:$('#profile-regions').value,buyer_timeline:$('#profile-timeline').value});App.dropProfileCache();fillProfile(p||{});say(t('acctProfileSaved'));});});
  $('#account-signout').addEventListener('click',async()=>{await account.signOut();App.clearPersonalData();say(t('acctSignedOut'));show();});
  $('#account-member').addEventListener('click',async event=>{
@@ -66,21 +66,20 @@
  $('#account-export').addEventListener('click',async()=>{
   try{const data=await account.exportData(),url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='motel-a-vendre-account-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);say(t('acctExported'));}catch(error){fail(error);}
  });
- $('#account-delete-open').addEventListener('click',()=>{$('#form-delete').reset();$('#delete-confirm').setCustomValidity('');$('#account-delete-dialog').showModal();});
- $('#delete-confirm').addEventListener('input',event=>event.target.setCustomValidity(''));
- $('#form-delete').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget,input=$('#delete-confirm');
-  if(input.value.trim().toLowerCase()!==String(account.user?.email||'').toLowerCase()){input.setCustomValidity(t('acctErrMismatch'));input.reportValidity();return;}
-  guarded(f,async()=>{await account.deleteAccount();App.clearPersonalData();$('#account-delete-dialog').close();say(t('acctDeleted'));show();});
+ $('#account-delete-open').addEventListener('click',()=>{$('#form-delete').reset();$('#account-delete-dialog').showModal();});
+ $('#form-delete').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;
+  guarded(f,async()=>{await account.deleteAccount($('#delete-password').value);App.clearPersonalData();$('#account-delete-dialog').close();say(t('acctDeleted'));show();});
  });
 
  // Confirmation and password-recovery links land here with tokens in the fragment.
  (async()=>{
   selectTab('signin');
-  const parsed=MAVAccount.parseAuthHash(location.hash);
-  if(parsed){
-   try{history.replaceState(null,'',location.pathname+location.search);}catch{location.hash='';}
-   try{const type=await account.adoptRedirect(parsed);if(type==='recovery'){say('');show('recovery');$('#new-password').focus();return;}say(t('acctLinkConfirmed'));}catch(error){fail(error.code==='link_invalid'||error.code==='session'?{code:'link_invalid'}:error);}
-  }
+  const parsed=MAVAccount.parseAuthHash(location.hash),linkLike=/^#(verify|reset)=/.test(location.hash);
+  if(linkLike){try{history.replaceState(null,'',location.pathname+location.search);}catch{location.hash='';}}
+  if(linkLike&&!parsed)fail({code:'link_invalid'});
+  if(parsed?.type==='reset'){resetToken=parsed.token;say('');show('recovery');$('#new-password').focus();return;}
+  if(parsed?.type==='verify'){try{await account.verify(parsed.token);say(t('acctLinkConfirmed'));}catch(error){fail(error);}}
+  else{try{await account.refresh();}catch(error){fail(error);}}
   show();
  })();
 })();

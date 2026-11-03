@@ -39,7 +39,7 @@ Les tests du Worker et du catalogue simulent les appels externes. Les tests du b
 | `scripts/` | Construction, import public et préparation de publication |
 | `supabase/functions/` | Interface de consultation et statistiques séparées |
 | `supabase/migrations/` | Extension SQL Motel de la plateforme existante |
-| `supabase-account/migrations/` | Espace compte : projet Supabase séparé (voir OPERATIONS.md) |
+| `d1/migrations/`, `deployment/account-api.mjs` | Espace compte : base Cloudflare D1 et API `/api/account` (voir OPERATIONS.md) |
 | `lib/account-core.js`, `account.js` | Client et page « Mon compte » |
 | `tests/`, `supabase/tests/` | Tests du site, du Worker et de l’interface serveur |
 
