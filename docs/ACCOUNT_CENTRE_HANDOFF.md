@@ -1,5 +1,7 @@
 # 用户中心交接说明（给负责 UI 的开发者 / ChatGPT）
 
+本地修复补充（尚未发布）：账户页新增确认邮件重发入口。过期、已使用或已被替换的确认链接会显示重发、登录和找回密码入口；同一标签页打开新的邮件链接也会处理。不要退回为仅在页面首次加载时读取链接。发送受原有验证码及每邮箱共享频率限制保护，429 响应带 `Retry-After`。本地预览会明确提示邮件只写入本机日志，账户及链接与正式站分离。
+
 后端、数据库、发信和部署都已完成并上线（版本 1.9.0）。这份文档说明：现有用户中心的代码在哪、后端接口怎么调用、改 UI 时**必须遵守**的规则。新 UI 只需要替换"外观"，接口和安全机制不用重做。
 
 仓库：`YuJieMichael/motel-a-vendre`。**推送到 `main` 会自动上线**（Cloudflare Workers Builds），所以请在新分支上改，测试通过后再合并到 `main`。
@@ -64,10 +66,11 @@ App.clearPersonalData()        // 退出/删除账户后清掉本机收藏、草
 |---|---|
 | `account.user` | 已登录时 `{id, email}`，否则 `null`（同步属性） |
 | `account.refresh()` | 向服务器确认登录状态，返回 `{user, profile}` 或 `null` |
-| `account.signUp(email, password, language)` | 注册，成功后提示"请查收确认邮件" |
+| `account.signUp(email, password, language, turnstile)` | 注册请求；根据邮件说明激活新账户或登录已有账户 |
+| `account.resendConfirmation(email, language, turnstile)` | 获取新确认邮件；不创建重复账户或更改密码。公开响应不透露邮箱是否已注册 |
 | `account.verify(token)` | 用邮件链接里的令牌确认邮箱并登录 |
 | `account.signIn(email, password)` | 登录 |
-| `account.recover(email, language)` | 发送重置密码邮件（无论邮箱是否存在都返回成功） |
+| `account.recover(email, language, turnstile)` | 发送重置密码邮件（无论邮箱是否存在都返回成功） |
 | `account.resetPassword(token, password)` | 用邮件令牌设新密码并登录，其他设备会被登出 |
 | `account.signOut()` | 退出 |
 | `account.profile()` / `account.updateProfile(p)` | 读取 / 保存资料 |
@@ -96,10 +99,11 @@ App.clearPersonalData()        // 退出/删除账户后清掉本机收藏、草
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| POST | `signup` | `{email, password, language, consent:true}` |
+| POST | `signup` | `{email, password, language, consent:true, turnstile?}` |
+| POST | `resend` | `{email, language, turnstile?}`；沿用共享发信限制及验证码校验，已激活账户收到登录说明 |
 | POST | `verify` | `{token}` → 设置登录 Cookie |
 | POST | `login` | `{email, password}` |
-| POST | `recover` | `{email, language}` |
+| POST | `recover` | `{email, language, turnstile?}` |
 | POST | `reset` | `{token, password}` |
 | POST | `logout` | — |
 | GET | `me` | `{user, profile}` |

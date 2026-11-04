@@ -3,18 +3,27 @@
 (function(){
  if(document.body.dataset.page!=='account'||!window.MAVApp)return;
  const App=window.MAVApp,account=App.account,t=App.t,$=s=>document.querySelector(s),e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const status=$('#account-status');
+ const status=$('#account-status'),localPreview=$('#account-page').dataset.localPreview==='true';
+ status.tabIndex=-1;
+ $('#account-local-preview').hidden=!localPreview;
  if(!account){$('#account-unavailable').hidden=false;return;}
  const say=(message,error=false)=>{status.textContent=message;status.classList.toggle('is-error',error);if(message)status.scrollIntoView({block:'nearest',behavior:'smooth'});};
  // A clear panel in place of the form, so a successful sign-up or reset request is never missed.
  function showSent(key,email){
-  status.textContent='';$('#account-sent-text').textContent=t(key).replace('{email}',email);
+  status.textContent='';$('#account-sent-heading').textContent=t(localPreview?'acctLocalMailTitle':'acctCheckEmailTitle');$('#account-sent-hint').hidden=localPreview;$('#account-sent-text').textContent=t(localPreview?'acctLocalMailSent':key).replace('{email}',email);
   selectTab('signin');$('#signin-email').value=email;$('#account-sent').showModal();$('#account-sent-back').focus();
  }
  $('#account-sent-back').addEventListener('click',()=>$('#account-sent').close());
  $('#account-sent').addEventListener('close',()=>$('#signin-password').focus());
- const fail=error=>{say(App.accountMessage(error),true);if(error?.code==='session')show();};
- let busy=false,resetToken='';
+ const fail=error=>{
+  say(error?.code==='rate'&&error.detail?.retryAfter?t('acctErrRateWait').replace('{minutes}',String(Math.ceil(error.detail.retryAfter/60))):App.accountMessage(error),true);
+  if(error?.code==='email_not_confirmed')openAccess('resend',$('#signin-email').value,false);
+  if(error?.code==='link_invalid'&&(linkPurpose==='verify'||linkPurpose==='reset'||resetToken)){openAccess(linkPurpose==='reset'||resetToken?'recover':'resend',null,false);resetToken='';show();}
+  if(error?.code==='link_invalid'&&linkPurpose==='unsubscribe')say(t('acctUnsubscribeInvalid'),true);
+  if(error?.code==='email_not_confirmed'||error?.code==='link_invalid'){status.focus();status.scrollIntoView({block:'nearest'});}
+  if(error?.code==='session')show();
+ };
+ let busy=false,resetToken='',linkPurpose='',authBusy=false,authQueue=Promise.resolve();
  // Cloudflare Turnstile, loaded only here and only when a site key is configured.
  const turnstileKey=$('#account-page').dataset.turnstile||'',widgets={};
  let turnstileReady=null;
@@ -30,13 +39,18 @@
  function turnstileToken(name){const ts=window.turnstile;return ts&&widgets[name]!==undefined?ts.getResponse(widgets[name])||'':'';}
  function resetTurnstile(name){const ts=window.turnstile;if(ts&&widgets[name]!==undefined)ts.reset(widgets[name]);}
  async function guarded(form,fn){
-  if(busy)return;busy=true;const controls=[...form.querySelectorAll('input,select,button')];controls.forEach(el=>el.disabled=true);form.setAttribute('aria-busy','true');
+  if(busy||authBusy)return;busy=true;const controls=[...form.querySelectorAll('input,select,button')];controls.forEach(el=>el.disabled=true);form.setAttribute('aria-busy','true');
   try{await fn();}catch(error){fail(error);}finally{busy=false;controls.forEach(el=>el.disabled=false);form.removeAttribute('aria-busy');}
  }
 
  function selectTab(name){
-  for(const tab of ['signin','signup','recover']){const on=tab===name;$('#tab-'+tab).setAttribute('aria-selected',String(on));$('#tab-'+tab).tabIndex=on?0:-1;$('#form-'+tab).hidden=!on;}
-  if(name==='signup'||name==='recover')renderTurnstile(name);
+  for(const tab of ['signin','signup','recover','resend']){const on=tab===name,button=$('#tab-'+tab);if(button){button.setAttribute('aria-selected',String(on));button.tabIndex=on?0:-1;}$('#form-'+tab).hidden=!on;}
+  $('.account-tabs').hidden=name==='resend';$('#account-access-help').hidden=name==='resend';
+  if(['signup','recover','resend'].includes(name))renderTurnstile(name);
+ }
+ function openAccess(name,email,focus=true){
+  const address=email||$('#resend-email').value||$('#signin-email').value||$('#signup-email').value||$('#recover-email').value;
+  selectTab(name);const input=$('#'+(name==='resend'?'resend':name==='recover'?'recover':'signin')+'-email');if(address)input.value=address.trim();if(focus)input.focus();
  }
  function show(mode){
   const user=account.user;
@@ -75,6 +89,10 @@
  $('#form-signin').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.signIn($('#signin-email').value.trim(),$('#signin-password').value);f.reset();say('');show();});});
  $('#form-signup').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#signup-email').value.trim();try{await account.signUp(email,$('#signup-password').value,App.language(),turnstileToken('signup'));}finally{resetTurnstile('signup');}f.reset();showSent('acctCheckEmailText',email);});});
  $('#form-recover').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#recover-email').value.trim();try{await account.recover(email,App.language(),turnstileToken('recover'));}finally{resetTurnstile('recover');}f.reset();showSent('acctResetSentText',email);});});
+ $('#account-resend-open').addEventListener('click',()=>{say('');openAccess('resend');});
+ $('#resend-signin').addEventListener('click',()=>{say('');openAccess('signin');});
+ $('#resend-recover').addEventListener('click',()=>{say('');openAccess('recover');});
+ $('#form-resend').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const email=$('#resend-email').value.trim();try{await account.resendConfirmation(email,App.language(),turnstileToken('resend'));}finally{resetTurnstile('resend');}showSent('acctResendSent',email);});});
  $('#form-new-password').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.resetPassword(resetToken,$('#new-password').value);resetToken='';f.reset();say(t('acctPasswordSaved'));show();});});
  $('#form-profile').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{const p=await account.updateProfile({full_name:$('#profile-name').value,phone:$('#profile-phone').value,preferred_language:$('#profile-language').value,buyer_budget:$('#profile-budget').value,buyer_regions:$('#profile-regions').value,buyer_timeline:$('#profile-timeline').value});App.dropProfileCache();fillProfile(p||{});say(t('acctProfileSaved'));});});
  $('#account-signout').addEventListener('click',async()=>{await account.signOut();App.clearPersonalData();say(t('acctSignedOut'));show();});
@@ -97,16 +115,30 @@
   guarded(f,async()=>{await account.deleteAccount($('#delete-password').value);App.clearPersonalData();$('#account-delete-dialog').close();say(t('acctDeleted'));show();});
  });
 
- // Confirmation and password-recovery links land here with tokens in the fragment.
- (async()=>{
-  selectTab('signin');
-  const parsed=MAVAccount.parseAuthHash(location.hash),linkLike=/^#(verify|reset|unsubscribe)=/.test(location.hash);
-  if(linkLike){try{history.replaceState(null,'',location.pathname+location.search);}catch{location.hash='';}}
-  if(linkLike&&!parsed)fail({code:'link_invalid'});
-  if(parsed?.type==='unsubscribe'){try{const r=await account.unsubscribe(parsed.token);say(t('acctUnsubscribed').replace('{name}',r.name||''));}catch(error){fail(error);}try{await account.refresh();}catch{}show();return;}
-  if(parsed?.type==='reset'){resetToken=parsed.token;say('');show('recovery');$('#new-password').focus();return;}
-  if(parsed?.type==='verify'){try{await account.verify(parsed.token);say(t('acctLinkConfirmed'));}catch(error){fail(error);}}
-  else{try{await account.refresh();}catch(error){fail(error);}}
-  show();
- })();
+ // Process email links on first load and same-page fragment navigation.
+ // Capture and clear each fragment immediately; serialize requests without persisting tokens.
+ function queueAuthLink(hash,initial=false){
+  const parsed=MAVAccount.parseAuthHash(hash),purpose=/^#(verify|reset|unsubscribe)=/.exec(hash)?.[1]||'';
+  if(!purpose&&!initial)return;
+  if(purpose){try{history.replaceState(null,'',location.pathname+location.search);}catch{location.hash='';}}
+  authQueue=authQueue.catch(()=>{}).then(async()=>{
+   authBusy=true;$('#account-page').setAttribute('aria-busy','true');
+   try{
+    if($('#account-sent').open)$('#account-sent').close();
+    linkPurpose=purpose;
+    if(initial)selectTab('signin');
+    if(purpose&&!parsed){fail({code:'link_invalid'});show();return;}
+    if(parsed?.type==='unsubscribe'){try{const r=await account.unsubscribe(parsed.token);say(t('acctUnsubscribed').replace('{name}',r.name||''));}catch(error){fail(error);}try{await account.refresh();}catch{}show();return;}
+    if(parsed?.type==='reset'){resetToken=parsed.token;say('');show('recovery');$('#new-password').focus();return;}
+    if(parsed?.type==='verify'){
+     say(t('acctLoading'));
+     try{await account.verify(parsed.token);say(t('acctLinkConfirmed'));}
+     catch(error){let session=null;if(error?.code==='link_invalid')try{session=await account.refresh();}catch{}if(session?.user)say(t('acctAlreadySignedIn'));else fail(error);}
+    }else{try{await account.refresh();}catch(error){fail(error);}}
+    show();
+   }finally{authBusy=false;$('#account-page').removeAttribute('aria-busy');}
+  });
+ }
+ window.addEventListener('hashchange',()=>queueAuthLink(location.hash));
+ queueAuthLink(location.hash,true);
 })();

@@ -44,6 +44,60 @@ test('duplicate sign-up does not reveal whether an address exists',async()=>{
  const unknown=await t.client().call('POST','recover',{email:'nobody@example.com'});assert.deepEqual(unknown.body,{ok:true});
 });
 
+test('an expired confirmation can be reissued without replacing the account or its password',async()=>{
+ const t=setup(),c=t.client(),email='pending@example.com',password='harbour-lights-42';
+ await c.call('POST','signup',{email,password,language:'fr',consent:true});
+ const old=t.tokenFrom('verify'),before=t.db.prepare('SELECT id,password_hash,consent_at FROM users').get();
+ t.tick(49*3600);assert.equal((await c.call('POST','verify',{token:old})).body.error,'link_invalid');
+ const resent=await c.call('POST','resend',{email:' Pending@Example.com ',language:'en'});
+ assert.deepEqual([resent.status,resent.body],[200,{ok:true}]);assert.equal(t.mails.length,2);assert.match(t.mails.at(-1).text,/\/en\/account\/#verify=/);
+ assert.deepEqual(t.db.prepare('SELECT id,password_hash,consent_at FROM users').get(),before);
+ const fresh=t.tokenFrom('verify');assert.notEqual(fresh,old);assert.equal((await c.call('POST','verify',{token:fresh})).status,200);
+ assert.equal((await c.call('POST','login',{email,password})).status,200);
+ assert.equal((await c.call('POST','verify',{token:fresh})).body.error,'link_invalid');
+});
+
+test('registering a pending address again sends a fresh link for the same account',async()=>{
+ const t=setup(),c=t.client(),body={email:'pending@example.com',password:'harbour-lights-42',language:'fr',consent:true};
+ assert.equal((await c.call('POST','signup',body)).status,200);const old=t.tokenFrom('verify');
+ assert.equal((await c.call('POST','signup',body)).status,200);assert.equal(t.mails.length,2);assert.equal(t.db.prepare('SELECT count(*) n FROM users').get().n,1);
+ assert.equal((await c.call('POST','verify',{token:old})).body.error,'link_invalid');
+ assert.equal((await c.call('POST','verify',{token:t.tokenFrom('verify')})).status,200);
+});
+
+test('resend is generic for unknown or activated addresses and cannot create or alter credentials',async()=>{
+ const t=setup(),c=t.client();const unknown=await c.call('POST','resend',{email:'unknown@example.com',password:'ignored-password'});
+ assert.deepEqual([unknown.status,unknown.body],[200,{ok:true}]);assert.equal(t.mails.length,0);assert.equal(t.db.prepare('SELECT count(*) n FROM users').get().n,0);
+ await t.verified(c);const before=t.db.prepare('SELECT * FROM users').get();
+ const known=await c.call('POST','resend',{email:'buyer@example.com',language:'fr',password:'ignored-password'});
+ assert.deepEqual([known.status,known.body],[unknown.status,unknown.body]);assert.match(t.mails.at(-1).subject,/existe déjà/);assert.doesNotMatch(t.mails.at(-1).text,/#verify=/);
+ assert.deepEqual(t.db.prepare('SELECT * FROM users').get(),before);
+});
+
+test('resend shares the mail budget, returns its real retry window and respects Turnstile',async()=>{
+ const t=setup(),c=t.client();await c.call('POST','signup',{email:'pending@example.com',password:'harbour-lights-42',consent:true});
+ t.env.TURNSTILE_SECRET='test-secret';t.env.TURNSTILE_VERIFY=async token=>token==='good-token';
+ assert.equal((await c.call('POST','resend',{email:'pending@example.com'})).body.error,'captcha');assert.equal(t.mails.length,1);
+ const body={email:'pending@example.com',turnstile:'good-token'};
+ assert.equal((await c.call('POST','resend',body)).status,200);assert.equal((await c.call('POST','resend',body)).status,200);
+ const limited=await c.call('POST','resend',body);assert.equal(limited.status,429);assert.equal(limited.body.error,'rate');assert.ok(Number(limited.headers.get('retry-after'))>0);assert.ok(Number(limited.headers.get('retry-after'))<=3600);
+ t.tick(3601);assert.equal((await c.call('POST','resend',body)).status,200);
+});
+
+test('confirmation resend rejects cross-origin requests before sending mail',async()=>{
+ const t=setup(),c=t.client();await c.call('POST','signup',{email:'pending@example.com',password:'harbour-lights-42',consent:true});
+ const result=await c.call('POST','resend',{email:'pending@example.com'},{origin:'https://untrusted.example'});
+ assert.deepEqual([result.status,result.body],[403,{error:'forbidden'}]);assert.equal(t.mails.length,1);assert.equal(result.headers.get('set-cookie'),null);
+});
+
+test('a failed mail delivery is not reported as success and a later resend can recover',async()=>{
+ const t=setup(),c=t.client();await c.call('POST','signup',{email:'pending@example.com',password:'harbour-lights-42',consent:true});
+ const logger=t.env.ACCOUNT_MAIL_LOG,originalFetch=globalThis.fetch;delete t.env.ACCOUNT_MAIL_LOG;t.env.RESEND_API_KEY='local-test-only';t.env.MAIL_FROM='Motel à vendre <compte@mail.motelavendre.ca>';
+ globalThis.fetch=async()=>Response.json({error:'unavailable'},{status:503});
+ try{const failed=await c.call('POST','resend',{email:'pending@example.com'});assert.deepEqual([failed.status,failed.body],[503,{error:'unavailable'}]);}finally{globalThis.fetch=originalFetch;t.env.ACCOUNT_MAIL_LOG=logger;}
+ assert.equal((await c.call('POST','resend',{email:'pending@example.com'})).status,200);assert.equal((await c.call('POST','verify',{token:t.tokenFrom('verify')})).status,200);
+});
+
 test('login failures are generic and rate limited per address',async()=>{
  const t=setup();await t.verified(t.client());
  const wrong=await t.client().call('POST','login',{email:'buyer@example.com',password:'nope-nope-nope'});const missing=await t.client().call('POST','login',{email:'ghost@example.com',password:'nope-nope-nope'});

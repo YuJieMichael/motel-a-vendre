@@ -17,20 +17,22 @@ Use Node.js 24 or later:
 
 ```sh
 npm run build
+npm run prepare:release
 npm test
 npm run test:backend
-npm run prepare:release
 ```
 
 `dist/` is the static local-preview build and remains non-indexable. `release/` is a separate indexable Cloudflare candidate with generated hashes, headers, asset manifest, dynamic rendering code and `wrangler.jsonc`. Both directories are ignored by Git.
 
-With `enquiryMode: "direct"` in `data/site-config.js`, the default release candidate enables the existing Motel intake on the canonical origin. Enquiries stay on this site; the endpoint and internal notification pipeline are unchanged. Default builds make no live intake request and record `intake.verification: "not-run"` in the manifest. To also verify the deployed intake without submitting an enquiry, run:
+With `directEnquiries: true` in `data/site-config.js`, the standard CLI build enables the existing Motel intake and performs its non-writing live check. Enquiries stay on this site; the endpoint and internal notification pipeline are unchanged. The explicit equivalent is:
 
 ```sh
 npm run prepare:release -- --direct-enquiries
 ```
 
 That option makes only an `OPTIONS` preflight and a deliberately invalid `{}` validation request to the configured intake. It must receive 204 and 400 with the canonical CORS origin and records `intake.verification: "non-writing-live-check"`. It sends no valid enquiry or email. Release preparation does not deploy. If direct intake is disabled, visitors can keep a local draft; there is no external enquiry or account redirect.
+
+For an offline local review only, set `MAV_INTAKE_CHECK=offline` before preparing the candidate. Its manifest records `intake.verification: "not-run"` and `offlineSkipped: true`; do not describe this as a successful live check. Keep the normal Cloudflare build environment free of that override.
 
 For an approved production update, review the generated release manifest, routes and intake mode first, then use the official Wrangler CLI with `release/wrangler.jsonc`. The deployed build used Wrangler **4.151.1**, with compatibility date **2026-10-19**. Authentication belongs to the operator's credential store, never this repository.
 

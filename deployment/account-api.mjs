@@ -13,7 +13,7 @@ const ACCOUNT_PATH = { fr: 'fr/compte/', en: 'en/account/', zh: 'zh/account/' };
 const REF = /^\d{1,12}$/, UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, EMAIL = /^[^\s@<>()",;:]{1,64}@[^\s@<>()",;:]+\.[^\s@<>()",;:]{2,}$/;
 const COMMON = new Set(['password', 'password1', '12345678', '123456789', '1234567890', 'qwertyuiop', 'motdepasse', 'azertyuiop', '11111111', 'iloveyou', 'motelavendre']);
 
-class ApiError extends Error { constructor(status, code) { super(code); this.status = status; this.code = code; } }
+class ApiError extends Error { constructor(status, code, retryAfter) { super(code); this.status = status; this.code = code; this.retryAfter = retryAfter; } }
 
 const b64u = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const fromB64u = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
@@ -112,7 +112,7 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
   async function limit(db, action, key, max, windowSec) {
     const bucket = await sha256(action + ':' + key), t = sec(), start = t - (t % windowSec);
     const row = await db.prepare('INSERT INTO rate_limits(bucket,window_start,count) VALUES(?1,?2,1) ON CONFLICT(bucket) DO UPDATE SET count=CASE WHEN window_start=?2 THEN count+1 ELSE 1 END, window_start=?2 RETURNING count').bind(bucket, start).first();
-    if (row.count > max) throw new ApiError(429, 'rate');
+    if (row.count > max) throw new ApiError(429, 'rate', Math.max(1, start + windowSec - t));
   }
   async function housekeeping(db) {
     const t = sec();
@@ -221,6 +221,21 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
           ]);
         }
         await sendMail(env, email, 'verify', language, link(language, 'verify', await issueToken(db, userId, 'verify', VERIFY_HOURS)));
+        return reply(200, { ok: true });
+      }
+      if (is('POST', 'resend')) {
+        const email = cleanEmail(body.email), language = lang(body.language);
+        await limit(db, 'resend-ip', ip, 5, 3600);
+        await checkTurnstile(env, body.turnstile, ip);
+        // Same per-address mail budget as sign-up and password recovery.
+        await limit(db, 'mail-to', email, 3, 3600);
+        await housekeeping(db);
+        const user = await db.prepare('SELECT id,verified_at FROM users WHERE email=?1').bind(email).first();
+        if (user) {
+          if (user.verified_at) await sendMail(env, email, 'exists', language, link(language));
+          else await sendMail(env, email, 'verify', language, link(language, 'verify', await issueToken(db, user.id, 'verify', VERIFY_HOURS)));
+        }
+        // Never create an account or change a password through a resend request.
         return reply(200, { ok: true });
       }
       if (is('POST', 'verify')) {
@@ -341,7 +356,11 @@ export function createAccountApi({ siteOrigin, now = () => Date.now() }) {
       }
       throw new ApiError(404, 'not_found');
     } catch (error) {
-      if (error instanceof ApiError) return reply(error.status, { error: error.code });
+      if (error instanceof ApiError) {
+        const response = reply(error.status, { error: error.code });
+        if (error.retryAfter) response.headers.set('Retry-After', String(error.retryAfter));
+        return response;
+      }
       console.error('account-api', error && error.message);
       return reply(500, { error: 'unavailable' });
     }

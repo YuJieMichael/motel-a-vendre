@@ -42,8 +42,11 @@ const server=http.createServer((req,res)=>{
   if(!publicFiles.has(publicPath)&&!/^assets\/[a-zA-Z0-9_/-]+\.(svg|png|jpe?g|webp)$/.test(publicPath)){res.writeHead(404);res.end('Not found');return;}
   fs.stat(file,(err,stat)=>{
     if(err||!stat.isFile()){res.writeHead(404);res.end('Not found');return;}
-    res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','Content-Length':stat.size,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','X-Frame-Options':'DENY','X-Robots-Tag':'noindex, nofollow'});
+    const accountPage=pageManifest.some(p=>p.kind==='account'&&p.file===publicPath);
+    const localHTML=accountPage?Buffer.from(fs.readFileSync(file,'utf8').replace('id="account-page"','id="account-page" data-local-preview="true"').replace(/ data-turnstile="[^"]*"/,'')):null;
+    res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','Content-Length':localHTML?localHTML.length:stat.size,'Cache-Control':'no-cache','X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin','X-Frame-Options':'DENY','X-Robots-Tag':'noindex, nofollow'});
     if(req.method==='HEAD'){res.end();return;}
+    if(localHTML){res.end(localHTML);return;}
     const stream=fs.createReadStream(file);stream.on('error',()=>res.destroy());stream.pipe(res);
   });
 });

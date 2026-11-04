@@ -31,6 +31,18 @@ test('requests stay same-origin with the CSRF header and the session cookie only
  assert.deepEqual(JSON.parse(storage.getItem(A.HINT_KEY)),{id:uid,email:'a@example.com'});assert.doesNotMatch(storage.getItem(A.HINT_KEY),/token|session/i);
 });
 
+test('confirmation resend uses the protected same-origin client without a password or login hint',async()=>{
+ const storage=memory(),{fetchImpl,calls}=fake({'POST /api/account/resend':()=>[200,{ok:true}]});
+ const client=A.createClient(site,{storage,fetchImpl});await client.resendConfirmation('pending@example.com','en','test-challenge');
+ assert.deepEqual(calls[0].body,{email:'pending@example.com',language:'en',turnstile:'test-challenge'});
+ assert.equal(calls[0].init.credentials,'same-origin');assert.equal(calls[0].init.headers['X-MAV-Account'],'1');assert.equal(storage.getItem(A.HINT_KEY),null);
+});
+
+test('mail retry timing reaches the account page instead of being lost',async()=>{
+ const client=A.createClient(site,{storage:memory(),fetchImpl:async()=>Response.json({error:'rate'},{status:429,headers:{'Retry-After':'2100'}})});
+ await assert.rejects(client.resendConfirmation('pending@example.com','fr'),e=>e.code==='rate'&&e.detail.retryAfter===2100);
+});
+
 test('server error codes reach the page and an expired session clears the hint',async()=>{
  const storage=memory();let n=0;
  const {fetchImpl}=fake({'POST /api/account/login':()=>++n===1?[401,{error:'invalid_credentials'}]:[200,me],'GET /api/account/saved':()=>[401,{error:'session'}],'POST /api/account/recover':()=>[429,{error:'rate'}]});
