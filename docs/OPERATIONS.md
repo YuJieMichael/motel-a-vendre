@@ -97,3 +97,17 @@ Saved-search alerts: a daily Cron Trigger (`17 13 * * *` UTC) checks every saved
 Turnstile: widget "motelavendre.ca account" (site key in `account.turnstileSiteKey`) protects sign-up and password-reset requests. The server enforces it only once the Worker secret `TURNSTILE_SECRET` exists. Only the account page allows `https://challenges.cloudflare.com` in `script-src`/`frame-src`.
 
 Direct enquiries: `directEnquiries: true` makes `prepare:release` verify the intake (OPTIONS + invalid `{}` only) and send enquiries straight from motelavendre.ca, so signed-in users get an enquiry log. A failed check stops the build. In an offline sandbox, `MAV_INTAKE_CHECK=offline` skips the network check (never in CI).
+
+## Staff workspace / Espace administration / 管理后台
+
+`https://motelavendre.ca/admin/` mirrors the Propriété En Vente admin (same layout, wording and styles) but is **fully independent** of it: everything below lives in this site's D1 (`ACCOUNTS`) and is served by this Worker at `/api/admin/*`. Tabs: enquiries, buyer accounts, listings on this site, activity log and, for the owner only, invite a member.
+
+- **Staff accounts** (`staff_members`, `staff_sessions`, `staff_tokens`): the owner `achat.vente.garderie@gmail.com` is seeded by migration 0004 without a password; on first use choose “First sign-in or forgot your password?” to receive a one-hour link. Passwords use the buyer-account PBKDF2 format. Sessions are an HttpOnly `__Host-mav_staff` cookie (SameSite=Strict, 12 hours); writes also require the `X-MAV-Admin: 1` header and this origin.
+- **Invitations (owner only):** enter an email; the person receives a 7-day link from `MAIL_FROM` to choose a password and becomes an operator. No prior account is needed. The owner can resend, deactivate (ends sessions at once) and reactivate members. Operators cannot invite.
+- **Enquiries:** the public form posts to `/api/enquiry` (`intake: "site"` in `data/site-config.js`). The Worker validates like the former Supabase intake, stores the enquiry in D1 `enquiries` (idempotent on `requestId`, rate-limited per connection and email) and emails the active owner(s), with Reply-To set to the enquirer. Staff accept, reopen, delete and restore them. Enquiries received before this change stay in the main site's database.
+- **Buyer accounts:** D1 `users` — search, confirm manually (also invalidates outstanding confirmation links), delete (cascades).
+- **Listings:** listing content still comes from the main site's public `published_listings` (read-only). D1 `listing_settings` hides or pins a listing on this site only; public pages pick it up within a minute.
+- **Audit:** D1 `staff_audit` records the staff email, action and target.
+- Page-view metrics (`metricsEndpoint`) are unchanged.
+
+Deploy: apply D1 migrations `0003_staff_workspace.sql` and `0004_independent_staff.sql` (record them in `d1_migrations` if run from the dashboard console), then merge to `main`.

@@ -36,7 +36,7 @@ test('production enquiries use the existing intake without an external hand-off 
  assert.equal(release.endpoint,site.endpoint);assert.equal(release.publishableKey,site.publishableKey);
  assert.equal(release.enquiryMode,'direct');assert.equal(E.canSubmit(release,release.siteOrigin),true);
  assert.equal(manifest.intake.enabled,true);
- assert.ok(['not-run','non-writing-live-check'].includes(manifest.intake.verification));
+ assert.ok(['not-run','non-writing-live-check','site-intake'].includes(manifest.intake.verification));
  if(manifest.intake.verification==='not-run'){assert.equal(manifest.intake.preflight,undefined);assert.equal(manifest.intake.rejectedInvalidBody,undefined);}
  for(const p of ['deployment/worker.mjs','deployment/live-worker.mjs','release/public/_headers'])assert.doesNotMatch(read(p),/form-action[^;\n"]*proprieteenvente/);
 });

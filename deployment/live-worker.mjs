@@ -1,15 +1,28 @@
 import createRenderer from '../lib/page-renderer.cjs';
 import Routes from '../lib/site-routes.cjs';
-import {loadCatalogue} from './live-catalogue.mjs';
+import {loadCatalogue as loadSourceCatalogue,applyListingSettings} from './live-catalogue.mjs';
 import {template,translations,site,fallback} from './runtime-inputs.mjs';
 import {responseHeaders} from './worker.mjs';
 import {createAccountApi} from './account-api.mjs';
 import {runAlerts} from './account-alerts.mjs';
+import {createAdminApi} from './admin-api.mjs';
+import {createEnquiryIntake} from './enquiry-intake.mjs';
 
 const locales={fr:'fr-CA',en:'en-CA',zh:'zh-Hans'};
 const sections={fr:{'guide-achat':'guide',compte:'account'},en:{'buying-guide':'guide',account:'account'},zh:{'buying-guide':'guide',account:'account'}};
 const accountsEnabled=!!(site.account&&site.account.enabled===true);
 const accountApi=createAccountApi({siteOrigin:site.siteOrigin});
+// Staff display settings, read at most once a minute per isolate; a staff change clears this copy at once.
+const settingsCache={at:0,rows:[]};
+async function listingSettings(env){
+ if(!env||!env.ACCOUNTS)return [];
+ if(Date.now()-settingsCache.at<60000)return settingsCache.rows;
+ try{settingsCache.rows=(await env.ACCOUNTS.prepare('SELECT listing_reference,hidden,pinned FROM listing_settings').all()).results||[];}catch{/* table not migrated yet: show everything */}
+ settingsCache.at=Date.now();return settingsCache.rows;
+}
+async function loadCatalogue(site,fallback,env){const result=await loadSourceCatalogue(site,fallback);return {...result,catalogue:applyListingSettings(result.catalogue,await listingSettings(env))};}
+const adminApi=createAdminApi({site,onListingsChanged:()=>{settingsCache.at=0;}});
+const enquiryIntake=createEnquiryIntake({site});
 const turnstile=accountsEnabled&&/^0x[A-Za-z0-9_-]{10,}$/.test(site.account.turnstileSiteKey||'');
 const turnstileOrigin='https://challenges.cloudflare.com';
 const checkedDay=c=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Toronto',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(c.updatedAt));
@@ -24,6 +37,18 @@ export async function handleLiveRequest(request,env){
   if(!local&&(url.hostname!=='motelavendre.ca'||url.protocol!=='https:'))return wrapped(Response.json({error:'forbidden'},{status:403,headers:{'Cache-Control':'no-store'}}));
   return wrapped(await accountApi(request,env));
  }
+ if(url.pathname==='/api/enquiry'){
+  // Enquiries are stored in this site's D1 and emailed to the owner.
+  if(!local&&(url.hostname!=='motelavendre.ca'||url.protocol!=='https:'))return wrapped(Response.json({error:'forbidden'},{status:403,headers:{'Cache-Control':'no-store'}}));
+  let lookup=()=>null;try{const {catalogue}=await loadCatalogue(site,fallback,env);lookup=ref=>catalogue.items.find(p=>p.reference===ref)||null;}catch{}
+  return wrapped(await enquiryIntake(request,env,{catalogueLookup:lookup,local}));
+ }
+ if(url.pathname.startsWith('/api/admin/')){
+  // Staff workspace API. HTTPS on the canonical host only.
+  if(!accountsEnabled)return wrapped(Response.json({error:'unavailable'},{status:404,headers:{'Cache-Control':'no-store'}}));
+  if(!local&&(url.hostname!=='motelavendre.ca'||url.protocol!=='https:'))return wrapped(Response.json({error:'forbidden'},{status:403,headers:{'Cache-Control':'no-store'}}));
+  return wrapped(await adminApi(request,env));
+ }
  if(!['GET','HEAD'].includes(request.method))return wrapped(new Response('Method not allowed',{status:405,headers:{Allow:'GET, HEAD'}}));
  if(!local&&(url.hostname==='www.motelavendre.ca'||url.protocol!=='https:'))return wrapped(Response.redirect(site.siteOrigin+url.pathname+url.search,308));
  if(['/','/index.html'].includes(url.pathname))return wrapped(Response.redirect(new URL('/fr/'+url.search,local?url.origin:site.siteOrigin).href,301));
@@ -32,7 +57,7 @@ export async function handleLiveRequest(request,env){
  const route=/^\/(fr|en|zh)(?:\/(.*))?$/.exec(url.pathname);
  const dynamic=['/data/catalogue-data.js','/api/catalogue','/sitemap.xml'].includes(url.pathname)||url.pathname.startsWith('/assets/centris/');
  if(!route&&!dynamic)return wrapped(await env.ASSETS.fetch(request));
- const {catalogue,status}=await loadCatalogue(site,fallback);
+ const {catalogue,status}=await loadCatalogue(site,fallback,env);
  if(url.pathname==='/data/catalogue-data.js')return wrapped(new Response(request.method==='HEAD'?null:'const MAV_CATALOGUE = '+JSON.stringify(catalogue).replace(/</g,'\\u003c')+';\n',{headers:{'Content-Type':'application/javascript; charset=utf-8','X-Catalogue-Status':status}}));
  if(url.pathname==='/api/catalogue')return wrapped(new Response(request.method==='HEAD'?null:JSON.stringify({catalogue,status,refreshIntervalSeconds:300}),{headers:{'Content-Type':'application/json; charset=utf-8','X-Catalogue-Status':status}}));
  if(url.pathname.startsWith('/assets/centris/')){
@@ -74,6 +99,6 @@ export async function handleLiveRequest(request,env){
 // Daily saved-search alerts (Cron Trigger in wrangler.jsonc).
 export async function handleScheduled(event,env,ctx){
  if(!accountsEnabled||!env.ACCOUNTS)return;
- ctx.waitUntil((async()=>{const {catalogue,status}=await loadCatalogue(site,fallback);if(status!=='live'){console.log('account-alerts skipped: catalogue',status);return;}await runAlerts(env,{site,catalogue});})());
+ ctx.waitUntil((async()=>{const {catalogue,status}=await loadCatalogue(site,fallback,env);if(status!=='live'){console.log('account-alerts skipped: catalogue',status);return;}await runAlerts(env,{site,catalogue});})());
 }
 export default {fetch:handleLiveRequest,scheduled:handleScheduled};

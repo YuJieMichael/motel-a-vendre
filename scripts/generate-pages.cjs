@@ -18,6 +18,6 @@ for(const lang of languages){pages.push(make(lang));pages.push(make(lang,'guide'
 fs.writeFileSync(path.join(root,'data/page-manifest.json'),JSON.stringify(pages,null,2)+'\n');
 const urls=pages.filter(p=>p.file!=='index.html'&&p.kind!=='account').map(p=>`<url><loc>${site.siteOrigin+'/'+p.route}</loc>${languages.map(lang=>`<xhtml:link rel="alternate" hreflang="${lang==='zh'?'zh-Hans':lang+'-CA'}" href="${site.siteOrigin+'/'+publicPath(lang,p.kind,p.reference)}"/>`).join('')}<lastmod>${date}</lastmod></url>`).join('\n');
 fs.writeFileSync(path.join(root,'sitemap.xml'),`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>\n`);
-fs.writeFileSync(path.join(root,'robots.txt'),indexable?`User-agent: *\nAllow: /\n${languages.map(l=>'Disallow: /'+publicPath(l,'account')+'\n').join('')}Sitemap: ${site.siteOrigin}/sitemap.xml\n`:'User-agent: *\nDisallow: /\n');
+fs.writeFileSync(path.join(root,'robots.txt'),indexable?`User-agent: *\nAllow: /\n${languages.map(l=>'Disallow: /'+publicPath(l,'account')+'\n').join('')}Disallow: /admin/\nSitemap: ${site.siteOrigin}/sitemap.xml\n`:'User-agent: *\nDisallow: /\n');
 console.log('Pre-rendered',pages.length,'pages (three languages); indexing',indexable?'enabled':'disabled for local review');
 module.exports={pages,publicPath};
