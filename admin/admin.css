@@ -833,3 +833,5 @@
 .admin-table-wrap .is-danger:hover{background:#fff0eb;color:#983f30}
 .admin-icon{width:1em;height:1em;flex-shrink:0;vertical-align:-.125em}
 .admin-local{margin:0 0 16px;padding:10px 14px;border-left:3px solid #c9a253;background:#fff8ea;font-size:.78rem}
+.admin-text-link{justify-self:center;min-height:36px;padding:4px 6px;border:0;background:transparent;color:#396a53;font-size:.8rem;font-weight:550;text-decoration:underline;text-underline-offset:3px}
+.admin-login .admin-message{margin:0;font-size:.8rem}

@@ -12,7 +12,7 @@ const pageManifest=JSON.parse(fs.readFileSync(path.join(root,'data/page-manifest
 const publicFiles=new Set([...pageManifest.map(p=>p.file),'styles.css','responsive.css','property.css','direction.css','app.js','i18n.js','lib/catalogue-core.js','lib/enquiry-core.js','lib/property-view.js','lib/account-core.js','lib/account-view.js','account.js','admin/index.html','admin/admin.js','admin/admin.css','data/catalogue-data.js','data/site-config.js','robots.txt','sitemap.xml','favicon.ico','apple-touch-icon.png','manifest.webmanifest']);
 // Local account API: same handler as production, SQLite file instead of D1, emails printed here.
 const site=vm.runInNewContext(fs.readFileSync(path.join(root,'data/site-config.js'),'utf8')+';MAV_SITE');
-let accountApi=null,accountEnv=null,adminApi=null;
+let accountApi=null,accountEnv=null,adminApi=null,enquiryIntake=null;
 if(site.account&&site.account.enabled===true){
   const {createAccountApi}=await import('./deployment/account-api.mjs'),{openLocalD1}=await import('./deployment/local-d1.mjs');
   fs.mkdirSync(path.join(root,'.local'),{recursive:true});
@@ -20,6 +20,7 @@ if(site.account&&site.account.enabled===true){
   accountApi=createAccountApi({siteOrigin:'https://motelavendre.ca'});
   // Staff workspace: real staff sign-in (Supabase), local D1 accounts and listing settings.
   const {createAdminApi}=await import('./deployment/admin-api.mjs');adminApi=createAdminApi({site});
+  const {createEnquiryIntake}=await import('./deployment/enquiry-intake.mjs');const intake=createEnquiryIntake({site});enquiryIntake=(request,env)=>intake(request,env,{local:true});
 }
 async function handleAccount(req,res,api=accountApi){
   const chunks=[];for await(const c of req){chunks.push(c);if(chunks.reduce((n,x)=>n+x.length,0)>16384){res.writeHead(413);res.end();return;}}
@@ -31,6 +32,7 @@ async function handleAccount(req,res,api=accountApi){
   res.end(Buffer.from(await response.arrayBuffer()));
 }
 const server=http.createServer((req,res)=>{
+  if(enquiryIntake&&req.url==='/api/enquiry'){handleAccount(req,res,enquiryIntake).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
   if(adminApi&&req.url.startsWith('/api/admin/')){handleAccount(req,res,adminApi).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
   if(accountApi&&req.url.startsWith('/api/account/')){handleAccount(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
   if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);res.end('Method not allowed');return;}

@@ -10,7 +10,8 @@ async function prepare({direct=false}={}){
  if(accounts&&!String(config.account.privacyContact||'').trim())throw Error('Québec Law 25: set account.privacyContact (person in charge of personal information) before enabling accounts');
  const directEnabled=direct||config.enquiryMode==='direct'||config.directEnquiries===true;
  let intakeCheck={enabled:directEnabled,verification:'not-run',reason:directEnabled?'Existing enquiry endpoint enabled by site configuration; no live request made during this build.':'Direct sending is disabled; local drafts remain available.'};
- if(direct&&process.env.MAV_INTAKE_CHECK==='offline'){intakeCheck={enabled:true,verification:'not-run',offlineSkipped:true,productionEnquiriesSent:0,reason:'Live intake check explicitly skipped in an offline local build.'};}
+ if(directEnabled&&config.intake==='site'){intakeCheck={enabled:true,verification:'site-intake',productionEnquiriesSent:0,reason:'Enquiries are received by this Worker at /api/enquiry and stored in D1; no external intake to check.'};}
+ else if(direct&&process.env.MAV_INTAKE_CHECK==='offline'){intakeCheck={enabled:true,verification:'not-run',offlineSkipped:true,productionEnquiriesSent:0,reason:'Live intake check explicitly skipped in an offline local build.'};}
  else if(direct){
   const preflight=await fetch(config.endpoint,{method:'OPTIONS',headers:{Origin:config.siteOrigin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'content-type,apikey'},signal:AbortSignal.timeout(12000)});
   if(preflight.status!==204||preflight.headers.get('access-control-allow-origin')!==config.siteOrigin)throw Error('Production enquiry origin is not yet allowed. Verify the existing enquiry backend before enabling direct sending.');
@@ -50,7 +51,7 @@ async function prepare({direct=false}={}){
  for(const file of ['catalogue-core.js','property-view.js','account-view.js','page-renderer.cjs','guide-content.js','site-routes.cjs'])fs.copyFileSync(path.join(root,'lib',file),path.join(runtime,file));
  const inputs='export const template='+JSON.stringify(fs.readFileSync(path.join(root,'templates/site.html'),'utf8'))+';\nexport const translations='+JSON.stringify(translations)+';\nexport const site='+JSON.stringify(config)+';\nexport const fallback='+JSON.stringify(catalogue)+';\n';
  fs.writeFileSync(path.join(release,'runtime-inputs.mjs'),inputs);
- for(const file of ['live-catalogue.mjs','live-worker.mjs','account-api.mjs','account-alerts.mjs','admin-api.mjs'])fs.writeFileSync(path.join(release,file),fs.readFileSync(path.join(root,'deployment',file),'utf8').replaceAll('../lib/','./runtime/'));
+ for(const file of ['live-catalogue.mjs','live-worker.mjs','account-api.mjs','account-alerts.mjs','admin-api.mjs','enquiry-intake.mjs'])fs.writeFileSync(path.join(release,file),fs.readFileSync(path.join(root,'deployment',file),'utf8').replaceAll('../lib/','./runtime/'));
  const wrangler={name:'motel-a-vendre',main:'./entry.mjs',compatibility_date:'2026-10-19',workers_dev:false,preview_urls:false,routes:[{pattern:'motelavendre.ca',custom_domain:true},{pattern:'www.motelavendre.ca',custom_domain:true}],assets:{directory:'./public',binding:'ASSETS',run_worker_first:['/','/index.html','/fr*','/en*','/zh*','/data/catalogue-data.js','/api/*','/sitemap.xml','/assets/centris/*','/googleb6173475a8eadbeb.html'],html_handling:'auto-trailing-slash',not_found_handling:'404-page'}};
  if(accounts){
   if(!/^[^<>@\s]+(?: [^<>@]+)* <[^<>@\s]+@mail\.motelavendre\.ca>$/.test(config.account.mailFrom||''))throw Error('Set account.mailFrom to an address on the verified Resend domain mail.motelavendre.ca');

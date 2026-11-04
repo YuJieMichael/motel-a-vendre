@@ -100,13 +100,14 @@ Direct enquiries: `directEnquiries: true` makes `prepare:release` verify the int
 
 ## Staff workspace / Espace administration / 管理后台
 
-`https://motelavendre.ca/admin/` mirrors the Propriété En Vente admin (same layout, wording and styles). Tabs: buyer enquiries, buyer accounts, listings on this site, activity log and, for the owner only, invite a member.
+`https://motelavendre.ca/admin/` mirrors the Propriété En Vente admin (same layout, wording and styles) but is **fully independent** of it: everything below lives in this site's D1 (`ACCOUNTS`) and is served by this Worker at `/api/admin/*`. Tabs: enquiries, buyer accounts, listings on this site, activity log and, for the owner only, invite a member.
 
-- **Sign-in:** the existing Propriété En Vente staff accounts (Supabase Auth). The Worker checks each token with the main admin's own `get_my_staff_role` and `get_my_staff_access`. No second password. The owner is `achat.vente.garderie@gmail.com`.
-- **Invite a member (owner only):** calls the main site's `invite-staff` function server-side from the Worker (it appoints an existing, confirmed proprieteenvente.ca account as operator), then emails the new member from `MAIL_FROM` with a link to `/admin/`. The person must first create and confirm an account on proprieteenvente.ca.
-- **Buyer enquiries:** the main buyer inbox functions already in the shared Supabase project (`list_buyer_enquiries_managed`, `review_buyer_enquiry`), narrowed to `propertyType = hotel-motel`. They include hotel/motel enquiries from both sites; status changes are shared with the main admin. No Supabase migration is needed.
+- **Staff accounts** (`staff_members`, `staff_sessions`, `staff_tokens`): the owner `achat.vente.garderie@gmail.com` is seeded by migration 0004 without a password; on first use choose “First sign-in or forgot your password?” to receive a one-hour link. Passwords use the buyer-account PBKDF2 format. Sessions are an HttpOnly `__Host-mav_staff` cookie (SameSite=Strict, 12 hours); writes also require the `X-MAV-Admin: 1` header and this origin.
+- **Invitations (owner only):** enter an email; the person receives a 7-day link from `MAIL_FROM` to choose a password and becomes an operator. No prior account is needed. The owner can resend, deactivate (ends sessions at once) and reactivate members. Operators cannot invite.
+- **Enquiries:** the public form posts to `/api/enquiry` (`intake: "site"` in `data/site-config.js`). The Worker validates like the former Supabase intake, stores the enquiry in D1 `enquiries` (idempotent on `requestId`, rate-limited per connection and email) and emails the active owner(s), with Reply-To set to the enquirer. Staff accept, reopen, delete and restore them. Enquiries received before this change stay in the main site's database.
 - **Buyer accounts:** D1 `users` — search, confirm manually (also invalidates outstanding confirmation links), delete (cascades).
-- **Listings:** D1 `listing_settings` hides or pins a published hotel/motel listing on this site only; public pages pick it up within a minute. Edit listing content in the main admin.
+- **Listings:** listing content still comes from the main site's public `published_listings` (read-only). D1 `listing_settings` hides or pins a listing on this site only; public pages pick it up within a minute.
 - **Audit:** D1 `staff_audit` records the staff email, action and target.
+- Page-view metrics (`metricsEndpoint`) are unchanged.
 
-Deploy: D1 migration `0003_staff_workspace.sql` (applied on 2026-11-04 through the D1 console and recorded in `d1_migrations`), then merge to `main`.
+Deploy: apply D1 migrations `0003_staff_workspace.sql` and `0004_independent_staff.sql` (record them in `d1_migrations` if run from the dashboard console), then merge to `main`.

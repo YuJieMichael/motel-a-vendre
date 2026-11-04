@@ -20,5 +20,6 @@ const MAV_SITE = {
     "100028": "assets/covers/100028.webp",
     "100030": "assets/covers/100030.webp"
   },
-  "enquiryMode": "direct"
+  "enquiryMode": "direct",
+  "intake": "site"
 };
