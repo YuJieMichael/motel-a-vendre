@@ -97,3 +97,20 @@ Saved-search alerts: a daily Cron Trigger (`17 13 * * *` UTC) checks every saved
 Turnstile: widget "motelavendre.ca account" (site key in `account.turnstileSiteKey`) protects sign-up and password-reset requests. The server enforces it only once the Worker secret `TURNSTILE_SECRET` exists. Only the account page allows `https://challenges.cloudflare.com` in `script-src`/`frame-src`.
 
 Direct enquiries: `directEnquiries: true` makes `prepare:release` verify the intake (OPTIONS + invalid `{}` only) and send enquiries straight from motelavendre.ca, so signed-in users get an enquiry log. A failed check stops the build. In an offline sandbox, `MAV_INTAKE_CHECK=offline` skips the network check (never in CI).
+
+## Staff workspace / Espace administration / 管理后台
+
+`https://motelavendre.ca/admin/` mirrors the Propriété En Vente admin (same layout, wording and styles). Tabs: buyer enquiries, buyer accounts, listings on this site, activity log and, for the owner only, invite a member.
+
+- **Sign-in:** the existing Propriété En Vente staff accounts (Supabase Auth, `staff_members` owner/operator with confirmed email). No second password. The owner is `achat.vente.garderie@gmail.com`.
+- **Invite a member (owner only):** calls the main site's `invite-staff` function server-side from the Worker (it appoints an existing, confirmed proprieteenvente.ca account as operator), then emails the new member from `MAIL_FROM` with a link to `/admin/`. The person must first create and confirm an account on proprieteenvente.ca.
+- **Buyer enquiries:** only enquiries recorded in `private.motel_enquiry_receipts`, via `list_motel_enquiries` / `review_motel_enquiry` (staff-checked in the database, audited in `audit_events`).
+- **Buyer accounts:** D1 `users` — search, confirm manually (also invalidates outstanding confirmation links), delete (cascades).
+- **Listings:** D1 `listing_settings` hides or pins a published hotel/motel listing on this site only; public pages pick it up within a minute. Edit listing content in the main admin.
+- **Audit:** D1 `staff_audit` records the staff email, action and target.
+
+Deploy order (each step is separate and reversible up to the merge):
+
+1. `supabase db push` (or run `supabase/migrations/20261104000000_motel_admin.sql`) on the shared project.
+2. `npx wrangler d1 migrations apply motel-a-vendre-accounts --remote` for `d1/migrations/0003_staff_workspace.sql`.
+3. Merge to `main` (Cloudflare Workers Builds deploys). Until steps 1–2 are done the public site keeps working; only `/admin/` reports the service as unavailable.

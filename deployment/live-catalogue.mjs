@@ -35,3 +35,10 @@ export async function loadCatalogue(site,fallback,{fetchImpl=fetch,cache=globalT
   return {catalogue,status};
  }
 }
+// Staff display settings (D1 listing_settings): hidden listings leave this site; pinned ones lead.
+export function applyListingSettings(catalogue,settings){
+ if(!Array.isArray(settings)||!settings.length)return catalogue;
+ const hidden=new Set(settings.filter(s=>Number(s.hidden)===1).map(s=>String(s.listing_reference))),pinned=new Set(settings.filter(s=>Number(s.pinned)===1).map(s=>String(s.listing_reference)));
+ const items=catalogue.items.filter(p=>!hidden.has(p.reference)).map((p,i)=>[p,i]).sort((a,b)=>(pinned.has(b[0].reference)-pinned.has(a[0].reference))||a[1]-b[1]).map(x=>x[0]);
+ return {...catalogue,items};
+}
