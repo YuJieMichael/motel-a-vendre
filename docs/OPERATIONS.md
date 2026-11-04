@@ -102,15 +102,11 @@ Direct enquiries: `directEnquiries: true` makes `prepare:release` verify the int
 
 `https://motelavendre.ca/admin/` mirrors the Propriété En Vente admin (same layout, wording and styles). Tabs: buyer enquiries, buyer accounts, listings on this site, activity log and, for the owner only, invite a member.
 
-- **Sign-in:** the existing Propriété En Vente staff accounts (Supabase Auth, `staff_members` owner/operator with confirmed email). No second password. The owner is `achat.vente.garderie@gmail.com`.
+- **Sign-in:** the existing Propriété En Vente staff accounts (Supabase Auth). The Worker checks each token with the main admin's own `get_my_staff_role` and `get_my_staff_access`. No second password. The owner is `achat.vente.garderie@gmail.com`.
 - **Invite a member (owner only):** calls the main site's `invite-staff` function server-side from the Worker (it appoints an existing, confirmed proprieteenvente.ca account as operator), then emails the new member from `MAIL_FROM` with a link to `/admin/`. The person must first create and confirm an account on proprieteenvente.ca.
-- **Buyer enquiries:** only enquiries recorded in `private.motel_enquiry_receipts`, via `list_motel_enquiries` / `review_motel_enquiry` (staff-checked in the database, audited in `audit_events`).
+- **Buyer enquiries:** the main buyer inbox functions already in the shared Supabase project (`list_buyer_enquiries_managed`, `review_buyer_enquiry`), narrowed to `propertyType = hotel-motel`. They include hotel/motel enquiries from both sites; status changes are shared with the main admin. No Supabase migration is needed.
 - **Buyer accounts:** D1 `users` — search, confirm manually (also invalidates outstanding confirmation links), delete (cascades).
 - **Listings:** D1 `listing_settings` hides or pins a published hotel/motel listing on this site only; public pages pick it up within a minute. Edit listing content in the main admin.
 - **Audit:** D1 `staff_audit` records the staff email, action and target.
 
-Deploy order (each step is separate and reversible up to the merge):
-
-1. `supabase db push` (or run `supabase/migrations/20261104000000_motel_admin.sql`) on the shared project.
-2. `npx wrangler d1 migrations apply motel-a-vendre-accounts --remote` for `d1/migrations/0003_staff_workspace.sql`.
-3. Merge to `main` (Cloudflare Workers Builds deploys). Until steps 1–2 are done the public site keeps working; only `/admin/` reports the service as unavailable.
+Deploy: D1 migration `0003_staff_workspace.sql` (applied on 2026-11-04 through the D1 console and recorded in `d1_migrations`), then merge to `main`.

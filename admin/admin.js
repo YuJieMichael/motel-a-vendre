@@ -56,9 +56,9 @@ const COPY = {
 };
 // Buyer inbox copy: Propriété En Vente buyer-enquiries.tsx, with Motel seller fields added.
 const INBOX = {
- en: { title: 'Buyer enquiries', hint: 'Each enquiry sent from motelavendre.ca appears individually. Each enquiry is emailed individually when email delivery is configured.', autoRefresh: 'Updates automatically every 15 seconds and when you return to this page.', loading: 'Loading…', error: 'Could not sync enquiries. The system will retry automatically.', empty: 'No enquiries yet.', date: 'Submitted', name: 'Name', email: 'Email', phone: 'Phone', city: 'Preferred cities', min: 'Minimum budget (CAD)', max: 'Maximum budget (CAD)', expectedPrice: 'Expected price (CAD)', address: 'Address', requirements: 'Requirements', timeline: 'Timeline', contactLanguage: 'Contact language', contactMethod: 'Contact method', contactTime: 'Contact availability', details: 'View request', seller: 'Seller', buyer: 'Buyer' },
- fr: { title: 'Demandes d’achat', hint: 'Chaque demande envoyée depuis motelavendre.ca apparaît individuellement. Chaque demande est envoyée individuellement lorsque le service courriel est configuré.', autoRefresh: 'Mise à jour automatique toutes les 15 secondes et à votre retour sur la page.', loading: 'Chargement…', error: 'Impossible de synchroniser les demandes. Une nouvelle tentative sera faite automatiquement.', empty: 'Aucune demande pour le moment.', date: 'Date de réception', name: 'Nom', email: 'Courriel', phone: 'Téléphone', city: 'Villes recherchées', min: 'Budget minimum (CAD)', max: 'Budget maximum (CAD)', expectedPrice: 'Prix souhaité (CAD)', address: 'Adresse', requirements: 'Critères', timeline: 'Échéancier', contactLanguage: 'Langue de contact', contactMethod: 'Moyen de contact', contactTime: 'Disponibilités', details: 'Voir la demande', seller: 'Vendeur', buyer: 'Acheteur' },
- zh: { title: '买家咨询', hint: '在 motelavendre.ca 提交的每条咨询都会单独显示。配置发信服务后，每条咨询另行发送邮件通知。', autoRefresh: '每 15 秒自动同步；返回此页面时也会立即更新。', loading: '正在加载…', error: '咨询暂时无法同步，系统会自动重试。', empty: '目前还没有咨询。', date: '提交时间', name: '姓名', email: '邮箱', phone: '电话', city: '意向城市', min: '最低预算（加元）', max: '最高预算（加元）', expectedPrice: '期望售价（加元）', address: '地址', requirements: '购房要求', timeline: '计划时间', contactLanguage: '联系语言', contactMethod: '联系方式', contactTime: '方便联系的时间', details: '查看需求', seller: '卖家', buyer: '买家' }
+ en: { title: 'Buyer enquiries', hint: 'Buyer enquiries for hotels and motels, from motelavendre.ca and from the Propriété En Vente main site. Status changes also apply in the main admin.', autoRefresh: 'Updates automatically every 15 seconds and when you return to this page.', loading: 'Loading…', error: 'Could not sync enquiries. The system will retry automatically.', empty: 'No hotel or motel enquiries on this page.', date: 'Submitted', name: 'Name', email: 'Email', phone: 'Phone', city: 'Preferred cities', min: 'Minimum budget (CAD)', max: 'Maximum budget (CAD)', expectedPrice: 'Expected price (CAD)', address: 'Address', requirements: 'Requirements', timeline: 'Timeline', contactLanguage: 'Contact language', contactMethod: 'Contact method', contactTime: 'Contact availability', details: 'View request', seller: 'Seller', buyer: 'Buyer' },
+ fr: { title: 'Demandes d’achat', hint: 'Demandes d’achat pour des hôtels et motels, envoyées depuis motelavendre.ca et le site principal Propriété En Vente. Les changements d’état s’appliquent aussi dans l’administration principale.', autoRefresh: 'Mise à jour automatique toutes les 15 secondes et à votre retour sur la page.', loading: 'Chargement…', error: 'Impossible de synchroniser les demandes. Une nouvelle tentative sera faite automatiquement.', empty: 'Aucune demande d’hôtel ou de motel sur cette page.', date: 'Date de réception', name: 'Nom', email: 'Courriel', phone: 'Téléphone', city: 'Villes recherchées', min: 'Budget minimum (CAD)', max: 'Budget maximum (CAD)', expectedPrice: 'Prix souhaité (CAD)', address: 'Adresse', requirements: 'Critères', timeline: 'Échéancier', contactLanguage: 'Langue de contact', contactMethod: 'Moyen de contact', contactTime: 'Disponibilités', details: 'Voir la demande', seller: 'Vendeur', buyer: 'Acheteur' },
+ zh: { title: '买家咨询', hint: '意向房型为酒店/汽车旅馆的买家咨询，包括 motelavendre.ca 和 Propriété En Vente 主站提交的。在这里改的状态，主站后台会同步。', autoRefresh: '每 15 秒自动同步；返回此页面时也会立即更新。', loading: '正在加载…', error: '咨询暂时无法同步，系统会自动重试。', empty: '本页没有酒店/汽车旅馆的咨询。', date: '提交时间', name: '姓名', email: '邮箱', phone: '电话', city: '意向城市', min: '最低预算（加元）', max: '最高预算（加元）', expectedPrice: '期望售价（加元）', address: '地址', requirements: '购房要求', timeline: '计划时间', contactLanguage: '联系语言', contactMethod: '联系方式', contactTime: '方便联系的时间', details: '查看需求', seller: '卖家', buyer: '买家' }
 };
 const ACTION = {
  en: { active: 'All active', pending: 'Pending', accepted: 'Accepted', deleted: 'Deleted', accept: 'Accept', remove: 'Delete', restore: 'Restore', reopen: 'Mark pending', confirm: 'Move this enquiry to Deleted? You can restore it later. Existing email summaries are retained.', yes: 'Confirm delete', cancel: 'Keep enquiry', saving: 'Saving…', error: 'Could not save. The enquiry may have changed; its latest status has been loaded.' },
@@ -265,13 +265,14 @@ function enquiriesTab(panel) {
 
  async function load() {
   if (inFlight) return; inFlight = true; const version = ++generation; error = false;
-  try { const data = await rpc('list_motel_enquiries', { p_filter: filter, p_offset: offset }) || []; if (version !== generation) return; rows = data.slice(0, 50); more = data.length > 50; }
+  try { // Main buyer inbox (list_buyer_enquiries_managed), narrowed to hotel/motel enquiries, which is what this site sends.
+  const data = await rpc('list_buyer_enquiries_managed', { p_filter: filter, p_offset: offset }) || []; if (version !== generation) return; rows = data.slice(0, 50).filter(r => (r.payload || {}).propertyType === 'hotel-motel'); more = data.length > 50; }
   catch (e) { if (handle(e)) return; if (version === generation) error = true; }
   finally { inFlight = false; if (version === generation) { loading = false; draw(); } }
  }
  async function review(row, action) {
   if (busy) return; busy = row.id; actionError = false; generation++; draw();
-  try { await rpc('review_motel_enquiry', { p_id: row.id, p_revision: row.revision ?? 0, p_action: action }); confirmDelete = null; rows = rows.filter(r => r.id !== row.id); }
+  try { await rpc('review_buyer_enquiry', { p_id: row.id, p_revision: row.revision ?? 0, p_action: action }); confirmDelete = null; rows = rows.filter(r => r.id !== row.id); }
   catch (e) { if (handle(e)) return; actionError = true; }
   finally { busy = null; draw(); load(); }
  }
@@ -470,22 +471,10 @@ function auditTab(panel) {
 // ---- Invite a member (owner only; same appointment as the main admin) ----
 function inviteTab(panel) {
  const c = COPY[lang], tx = INVITE[lang];
- let members = null, message = null, busy = false;
+ let message = null, busy = false;
  const input = h('input', { type: 'email', required: true, maxlength: 254, autocomplete: 'off' });
  const section = h('section', { class: 'admin-panel admin-invite' });
- const list = h('div');
- fill(panel, section, h('section', { class: 'admin-panel' }, list));
- async function loadTeam() {
-  try { members = (await api('team')).members; } catch (e) { if (handle(e)) return; members = []; }
-  drawTeam();
- }
- function drawTeam() {
-  if (!list.isConnected) return;
-  fill(list, h('h2', {}, tx.team, ' ', members ? h('span', { class: 'admin-count', text: members.length }) : null),
-   !members ? h('p', { role: 'status', text: c.loading }) : h('div', { class: 'admin-table-wrap' }, h('table', {},
-    h('thead', {}, h('tr', {}, [tx.email, c.status || '', tx.since].map(x => h('th', { text: x })))),
-    h('tbody', {}, members.map(m => h('tr', {}, h('td', { text: m.email }), h('td', {}, h('span', { class: 'admin-badge' + (m.active ? ' is-ok' : ' is-muted'), text: m.active ? tx[m.role] || m.role : tx.inactive })), h('td', { text: m.created_at ? day(m.created_at) : '—' })))))));
- }
+ panel.replaceChildren(section);
  const submit = h('button', { class: 'admin-primary', type: 'submit', text: tx.send });
  function draw() {
   submit.disabled = busy; input.disabled = busy; submit.textContent = busy ? c.loading : tx.send;
@@ -496,11 +485,11 @@ function inviteTab(panel) {
  const form = h('form', { onsubmit: async e => {
   e.preventDefault(); if (busy) return; busy = true; message = null; draw();
   const email = input.value.trim();
-  try { const r = await api('invite', { email, language: lang }); message = { text: fmt(r.mailed ? tx.sent : tx.sentNoMail, { email }), error: false }; input.value = ''; loadTeam(); }
+  try { const r = await api('invite', { email, language: lang }); message = { text: fmt(r.mailed ? tx.sent : tx.sentNoMail, { email }), error: false }; input.value = ''; }
   catch (err) { if (handle(err)) return; message = { text: err.code === 'account_not_found' ? tx.notFound : err.code === 'already_staff' ? tx.already : err.code === 'invalid_input' ? tx.invalid : tx.error, error: true }; }
   busy = false; draw();
  } }, h('label', { class: 'admin-field' }, tx.email, input), h('p', { class: 'admin-help' }, tx.hint, ' ', h('a', { href: 'https://proprieteenvente.ca/', rel: 'noopener', target: '_blank', text: tx.signup })), submit);
- draw(); drawTeam(); loadTeam();
+ draw();
 }
 
 window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (v !== tab && ['enquiries', 'accounts', 'listings', 'audit', 'invite'].includes(v)) { tab = v; render(); } });

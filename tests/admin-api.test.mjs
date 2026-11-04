@@ -15,9 +15,9 @@ function setup({inviteStatus=200,inviteError}={}){
   url=String(url);calls.push({url,init});
   const token=(init.headers?.Authorization||'').replace('Bearer ','');
   const role=Object.entries(TOKENS).find(([,v])=>v===token)?.[0];
-  if(url.endsWith('/rest/v1/rpc/motel_staff_role'))return role?Response.json(role==='buyer'?null:role):new Response('{}',{status:401});
+  if(url.endsWith('/rest/v1/rpc/get_my_staff_role'))return role?Response.json(role==='buyer'?null:role):new Response('{}',{status:401});
+  if(url.endsWith('/rest/v1/rpc/get_my_staff_access'))return role?Response.json(role!=='buyer'):new Response('{}',{status:401});
   if(url.endsWith('/auth/v1/user'))return role?Response.json({email:role+'@example.com'}):new Response('{}',{status:401});
-  if(url.endsWith('/rest/v1/rpc/motel_staff_members'))return role==='owner'?Response.json([{email:'owner@example.com',role:'owner',active:true,created_at:'2026-09-01T00:00:00Z'}]):new Response('{}',{status:403});
   if(url.endsWith('/functions/v1/invite-staff'))return Response.json(inviteError?{error:inviteError}:{ok:true},{status:inviteStatus});
   if(url.includes('/rest/v1/published_listings'))return Response.json(rows);
   throw Error('unexpected '+url);
@@ -44,7 +44,7 @@ test('staff workspace requires a staff token verified by Supabase',async()=>{
  const denied=await t.call('GET','me',null,'buyer');assert.equal(denied.status,403);assert.equal(denied.body.error,'staff_required');
  const me=await t.call('GET','me',null,'operator');assert.deepEqual(me.body,{email:'operator@example.com',role:'operator'});
  assert.equal(me.headers.get('cache-control'),'no-store');
- const rpc=t.calls.find(c=>c.url.endsWith('motel_staff_role'));assert.equal(rpc.init.headers.apikey,'sb_publishable_test');
+ const rpc=t.calls.find(c=>c.url.endsWith('get_my_staff_role'));assert.equal(rpc.init.headers.apikey,'sb_publishable_test');
  assert.equal((await t.call('GET','nope',null,'operator')).status,404);
 });
 
@@ -84,11 +84,9 @@ test('listing display settings: hide and pin on this site only',async()=>{
  assert.deepEqual((await t.call('GET','audit',null,'operator')).body.events.map(e=>e.action),['listing_pin','listing_hide']);
 });
 
-test('only the owner can see the team and invite; invitations reuse the main invite-staff function',async()=>{
+test('only the owner can invite; invitations reuse the main invite-staff function',async()=>{
  let t=setup();
- assert.equal((await t.call('GET','team',null,'operator')).body.error,'owner_required');
- assert.equal((await t.call('POST','invite',{email:'new@example.com'},'operator')).status,403);
- assert.equal((await t.call('GET','team',null,'owner')).body.members[0].role,'owner');
+ assert.equal((await t.call('POST','invite',{email:'new@example.com'},'operator')).body.error,'owner_required');
  const ok=await t.call('POST','invite',{email:' New@Example.com ',language:'zh'},'owner');
  assert.deepEqual(ok.body,{ok:true,mailed:true});
  const call=t.calls.find(c=>c.url.endsWith('/functions/v1/invite-staff'));
@@ -110,4 +108,5 @@ test('admin page ships with the release, stays out of search and calls only same
  const html=fs.readFileSync(path.resolve(here,'../admin/index.html'),'utf8');assert.match(html,/noindex,nofollow/);assert.doesNotMatch(html,/<script>(?!<)/,'no inline scripts under the CSP');
  const js=fs.readFileSync(path.resolve(here,'../admin/admin.js'),'utf8');assert.doesNotMatch(js,/innerHTML|localStorage\.setItem\('mav_admin_session/);
  for(const lang of ['fr','en','zh'])assert.match(js,new RegExp(lang+': \\{ tab:'));
+ assert.match(js,/list_buyer_enquiries_managed/);assert.match(js,/review_buyer_enquiry/);
 });

@@ -30,34 +30,21 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
     const key = await hex(token), hit = staffCache.get(key);
     if (hit && hit.until > now()) return hit;
     const headers = { apikey: site.publishableKey, Authorization: 'Bearer ' + token };
-    let check, user;
-    try {
-      [check, user] = await Promise.all([
-        fetchImpl(supabase + '/rest/v1/rpc/motel_staff_role', { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: '{}', signal: AbortSignal.timeout(8000), redirect: 'manual' }),
-        fetchImpl(supabase + '/auth/v1/user', { headers, signal: AbortSignal.timeout(8000), redirect: 'manual' })
-      ]);
-    } catch { throw new AdminError(503, 'unavailable'); }
-    if (check.status === 401 || user.status === 401 || user.status === 403) throw new AdminError(401, 'signin_required');
-    if (!check.ok || !user.ok) throw new AdminError(503, 'unavailable');
-    const role = await check.json(), email = String((await user.json())?.email || '').slice(0, 150);
-    if (!['owner', 'operator'].includes(role) || !email) throw new AdminError(403, 'staff_required');
+    // Same checks as the main admin (auth.tsx): get_my_staff_role + get_my_staff_access (private.is_staff).
+    const rpc = name => fetchImpl(supabase + '/rest/v1/rpc/' + name, { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: '{}', signal: AbortSignal.timeout(8000), redirect: 'manual' });
+    let roleRes, accessRes, user;
+    try { [roleRes, accessRes, user] = await Promise.all([rpc('get_my_staff_role'), rpc('get_my_staff_access'), fetchImpl(supabase + '/auth/v1/user', { headers, signal: AbortSignal.timeout(8000), redirect: 'manual' })]); }
+    catch { throw new AdminError(503, 'unavailable'); }
+    if ([roleRes, accessRes, user].some(r => r.status === 401) || user.status === 403) throw new AdminError(401, 'signin_required');
+    if (!roleRes.ok || !accessRes.ok || !user.ok) throw new AdminError(503, 'unavailable');
+    const role = await roleRes.json(), access = await accessRes.json(), email = String((await user.json())?.email || '').slice(0, 150);
+    if (!['owner', 'operator'].includes(role) || access !== true || !email) throw new AdminError(403, 'staff_required');
     if (staffCache.size > 200) staffCache.clear();
     const who = { email, role, token, until: now() + STAFF_CACHE_MS };
     staffCache.set(key, who);
     return who;
   }
 
-  // Team list (owner only, enforced again by the database function).
-  async function team(token) {
-    let r;
-    try { r = await fetchImpl(supabase + '/rest/v1/rpc/motel_staff_members', { method: 'POST', headers: { apikey: site.publishableKey, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: '{}', signal: AbortSignal.timeout(8000), redirect: 'manual' }); }
-    catch { throw new AdminError(503, 'unavailable'); }
-    if (r.status === 401) throw new AdminError(401, 'signin_required');
-    if (r.status === 403) throw new AdminError(403, 'owner_required');
-    if (!r.ok) throw new AdminError(503, 'unavailable');
-    const rows = await r.json();
-    return Array.isArray(rows) ? rows.map(m => ({ email: String(m.email || ''), role: m.role, active: !!m.active, created_at: m.created_at })) : [];
-  }
   // Appointment goes through the main site's own invite-staff function (owner check,
   // appoint_existing_staff, audit). Called server-side: that function only admits its own browser origin.
   async function appoint(token, email) {
@@ -142,9 +129,8 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
       const who = await staff(request), actor = who.email;
       const is = (method, name) => request.method === method && route === name;
       if (is('GET', 'me')) return json(200, { email: who.email, role: who.role });
-      if (is('GET', 'team') || is('POST', 'invite')) {
+      if (is('POST', 'invite')) {
         if (who.role !== 'owner') throw new AdminError(403, 'owner_required');
-        if (route === 'team') return json(200, { members: await team(who.token) });
         const input = await body(request), email = typeof input.email === 'string' ? input.email.trim().toLowerCase() : '';
         if (!EMAIL.test(email) || email.length > 254) throw new AdminError(400, 'invalid_input');
         await appoint(who.token, email);
