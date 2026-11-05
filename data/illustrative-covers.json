@@ -26,5 +26,11 @@
     "sourceImage": "https://pbnscmdfudknggxgiuov.supabase.co/storage/v1/object/public/entreprises/d46a2824-fa67-469e-84a9-6926aea85735/66cebed3-5909-4688-9f90-4c2526b05543/thumbnails/thumb_main_mvscx2pzkqz7svx.webp",
     "sha256": "cf0c0b123124483387e0289657cdbd7dc4ccd2e1440be88a6d2bb109488cfa3a",
     "label": "AI-generated illustrative cover; user confirmed illustrative use"
+  },
+  "100045": {
+    "image": "assets/covers/100045.webp",
+    "source": "https://entreprisesavendre.quebec/entreprises/hebergement-a-vendre-a-mont-tremblant-17-chambres-appartement-et-plage",
+    "sha256": "8f2a42873c1f4f4132eeda890d6fdc6e7ae03fb66022621562a3ea306886a30b",
+    "label": "AI-generated illustration; not a photograph of the property. User-authorized new confidential listing, distinct from 100031."
   }
 }

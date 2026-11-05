@@ -22,7 +22,8 @@ test('only useful page types enter the build and the sitemap',()=>{
  const pages=JSON.parse(read('data/page-manifest.json'));
  assert.deepEqual([...new Set(pages.map(p=>p.kind))].sort(),['account','guide','home','property']);
  const sitemap=read('release/public/sitemap.xml');assert.doesNotMatch(sitemap,/\/(?:equipe|team|vendre|sell|compte|account)\//);
- assert.equal((sitemap.match(/<loc>/g)||[]).length,21);
+ const publicPages=pages.filter(page=>page.kind!=='account'&&page.file!=='index.html');
+ assert.equal((sitemap.match(/<loc>/g)||[]).length,publicPages.length);
  for(const lang of ['fr','en','zh']){
   const html=read(lang+'/index.html');assert.doesNotMatch(html,/approach-section|team-section|seller-section|data-route="(?:team|seller)"/);
   const guide=read(lang+'/'+(lang==='fr'?'guide-achat':'buying-guide')+'/index.html');assert.match(guide,/id="vendre"/);assert.match(guide,/class="guide-faq"/);
