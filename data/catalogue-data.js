@@ -2,9 +2,106 @@
 const MAV_CATALOGUE = {
   "schemaVersion": 1,
   "mode": "main-snapshot",
-  "updatedAt": "2026-11-03T02:50:24.576Z",
+  "updatedAt": "2026-11-05T16:35:26.142Z",
   "source": "proprieteenvente.ca",
   "items": [
+    {
+      "id": "main-100045",
+      "reference": "100045",
+      "name": "Hôtel / Motel — Mont-Tremblant",
+      "names": {
+        "fr": "Hôtel / Motel — Mont-Tremblant",
+        "en": "Hotel / motel — Mont-Tremblant",
+        "zh": "Mont-Tremblant 酒店／汽车旅馆"
+      },
+      "city": "Mont-Tremblant",
+      "region": "Laurentides",
+      "type": "hotel-motel",
+      "price": 1990000,
+      "rooms": 17,
+      "roomsText": {
+        "fr": "17",
+        "en": "17",
+        "zh": "17间"
+      },
+      "acres": null,
+      "parking": null,
+      "tenure": null,
+      "season": "unknown",
+      "image": "assets/covers/100045.webp",
+      "photos": [
+        "assets/covers/100045.webp"
+      ],
+      "facts": [
+        {
+          "label": {
+            "fr": "Chambres",
+            "en": "Guest rooms",
+            "zh": "客房数量"
+          },
+          "value": {
+            "fr": "17",
+            "en": "17",
+            "zh": "17间"
+          }
+        },
+        {
+          "label": {
+            "fr": "Appartement du propriétaire",
+            "en": "Owner’s apartment",
+            "zh": "业主自住公寓"
+          },
+          "value": {
+            "fr": "Un appartement pour le propriétaire occupant",
+            "en": "One owner-occupied apartment",
+            "zh": "一套业主自住公寓"
+          }
+        },
+        {
+          "label": {
+            "fr": "Atout de la propriété",
+            "en": "Property feature",
+            "zh": "物业特色"
+          },
+          "value": {
+            "fr": "Plage",
+            "en": "Beach",
+            "zh": "沙滩"
+          }
+        }
+      ],
+      "illustrative": true,
+      "copy": {
+        "fr": {
+          "short": "Établissement d’hébergement à vendre à Mont-Tremblant, dans les Laurentides.",
+          "description": "Établissement d’hébergement à vendre à Mont-Tremblant, dans les Laurentides. L’offre comprend 17 chambres, un appartement pour le propriétaire occupant et une plage. Prix demandé : 1 990 000 $ CA. Cette configuration permet de réunir une activité d’hébergement et une résidence sur place. L’adresse précise n’est pas publiée. Communiquez avec la plateforme pour obtenir les renseignements complémentaires et organiser une visite. L’image est une illustration générée par intelligence artificielle; elle ne représente pas le bien réel.",
+          "features": [
+            "Chambres: 17",
+            "Appartement du propriétaire: Un appartement pour le propriétaire occupant",
+            "Atout de la propriété: Plage"
+          ]
+        },
+        "en": {
+          "short": "Hospitality property for sale in Mont-Tremblant, in the Laurentians.",
+          "description": "Hospitality property for sale in Mont-Tremblant, in the Laurentians. The offering includes 17 guest rooms, an owner-occupied apartment and a beach. Asking price: CAD $1,990,000. The configuration combines a hospitality business with on-site living. The exact address is not published. Contact the platform for further information and to arrange a visit. The image is an AI-generated illustration and does not depict the actual property.",
+          "features": [
+            "Guest rooms: 17",
+            "Owner’s apartment: One owner-occupied apartment",
+            "Property feature: Beach"
+          ]
+        },
+        "zh": {
+          "short": "Mont-Tremblant住宿物业出售，位于Laurentides地区，设17间客房，另带一套供业主自住的公寓及沙滩。",
+          "description": "Mont-Tremblant住宿物业出售，位于Laurentides地区，设17间客房，另带一套供业主自住的公寓及沙滩。要价199万加元，可兼顾住宿经营与现场居住。具体地址不公开。详细资料及看房安排请通过平台联系。图片由AI生成，仅作示意，不代表实际物业。",
+          "features": [
+            "客房数量: 17间",
+            "业主自住公寓: 一套业主自住公寓",
+            "物业特色: 沙滩"
+          ]
+        }
+      },
+      "real": true
+    },
     {
       "id": "main-100021",
       "reference": "100021",

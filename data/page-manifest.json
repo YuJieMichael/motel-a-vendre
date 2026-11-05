@@ -28,6 +28,13 @@
     "reference": ""
   },
   {
+    "file": "fr/proprietes/100045/index.html",
+    "route": "fr/proprietes/100045/",
+    "lang": "fr",
+    "kind": "property",
+    "reference": "100045"
+  },
+  {
     "file": "fr/proprietes/100021/index.html",
     "route": "fr/proprietes/100021/",
     "lang": "fr",
@@ -84,6 +91,13 @@
     "reference": ""
   },
   {
+    "file": "en/proprietes/100045/index.html",
+    "route": "en/proprietes/100045/",
+    "lang": "en",
+    "kind": "property",
+    "reference": "100045"
+  },
+  {
     "file": "en/proprietes/100021/index.html",
     "route": "en/proprietes/100021/",
     "lang": "en",
@@ -138,6 +152,13 @@
     "lang": "zh",
     "kind": "account",
     "reference": ""
+  },
+  {
+    "file": "zh/proprietes/100045/index.html",
+    "route": "zh/proprietes/100045/",
+    "lang": "zh",
+    "kind": "property",
+    "reference": "100045"
   },
   {
     "file": "zh/proprietes/100021/index.html",
