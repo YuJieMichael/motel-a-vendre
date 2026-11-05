@@ -15,7 +15,7 @@ const COPY = {
   email: 'Courriel', password: 'Mot de passe', forgot: 'Première connexion ou mot de passe oublié ?', linkTitle: 'Recevoir un lien par courriel', linkText: 'Saisissez votre courriel d’équipe. Vous recevrez un lien pour choisir votre mot de passe (valide une heure).', sendLink: 'Envoyer le lien', linkSent: 'Si cette adresse fait partie de l’équipe, un courriel vient d’être envoyé. Utilisez le lien le plus récent.', setTitle: 'Choisissez votre mot de passe', setText: 'Au moins 10 caractères. Il sert uniquement à l’administration Motel à vendre.', newPassword: 'Nouveau mot de passe', confirmPassword: 'Confirmer le mot de passe', save: 'Enregistrer et se connecter', mismatch: 'Les deux mots de passe ne correspondent pas.', weak: 'Choisissez au moins 10 caractères, différents de votre courriel.', badLink: 'Ce lien est expiré, déjà utilisé ou remplacé. Demandez un nouveau lien.', rate: 'Trop de tentatives. Réessayez dans quelques minutes.', backToLogin: 'Retour à la connexion', badLogin: 'Courriel ou mot de passe incorrect.',
   noAccess: 'Accès réservé à l’équipe', noAccessText: 'Ce compte n’est pas un compte d’administration actif. Demandez une invitation au propriétaire de la plateforme.',
   setup: 'Connexion au serveur à configurer', setupText: 'La configuration du site ne contient pas l’adresse du service.', expired: 'Votre session a expiré. Connectez-vous de nouveau.',
-  loading: 'Chargement…', work: 'Travail', management: 'Gestion', signOut: 'Se déconnecter', refresh: 'Actualiser', original: 'Administration Propriété En Vente',
+  loading: 'Chargement…', work: 'Travail', management: 'Gestion', signOut: 'Déconnexion', administration: 'Administration', viewSite: 'Voir le site', refresh: 'Actualiser', original: 'Administration Propriété En Vente',
   error: 'Impossible de charger les données. Réessayez après avoir vérifié votre connexion et vos droits d’accès.', unavailable: 'Service momentanément indisponible. Réessayez dans un instant.',
   previous: 'Précédent', next: 'Suivant', cancel: 'Annuler', saving: 'Enregistrement…', saveError: 'Enregistrement impossible. Les données ont été actualisées.',
   status: 'Rôle', audit: 'Journal des opérations', emptyAudit: 'Aucune opération à afficher.', date: 'Date', action: 'Opération', actor: 'Compte responsable', target: 'Élément',
@@ -28,7 +28,7 @@ const COPY = {
   email: 'Email', password: 'Password', forgot: 'First sign-in or forgot your password?', linkTitle: 'Get a link by email', linkText: 'Enter your team email. You will receive a link to choose your password (valid for one hour).', sendLink: 'Send link', linkSent: 'If this address is on the team, an email has just been sent. Use the most recent link.', setTitle: 'Choose your password', setText: 'At least 10 characters. It is used only for the Motel à vendre admin.', newPassword: 'New password', confirmPassword: 'Confirm password', save: 'Save and sign in', mismatch: 'The two passwords do not match.', weak: 'Use at least 10 characters, different from your email.', badLink: 'This link has expired, was already used or was replaced. Ask for a new link.', rate: 'Too many attempts. Try again in a few minutes.', backToLogin: 'Back to sign-in', badLogin: 'Incorrect email or password.',
   noAccess: 'Team access only', noAccessText: 'This account is not an active admin account. Ask the platform owner for an invitation.',
   setup: 'Server connection required', setupText: 'The site configuration has no service address.', expired: 'Your session expired. Please sign in again.',
-  loading: 'Loading…', work: 'Work', management: 'Management', signOut: 'Sign out', refresh: 'Refresh', original: 'Propriété En Vente admin',
+  loading: 'Loading…', work: 'Work', management: 'Management', signOut: 'Sign out', administration: 'Administration', viewSite: 'View the website', refresh: 'Refresh', original: 'Propriété En Vente admin',
   error: 'Could not load data. Check your connection and access rights, then try again.', unavailable: 'Service temporarily unavailable. Try again shortly.',
   previous: 'Previous', next: 'Next', cancel: 'Cancel', saving: 'Saving…', saveError: 'Could not save. The data has been refreshed.',
   status: 'Role', audit: 'Activity log', emptyAudit: 'No activity to show.', date: 'Date', action: 'Action', actor: 'Account', target: 'Item',
@@ -41,7 +41,7 @@ const COPY = {
   email: '邮箱', password: '密码', forgot: '首次登录或忘记密码？', linkTitle: '通过邮件获取链接', linkText: '输入您的团队邮箱，我们会发送一个设置密码的链接（1 小时内有效）。', sendLink: '发送链接', linkSent: '如果这是团队成员的邮箱，邮件已经发出。请使用最新的一封。', setTitle: '设置您的密码', setText: '至少 10 个字符，只用于 Motel à vendre 管理后台。', newPassword: '新密码', confirmPassword: '确认密码', save: '保存并登录', mismatch: '两次输入的密码不一致。', weak: '请至少使用 10 个字符，并且不要和邮箱相同。', badLink: '链接已过期、已使用或已被新链接取代。请重新获取链接。', rate: '尝试次数过多，请几分钟后再试。', backToLogin: '返回登录', badLogin: '邮箱或密码不正确。',
   noAccess: '仅限授权团队成员', noAccessText: '此账号不是有效的管理员账号。请向平台所有者申请邀请。',
   setup: '需要配置后端连接', setupText: '网站配置中缺少服务地址。', expired: '登录已过期，请重新登录。',
-  loading: '加载中…', work: '工作', management: '管理', signOut: '退出登录', refresh: '刷新', original: 'Propriété En Vente 主站后台',
+  loading: '加载中…', work: '工作', management: '管理', signOut: '退出登录', administration: '管理后台', viewSite: '查看网站', refresh: '刷新', original: 'Propriété En Vente 主站后台',
   error: '无法加载资料。请检查网络和账号权限后重试。', unavailable: '服务暂时不可用，请稍后再试。',
   previous: '上一页', next: '下一页', cancel: '取消', saving: '正在保存…', saveError: '保存失败，已重新获取最新数据。',
   status: '角色', audit: '操作记录', emptyAudit: '暂无操作记录。', date: '时间', action: '操作', actor: '操作账号', target: '对象',
@@ -80,6 +80,11 @@ const INVITE = {
  en: { tab: 'Invite a member', title: 'Invite an operations administrator', text: 'The invitation gives access to Motel à vendre enquiries, buyer accounts and listings. It does not allow inviting other administrators.', email: 'Work email address', send: 'Send invitation', hint: 'They receive an email to choose their password (link valid for 7 days). No existing account is needed.', sent: 'Invitation sent to {email}.', sentNoMail: 'Member added ({email}), but the email could not be sent. Use “Resend” later.', already: 'This account is already on the team.', invalid: 'Invalid address, or this is your own account.', error: 'The action could not be completed. Try again shortly.', team: 'Team members', role: 'Role', state: 'Status', since: 'Since', owner: 'Owner', operator: 'Administrator', activeLabel: 'Active', pending: 'Invitation pending', inactive: 'Deactivated', resend: 'Resend', deactivate: 'Deactivate', activate: 'Reactivate', resent: 'Email resent to {email}.', confirmDeactivate: 'Deactivate {email}? Their sessions end immediately. You can reactivate them later.', yes: 'Deactivate' },
  zh: { tab: '邀请成员', title: '邀请运营管理员', text: '受邀成员可以处理 Motel à vendre 的咨询、买家账户和房源，但不能再邀请其他管理员。', email: '工作邮箱', send: '发送邀请', hint: '对方会收到一封邮件，点链接设置密码即可开通（链接 7 天内有效），不需要事先注册任何账号。', sent: '邀请已发送至 {email}。', sentNoMail: '已添加成员（{email}），但邀请邮件没有发出，请稍后点“重新发送”。', already: '这个账号已经是团队成员。', invalid: '邮箱无效，或者这是您自己的账号。', error: '操作未能完成，请稍后再试。', team: '团队成员', role: '角色', state: '状态', since: '加入时间', owner: '所有者', operator: '管理员', activeLabel: '已开通', pending: '等待接受邀请', inactive: '已停用', resend: '重新发送', deactivate: '停用', activate: '重新启用', resent: '已重新发送邮件给 {email}。', confirmDeactivate: '停用 {email}？对方会立即被退出登录，之后可以重新启用。', yes: '确认停用' }
 };
+const STORY = {
+ fr: { eyebrow: 'MOTEL À VENDRE · ESPACE ÉQUIPE', title: 'Votre équipe,\nà chaque demande.', intro: 'Traitez les demandes, les comptes acheteurs et l’affichage des annonces. Chaque membre de l’équipe a son propre accès.', benefits: ['Un courriel à chaque nouvelle demande', 'L’affichage des annonces à votre main', 'Des accès d’équipe contrôlés'], privacy: 'Les comptes d’administration sont personnels et réservés à l’équipe.', home: 'Retour à l’accueil' },
+ en: { eyebrow: 'MOTEL À VENDRE · TEAM SPACE', title: 'Your team,\non every enquiry.', intro: 'Handle enquiries, buyer accounts and how listings appear. Each team member has their own access.', benefits: ['An email for every new enquiry', 'Listing display under your control', 'Controlled team access'], privacy: 'Admin accounts are personal and reserved for the team.', home: 'Back to home' },
+ zh: { eyebrow: 'MOTEL À VENDRE · 团队空间', title: '您的团队，\n不错过每条咨询。', intro: '集中处理买家咨询、买家账户和本站房源展示，团队成员各自使用独立账号。', benefits: ['每条新咨询都有邮件提醒', '房源展示随时调整', '团队成员与权限可控'], privacy: '后台账号仅供团队成员本人使用。', home: '返回首页' }
+};
 const LANG_NAMES = { fr: 'FR', en: 'EN', zh: '中文' };
 const LOCALES = { fr: 'fr-CA', en: 'en-CA', zh: 'zh-CN' };
 
@@ -103,6 +108,10 @@ const ICONS = {
  download: ['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'M7 10l5 5 5-5', 'M12 15V3'],
  refresh: ['M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8', 'M21 3v5h-5', 'M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16', 'M8 16H3v5'],
  arrowUp: ['M7 7h10v10', 'M7 17 17 7'],
+ checkCircle: ['M22 11.08V12a10 10 0 1 1-5.93-9.14', 'm9 11 3 3L22 4'],
+ arrowRight: ['M5 12h14', 'm12 5 7 7-7 7'],
+ key: ['M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z', 'M16.5 7.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z'],
+ globe: ['M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z', 'M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20', 'M2 12h20'],
  userPlus: ['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', 'M19 8v6', 'M22 11h-6']
 };
 function icon(name, size = 16) {
@@ -160,47 +169,70 @@ function setDocLang() { document.documentElement.lang = { fr: 'fr-CA', en: 'en-C
 function clearTimers() { for (const id of timers) clearInterval(id); timers = []; }
 const errorText = error => { const c = t(); return error.code === 'rate' ? c.rate : error.code === 'link_invalid' ? c.badLink : error.code === 'weak_password' ? c.weak : error.code === 'invalid_credentials' ? c.badLogin : c.unavailable; };
 
-// kind: 'login' | 'link' | 'set' | 'retry'
+// ---- Site header (Propriété En Vente: site-header workspace-header admin-site-header) ----
+function siteHeader(signed) {
+ const c = t();
+ return h('header', { class: 'site-header workspace-header admin-site-header' },
+  h('a', { href: '/' + lang + '/', class: 'brand', 'aria-label': 'Motel à vendre' }, h('span', { class: 'brand-mark' }, icon('home', 20)), h('span', { text: 'Motel à vendre' })),
+  h('div', { class: 'header-actions' },
+   h('div', { class: 'language-switch', 'aria-label': 'Language' }, icon('globe', 16), Object.keys(COPY).map(l => h('button', { type: 'button', lang: l, class: l === lang ? 'active' : '', 'aria-current': l === lang ? 'page' : null, onclick: () => { lang = l; try { localStorage.setItem('mav_admin_lang', l); } catch {} render(); } }, LANG_NAMES[l]))),
+   signed ? h('div', { class: 'header-account' },
+    h('a', { class: 'header-account-info', href: '#enquiries', title: staffEmail }, icon('key', 16), h('span', { text: c.administration })),
+    h('button', { class: 'header-logout', type: 'button', onclick: signOut, text: c.signOut })) : null));
+}
+
+// ---- Sign-in pages (Propriété En Vente auth.tsx: auth-page, auth-story, auth-card) ----
+// kind: 'login' | 'link' | 'set' | 'retry' | 'noaccess'
 function gate(title, text, kind) {
- const c = t(), children = [langSwitch(), icon('lock', 32), h('h1', { text: title }), h('p', { text: text })];
- const err = h('p', { role: 'alert', hidden: !gateNotice, text: gateNotice });
- const field = (label, attrs) => { const input = h('input', attrs); return [h('label', {}, label, input), input]; };
- const textLink = (text, onclick) => h('button', { type: 'button', class: 'admin-text-link', onclick, text });
+ const c = t(), s = STORY[lang];
+ if (kind === 'retry') {
+  return h('div', {}, siteHeader(false), h('main', { class: 'admin-gate' }, icon('lock', 32), h('h1', { text: title }), h('p', { text: text }),
+   h('button', { class: 'admin-primary', type: 'button', onclick: start }, icon('refresh', 16), c.refresh), h('a', { href: '/' + lang + '/', text: c.back })));
+ }
+ const err = h('div', { class: 'auth-error', role: 'alert', hidden: !gateNotice, text: gateNotice });
+ const field = (label, attrs, withIcon) => { const input = h('input', attrs); return [h('label', {}, label, withIcon ? h('span', { class: 'auth-input-wrap' }, icon('mail', 18), input) : input), input]; };
+ const primary = label => h('button', { class: 'auth-primary', type: 'submit' }, label, icon('arrowRight', 18));
+ const card = [h('div', { class: 'auth-symbol' }, icon('lock', 25)), h('h2', { id: 'auth-title', text: title }), h('p', { class: 'auth-subtitle', text: text })];
  if (kind === 'login') {
-  const [emailLabel, email] = field(c.email, { type: 'email', autocomplete: 'username', required: true, maxlength: 150 });
-  const [passLabel, password] = field(c.password, { type: 'password', autocomplete: 'current-password', required: true, maxlength: 128 });
-  const submit = h('button', { class: 'admin-primary', type: 'submit', text: c.login });
-  children.push(h('form', { class: 'admin-login', onsubmit: async e => {
+  const [emailLabel, email] = field(c.email, { type: 'email', name: 'email', autocomplete: 'username', required: true, maxlength: 150 }, true);
+  const [passLabel, password] = field(c.password, { type: 'password', name: 'password', autocomplete: 'current-password', required: true, maxlength: 128 });
+  const submit = primary(c.login);
+  card.push(h('form', { class: 'auth-form', onsubmit: async e => {
    e.preventDefault(); submit.disabled = true; err.hidden = true;
    try { await api('login', { email: email.value.trim(), password: password.value }); gateNotice = ''; await start(); }
    catch (error) { err.textContent = errorText(error); err.hidden = false; submit.disabled = false; password.value = ''; password.focus(); }
-  } }, emailLabel, passLabel, err, submit, textLink(c.forgot, () => { screen = 'link'; gateNotice = ''; render(); })));
+  } }, emailLabel, passLabel, h('a', { class: 'auth-forgot', href: '#', onclick: e => { e.preventDefault(); screen = 'link'; gateNotice = ''; render(); }, text: c.forgot }), err, submit));
  } else if (kind === 'link') {
-  const [emailLabel, email] = field(c.email, { type: 'email', autocomplete: 'username', required: true, maxlength: 150 });
-  const submit = h('button', { class: 'admin-primary', type: 'submit', text: c.sendLink });
-  const done = h('p', { role: 'status', class: 'admin-message success', hidden: true, text: c.linkSent });
-  children.push(h('form', { class: 'admin-login', onsubmit: async e => {
+  const [emailLabel, email] = field(c.email, { type: 'email', name: 'email', autocomplete: 'username', required: true, maxlength: 150 }, true);
+  const submit = primary(c.sendLink);
+  const done = h('div', { class: 'auth-notice', role: 'status', hidden: true, text: c.linkSent });
+  card.push(h('form', { class: 'auth-form', onsubmit: async e => {
    e.preventDefault(); submit.disabled = true; err.hidden = true; done.hidden = true;
    try { await api('password-link', { email: email.value.trim(), language: lang }); done.hidden = false; }
    catch (error) { err.textContent = errorText(error); err.hidden = false; }
    submit.disabled = false;
-  } }, emailLabel, err, done, submit, textLink(c.backToLogin, () => { screen = 'login'; gateNotice = ''; render(); })));
+  } }, emailLabel, err, done, submit), h('a', { class: 'auth-back', href: '#', onclick: e => { e.preventDefault(); screen = 'login'; gateNotice = ''; render(); }, text: c.backToLogin }));
  } else if (kind === 'set') {
   const [p1Label, p1] = field(c.newPassword, { type: 'password', autocomplete: 'new-password', required: true, minlength: 10, maxlength: 128 });
   const [p2Label, p2] = field(c.confirmPassword, { type: 'password', autocomplete: 'new-password', required: true, minlength: 10, maxlength: 128 });
-  const submit = h('button', { class: 'admin-primary', type: 'submit', text: c.save });
-  children.push(h('form', { class: 'admin-login', onsubmit: async e => {
+  const submit = primary(c.save);
+  card.push(h('form', { class: 'auth-form', onsubmit: async e => {
    e.preventDefault(); err.hidden = true;
    if (p1.value !== p2.value) { err.textContent = c.mismatch; err.hidden = false; return; }
    submit.disabled = true;
    try { await api('set-password', { token: linkToken, password: p1.value }); linkToken = ''; screen = 'login'; gateNotice = ''; await start(); }
    catch (error) { err.textContent = errorText(error); err.hidden = false; submit.disabled = false; }
-  } }, p1Label, p2Label, err, submit, textLink(c.linkTitle, () => { linkToken = ''; screen = 'link'; gateNotice = ''; render(); })));
- } else if (kind === 'retry') {
-  children.push(h('button', { class: 'admin-primary', type: 'button', onclick: start }, icon('refresh', 16), c.refresh));
+  } }, p1Label, p2Label, err, submit), h('a', { class: 'auth-back', href: '#', onclick: e => { e.preventDefault(); linkToken = ''; screen = 'link'; gateNotice = ''; render(); }, text: c.linkTitle }));
  }
- children.push(h('a', { href: '/' + lang + '/', text: c.back }));
- return h('main', { class: 'admin-gate' }, children);
+ card.push(h('p', { class: 'auth-privacy' }, icon('shield', 16), s.privacy), h('a', { class: 'auth-home', href: '/' + lang + '/', text: s.home }));
+ return h('div', {}, siteHeader(false), h('main', { class: 'auth-page' },
+  h('section', { class: 'auth-story' },
+   h('span', { class: 'auth-eyebrow', text: s.eyebrow }),
+   h('h1', {}, s.title.split('\n').map(line => h('span', { text: line }))),
+   h('p', { text: s.intro }),
+   h('ul', {}, s.benefits.map(b => h('li', {}, icon('checkCircle', 19), b))),
+   h('div', { class: 'auth-story-mark' }, icon('home', 35), h('span', {}, 'La technologie pour avancer.', h('br'), 'Un humain pour décider.'))),
+  h('section', { class: 'auth-card', 'aria-labelledby': 'auth-title' }, card)));
 }
 
 async function signOut() {
@@ -227,14 +259,14 @@ function render() {
  if (!signedIn) { fill(root, screen === 'link' ? gate(c.linkTitle, c.linkText, 'link') : gate(c.loginTitle, c.loginText, 'login')); return; }
  const nav = (id, name, label) => h('button', { type: 'button', class: tab === id ? 'active' : '', 'aria-current': tab === id ? 'page' : null, onclick: () => { tab = id; history.replaceState(null, '', '#' + id); render(); } }, icon(name, 18), label);
  const panel = h('div', { 'aria-live': 'polite' });
- fill(root, h('main', { class: 'admin-app admin-horizontal' },
+ fill(root, siteHeader(true), h('main', { class: 'admin-app admin-horizontal' },
   h('header', { class: 'admin-sidebar admin-toolbar' },
    h('a', { href: '/' + lang + '/', class: 'admin-back' }, icon('back'), c.back),
    h('div', { class: 'admin-brand' }, icon('shield', 30), h('strong', {}, 'Motel à vendre', h('small', { text: c.title }))),
    h('nav', { 'aria-label': c.title },
     h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.work }), nav('enquiries', 'message', INBOX[lang].title)),
     h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.management }), nav('accounts', 'users', ACCOUNTS[lang].title), nav('listings', 'home', LISTINGS[lang].title), nav('audit', 'history', c.audit), staffRole === 'owner' ? nav('invite', 'userPlus', INVITE[lang].tab) : null)),
-   h('div', { class: 'admin-account' }, langSwitch(), h('span', { class: 'admin-who', text: staffEmail }), h('button', { type: 'button', class: 'admin-secondary', onclick: signOut, text: c.signOut }))),
+   h('a', { class: 'admin-seller-link', href: '/' + lang + '/', target: '_blank', rel: 'noopener' }, c.viewSite, icon('external', 14))),
   h('section', { class: 'admin-content' },
    h('header', { class: 'admin-heading' }, h('div', {}, h('span', { text: c.eyebrow }), h('h1', { text: c.title }), h('p', { text: c.intro }))),
    local ? h('p', { class: 'admin-local', text: c.local }) : null,

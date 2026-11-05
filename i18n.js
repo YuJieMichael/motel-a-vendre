@@ -855,3 +855,7 @@ Object.assign(translations.zh,{"acctAlreadySignedIn":"您已登录，可继续�
 Object.assign(translations.fr,{"acctLocalMailTitle":"Demande locale traitée"});
 Object.assign(translations.en,{"acctLocalMailTitle":"Local request processed"});
 Object.assign(translations.zh,{"acctLocalMailTitle":"本地请求已处理"});
+// Account centre in the Propriété En Vente layout (sign-in story column and privacy line).
+Object.assign(translations.fr,{"acctStoryEyebrow":"VOTRE ESPACE MOTEL À VENDRE","acctStoryTitle":"Vos recherches,\nau même endroit.","acctBenefit1":"Vos propriétés favorites","acctBenefit2":"Des alertes pour vos recherches","acctBenefit3":"L’historique de vos demandes","acctStoryMark":"Un compte gratuit, réservé à votre recherche de motel ou d’hôtel.","acctPrivacyNote":"Votre compte est personnel. Il est gratuit et vous pouvez le supprimer à tout moment."});
+Object.assign(translations.en,{"acctStoryEyebrow":"YOUR MOTEL À VENDRE SPACE","acctStoryTitle":"Your search,\nall in one place.","acctBenefit1":"Your favourite properties","acctBenefit2":"Alerts for your saved searches","acctBenefit3":"Your enquiry history","acctStoryMark":"A free account, just for your motel or hotel search.","acctPrivacyNote":"Your account is personal. It is free and you can delete it at any time."});
+Object.assign(translations.zh,{"acctStoryEyebrow":"MOTEL À VENDRE · 您的专属空间","acctStoryTitle":"您的找房进度，\n都在这里。","acctBenefit1":"收藏的心仪物业","acctBenefit2":"已保存搜索的新房源提醒","acctBenefit3":"每一次咨询记录","acctStoryMark":"免费账户，专为您寻找汽车旅馆和酒店而设。","acctPrivacyNote":"账户仅供本人使用，完全免费，可随时删除。"});
