@@ -72,18 +72,20 @@
  function renderSaved(refs){
   const list=$('#account-saved'),items=refs.map(ref=>({ref,p:App.byReference(ref)}));
   list.innerHTML=items.map(({ref,p})=>`<li><span><strong>${e(p?App.nameOf(p):'#'+ref)}</strong><small>${e(p?p.city+' · '+App.money(p.price):t('propertyUnavailable'))}</small></span><span class="account-row-actions">${p?`<a class="text-link" href="${e(App.pageURL(App.language(),'property',ref))}">${e(t('acctOpen'))}</a>`:''}<button class="quiet-button" data-remove-saved="${e(ref)}">${e(t('acctRemove'))}</button></span></li>`).join('');
-  $('#account-saved-empty').hidden=items.length>0;
+  $('#account-saved-empty').hidden=items.length>0;$('#count-saved').textContent=String(items.length);
  }
  function renderSearches(rows){
   $('#account-searches').innerHTML=rows.map(r=>`<li><span><strong>${e(r.name)}</strong><small>${e(new Date(r.created_at).toLocaleDateString(document.documentElement.lang,{dateStyle:'medium',timeZone:'America/Toronto'}))}</small></span><span class="account-row-actions"><label class="account-switch"><input type="checkbox" data-search-alerts="${e(r.id)}"${r.alerts?' checked':''}><span>${e(t('acctAlerts'))}</span></label><a class="text-link" href="${e(App.shareURL(r.criteria||{}))}">${e(t('acctOpen'))}</a><button class="quiet-button" data-remove-search="${e(r.id)}">${e(t('acctRemove'))}</button></span></li>`).join('');
-  $('#account-searches-empty').hidden=rows.length>0;
+  $('#account-searches-empty').hidden=rows.length>0;$('#count-searches').textContent=String(rows.length);
  }
  function renderHistory(rows){
   const purposes={info:'purposeInfo',viewing:'purposeViewing',documents:'purposeDocuments'};
   $('#account-history').innerHTML=rows.map(r=>{const p=r.listing_reference?App.byReference(r.listing_reference):null;return `<li><span><strong>${e(t(r.kind==='seller'?'acctHistorySeller':'acctHistoryBuyer'))}${r.kind==='buyer'?' · '+e(t(purposes[r.purpose]||'purposeInfo')):''}</strong><small>${e(new Date(r.sent_at).toLocaleString(document.documentElement.lang,{dateStyle:'medium',timeStyle:'short',timeZone:'America/Toronto'}))}${r.listing_reference?' · '+e(p?App.nameOf(p):'#'+r.listing_reference):''}</small></span><span class="receipt-code">${e(r.id.slice(0,8))}</span></li>`;}).join('');
-  $('#account-history-empty').hidden=rows.length>0;
+  $('#account-history-empty').hidden=rows.length>0;$('#count-history').textContent=String(rows.length);
  }
 
+ // Sidebar (main-site workspace-nav): mark the chosen section, the browser scrolls to it.
+ $('.workspace-nav').addEventListener('click',event=>{const link=event.target.closest('[data-account-nav]');if(!link)return;for(const a of $('.workspace-nav').querySelectorAll('[data-account-nav]')){a.classList.toggle('selected',a===link);if(a===link)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');}});
  $('.account-tabs').addEventListener('click',event=>{const tab=event.target.closest('[data-account-tab]');if(tab){selectTab(tab.dataset.accountTab);say('');}});
  $('.account-tabs').addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight'].includes(event.key))return;const tabs=['signin','signup','recover'],current=tabs.findIndex(x=>$('#tab-'+x).getAttribute('aria-selected')==='true'),next=tabs[(current+(event.key==='ArrowRight'?1:2))%3];selectTab(next);$('#tab-'+next).focus();});
  $('#form-signin').addEventListener('submit',event=>{event.preventDefault();const f=event.currentTarget;guarded(f,async()=>{await account.signIn($('#signin-email').value.trim(),$('#signin-password').value);f.reset();say('');show();});});
