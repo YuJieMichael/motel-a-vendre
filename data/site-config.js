@@ -14,6 +14,7 @@ const MAV_SITE = {
   "siteOrigin": "https://motelavendre.ca",
   "socialLinks": {
     "Facebook": "https://www.facebook.com/profile.php?id=61596159879012",
+    "Instagram": "https://www.instagram.com/motelavendre/",
     "X": "https://x.com/MotelAvendre"
   },
   "directEnquiries": true,
