@@ -8,6 +8,8 @@ const translations = {
     "navApproach": "收购准备",
     "saved": "收藏",
     "sell": "出售物业",
+    "staffBar": "已以管理员身份登录",
+    "staffOpen": "进入管理后台",
     "eyebrow": "魁北克 · MOTEL 与酒店物业",
     "hero1": "魁北克 Motel",
     "hero2": "与酒店出售",
@@ -282,6 +284,8 @@ const translations = {
     "navApproach": "Your plans",
     "saved": "Saved",
     "sell": "Sell",
+    "staffBar": "Signed in as admin",
+    "staffOpen": "Open admin",
     "eyebrow": "MOTELS & HOTELS FOR SALE · QUÉBEC",
     "hero1": "Motels & hotels",
     "hero2": "for sale in Québec.",
@@ -556,6 +560,8 @@ const translations = {
     "navApproach": "Votre projet",
     "saved": "Favoris",
     "sell": "Vendre",
+    "staffBar": "Connecté en tant qu’administrateur",
+    "staffOpen": "Ouvrir l’administration",
     "eyebrow": "MOTELS & HÔTELS À VENDRE · QUÉBEC",
     "hero1": "Motels et hôtels",
     "hero2": "à vendre au Québec.",
@@ -855,3 +861,6 @@ Object.assign(translations.zh,{"acctAlreadySignedIn":"您已登录，可继续�
 Object.assign(translations.fr,{"acctLocalMailTitle":"Demande locale traitée"});
 Object.assign(translations.en,{"acctLocalMailTitle":"Local request processed"});
 Object.assign(translations.zh,{"acctLocalMailTitle":"本地请求已处理"});
+Object.assign(translations.fr,{"acctMenu":"Menu du compte","acctNavOverview":"Aperçu","acctNavProfile":"Profil","acctNavSaved":"Favoris","acctNavSearches":"Recherches","acctNavHistory":"Demandes","acctNavData":"Données","acctOverviewTitle":"Bienvenue dans votre espace","acctOverviewText":"Un résumé de vos favoris, recherches et demandes. Choisissez une section dans le menu pour la gérer.","acctBrowse":"Parcourir les propriétés"});
+Object.assign(translations.en,{"acctMenu":"Account menu","acctNavOverview":"Overview","acctNavProfile":"Profile","acctNavSaved":"Favourites","acctNavSearches":"Saved searches","acctNavHistory":"Enquiries","acctNavData":"Privacy & data","acctOverviewTitle":"Welcome to your space","acctOverviewText":"A summary of your favourites, searches and enquiries. Pick a section from the menu to manage it.","acctBrowse":"Browse properties"});
+Object.assign(translations.zh,{"acctMenu":"账户菜单","acctNavOverview":"概览","acctNavProfile":"个人资料","acctNavSaved":"我的收藏","acctNavSearches":"保存的搜索","acctNavHistory":"咨询记录","acctNavData":"隐私与数据","acctOverviewTitle":"欢迎来到您的个人中心","acctOverviewText":"这里汇总了您的收藏、搜索和咨询。点菜单进入对应功能。","acctBrowse":"浏览在售物业"});

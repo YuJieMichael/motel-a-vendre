@@ -1,5 +1,5 @@
-// Motel à vendre staff workspace. Same structure, wording and styles as the
-// Propriété En Vente admin (frontend/src/admin.tsx, buyer-enquiries.tsx), without a framework.
+// Motel à vendre staff workspace. Wording follows the Propriété En Vente admin
+// (frontend/src/admin.tsx, buyer-enquiries.tsx); layout and styles are this site's own console design, without a framework.
 // Fully independent: staff accounts, enquiries and invitations live in this site's
 // Cloudflare D1, behind /api/admin/* with an HttpOnly session cookie. Nothing else is called.
 (function () {
@@ -20,7 +20,8 @@ const COPY = {
   previous: 'Précédent', next: 'Suivant', cancel: 'Annuler', saving: 'Enregistrement…', saveError: 'Enregistrement impossible. Les données ont été actualisées.',
   status: 'Rôle', audit: 'Journal des opérations', emptyAudit: 'Aucune opération à afficher.', date: 'Date', action: 'Opération', actor: 'Compte responsable', target: 'Élément',
   actions: { staff_invite: 'Membre invité', staff_deactivate: 'Membre désactivé', staff_activate: 'Membre réactivé', staff_resend: 'Courriel renvoyé', staff_password: 'Mot de passe défini', enquiry_accept: 'Demande acceptée', enquiry_reopen: 'Demande remise à traiter', enquiry_delete: 'Demande supprimée', enquiry_restore: 'Demande restaurée', account_confirm: 'Compte confirmé manuellement', account_delete: 'Compte supprimé', listing_hide: 'Annonce masquée', listing_show: 'Annonce affichée', listing_pin: 'Annonce épinglée', listing_unpin: 'Annonce désépinglée' },
-  local: 'Aperçu local : toutes les données viennent de la base locale de ce poste. Les courriels restent dans le journal local.'
+  local: 'Aperçu local : toutes les données viennent de la base locale de ce poste. Les courriels restent dans le journal local.',
+  auditHint: 'Les 200 dernières opérations effectuées par l’équipe dans cet espace.', console: 'Administration', menu: 'Menu', staffArea: 'Espace réservé à l’équipe'
  },
  en: {
   title: 'Admin workspace', eyebrow: 'MOTELAVENDRE · TEAM', intro: 'Handle Motel à vendre enquiries, buyer accounts and listing display from one place.',
@@ -33,7 +34,8 @@ const COPY = {
   previous: 'Previous', next: 'Next', cancel: 'Cancel', saving: 'Saving…', saveError: 'Could not save. The data has been refreshed.',
   status: 'Role', audit: 'Activity log', emptyAudit: 'No activity to show.', date: 'Date', action: 'Action', actor: 'Account', target: 'Item',
   actions: { staff_invite: 'Staff invited', staff_deactivate: 'Member deactivated', staff_activate: 'Member reactivated', staff_resend: 'Email resent', staff_password: 'Password set', enquiry_accept: 'Enquiry accepted', enquiry_reopen: 'Enquiry marked pending', enquiry_delete: 'Enquiry deleted', enquiry_restore: 'Enquiry restored', account_confirm: 'Account confirmed manually', account_delete: 'Account deleted', listing_hide: 'Listing hidden', listing_show: 'Listing shown', listing_pin: 'Listing pinned', listing_unpin: 'Listing unpinned' },
-  local: 'Local preview: all data comes from this computer’s local database. Emails stay in the local log.'
+  local: 'Local preview: all data comes from this computer’s local database. Emails stay in the local log.',
+  auditHint: 'The most recent actions taken by the team in this workspace.', console: 'Admin', menu: 'Menu', staffArea: 'Team-only area'
  },
  zh: {
   title: '管理工作台', eyebrow: 'MOTELAVENDRE · 团队', intro: '在同一个入口处理 Motel à vendre 的买家咨询、买家账户和房源展示。',
@@ -46,7 +48,8 @@ const COPY = {
   previous: '上一页', next: '下一页', cancel: '取消', saving: '正在保存…', saveError: '保存失败，已重新获取最新数据。',
   status: '角色', audit: '操作记录', emptyAudit: '暂无操作记录。', date: '时间', action: '操作', actor: '操作账号', target: '对象',
   actions: { staff_invite: '邀请团队成员', staff_deactivate: '停用成员', staff_activate: '重新启用成员', staff_resend: '重新发送邮件', staff_password: '设置密码', enquiry_accept: '通过咨询', enquiry_reopen: '咨询改为待处理', enquiry_delete: '删除咨询', enquiry_restore: '恢复咨询', account_confirm: '手动确认账户', account_delete: '删除账户', listing_hide: '隐藏房源', listing_show: '显示房源', listing_pin: '置顶房源', listing_unpin: '取消置顶' },
-  local: '本地预览：所有数据来自本机的本地数据库，邮件只写入本地日志。'
+  local: '本地预览：所有数据来自本机的本地数据库，邮件只写入本地日志。',
+  auditHint: '团队成员在后台中最近的操作记录。', console: '管理后台', menu: '菜单', staffArea: '仅限团队成员'
  }
 };
 // Buyer inbox copy: Propriété En Vente buyer-enquiries.tsx, with Motel seller fields added.
@@ -66,14 +69,14 @@ const PROPERTY = {
  zh: { heading: '咨询房源', general: '通用找房咨询', unavailable: '房源暂不可用，原编号已保留', unpublished: '地址未公开', view: '查看房源', recovered: '依据当前房源补充；咨询当时的价格未知。', export: '导出本页（CSV）', noDetails: '暂无补充需求。', nda: 'NDA 资料申请 · 人工核验' }
 };
 const ACCOUNTS = {
- en: { title: 'Buyer accounts', hint: 'Accounts created on motelavendre.ca. Unconfirmed accounts are removed automatically after 7 days.', search: 'Search by email, name or phone', all: 'All', verified: 'Confirmed', unverified: 'Not confirmed', total: 'Accounts', confirmedCount: 'Confirmed', empty: 'No matching accounts.', person: 'Account', status: 'Status', created: 'Created', lastSignin: 'Last sign-in', activity: 'Saved · searches · enquiries', actions: 'Actions', confirmBtn: 'Confirm manually', deleteBtn: 'Delete', confirmDelete: 'Permanently delete {email}? Their profile, saved listings, saved searches and enquiry history are erased. This cannot be undone.', yes: 'Delete permanently', confirmed: 'Account confirmed. The buyer can sign in now.', deleted: 'Account deleted.', never: 'Never', budget: 'Budget', regions: 'Regions' },
- fr: { title: 'Comptes acheteurs', hint: 'Comptes créés sur motelavendre.ca. Les comptes non confirmés sont supprimés automatiquement après 7 jours.', search: 'Rechercher par courriel, nom ou téléphone', all: 'Tous', verified: 'Confirmés', unverified: 'Non confirmés', total: 'Comptes', confirmedCount: 'Confirmés', empty: 'Aucun compte correspondant.', person: 'Compte', status: 'État', created: 'Création', lastSignin: 'Dernière connexion', activity: 'Favoris · recherches · demandes', actions: 'Actions', confirmBtn: 'Confirmer manuellement', deleteBtn: 'Supprimer', confirmDelete: 'Supprimer définitivement {email} ? Le profil, les favoris, les recherches et l’historique des demandes seront effacés. Action irréversible.', yes: 'Supprimer définitivement', confirmed: 'Compte confirmé. L’acheteur peut maintenant se connecter.', deleted: 'Compte supprimé.', never: 'Jamais', budget: 'Budget', regions: 'Régions' },
- zh: { title: '买家账户', hint: '在 motelavendre.ca 注册的账户。未确认邮箱的账户会在 7 天后自动删除。', search: '按邮箱、姓名或电话搜索', all: '全部', verified: '已确认', unverified: '未确认', total: '账户总数', confirmedCount: '已确认', empty: '没有符合条件的账户。', person: '账户', status: '状态', created: '注册时间', lastSignin: '最近登录', activity: '收藏 · 搜索 · 咨询', actions: '操作', confirmBtn: '手动确认', deleteBtn: '删除', confirmDelete: '永久删除 {email}？其资料、收藏、保存的搜索和咨询记录都会被清除，无法恢复。', yes: '永久删除', confirmed: '账户已确认，买家现在可以登录了。', deleted: '账户已删除。', never: '从未', budget: '预算', regions: '意向地区' }
+ en: { title: 'Buyer accounts', hint: 'Accounts created on motelavendre.ca. Unconfirmed accounts are removed automatically after 7 days.', search: 'Search by email, name or phone', all: 'All', verified: 'Confirmed', unverified: 'Not confirmed', total: 'Accounts', confirmedCount: 'Confirmed', empty: 'No matching accounts.', person: 'Account', status: 'Status', created: 'Created', lastSignin: 'Last sign-in', activity: 'Saved · searches · enquiries', actions: 'Actions', confirmBtn: 'Confirm manually', deleteBtn: 'Delete', confirmDelete: 'Permanently delete {email}? Their profile, saved listings, saved searches and enquiry history are erased. This cannot be undone.', yes: 'Delete permanently', confirmed: 'Account confirmed. The buyer can sign in now.', deleted: 'Account deleted.', never: 'Never', budget: 'Budget', regions: 'Regions', saved: 'Saved listings', searches: 'Saved searches', enquiries: 'Enquiries' },
+ fr: { title: 'Comptes acheteurs', hint: 'Comptes créés sur motelavendre.ca. Les comptes non confirmés sont supprimés automatiquement après 7 jours.', search: 'Rechercher par courriel, nom ou téléphone', all: 'Tous', verified: 'Confirmés', unverified: 'Non confirmés', total: 'Comptes', confirmedCount: 'Confirmés', empty: 'Aucun compte correspondant.', person: 'Compte', status: 'État', created: 'Création', lastSignin: 'Dernière connexion', activity: 'Favoris · recherches · demandes', actions: 'Actions', confirmBtn: 'Confirmer manuellement', deleteBtn: 'Supprimer', confirmDelete: 'Supprimer définitivement {email} ? Le profil, les favoris, les recherches et l’historique des demandes seront effacés. Action irréversible.', yes: 'Supprimer définitivement', confirmed: 'Compte confirmé. L’acheteur peut maintenant se connecter.', deleted: 'Compte supprimé.', never: 'Jamais', budget: 'Budget', regions: 'Régions', saved: 'Favoris', searches: 'Recherches enregistrées', enquiries: 'Demandes' },
+ zh: { title: '买家账户', hint: '在 motelavendre.ca 注册的账户。未确认邮箱的账户会在 7 天后自动删除。', search: '按邮箱、姓名或电话搜索', all: '全部', verified: '已确认', unverified: '未确认', total: '账户总数', confirmedCount: '已确认', empty: '没有符合条件的账户。', person: '账户', status: '状态', created: '注册时间', lastSignin: '最近登录', activity: '收藏 · 搜索 · 咨询', actions: '操作', confirmBtn: '手动确认', deleteBtn: '删除', confirmDelete: '永久删除 {email}？其资料、收藏、保存的搜索和咨询记录都会被清除，无法恢复。', yes: '永久删除', confirmed: '账户已确认，买家现在可以登录了。', deleted: '账户已删除。', never: '从未', budget: '预算', regions: '意向地区', saved: '收藏房源', searches: '保存的搜索', enquiries: '咨询' }
 };
 const LISTINGS = {
- en: { title: 'Listings on this site', hint: 'Hotel and motel listings published on Propriété En Vente. Hiding or pinning only affects motelavendre.ca; edit the listing itself in the main admin.', delay: 'Changes appear on the public site within one minute.', empty: 'No published hotel or motel listings.', ref: 'Listing', place: 'Location', price: 'Price', photos: 'Photos', published: 'Published', state: 'On this site', actions: 'Actions', shown: 'Shown', hidden: 'Hidden', pinned: 'Pinned', illustrative: 'Illustrative photo', hide: 'Hide', show: 'Show', pin: 'Pin to top', unpin: 'Unpin', view: 'View', catalogue: 'The main catalogue is unavailable right now. Try again shortly.', counts: '{shown} shown · {hidden} hidden · {pinned} pinned' },
- fr: { title: 'Annonces sur ce site', hint: 'Annonces d’hôtels et de motels publiées sur Propriété En Vente. Masquer ou épingler ne concerne que motelavendre.ca; modifiez l’annonce elle-même dans l’administration principale.', delay: 'Les changements apparaissent sur le site public en moins d’une minute.', empty: 'Aucune annonce d’hôtel ou de motel publiée.', ref: 'Annonce', place: 'Lieu', price: 'Prix', photos: 'Photos', published: 'Publication', state: 'Sur ce site', actions: 'Actions', shown: 'Affichée', hidden: 'Masquée', pinned: 'Épinglée', illustrative: 'Photo d’illustration', hide: 'Masquer', show: 'Afficher', pin: 'Épingler en tête', unpin: 'Désépingler', view: 'Voir', catalogue: 'Le catalogue principal est momentanément indisponible. Réessayez dans un instant.', counts: '{shown} affichées · {hidden} masquées · {pinned} épinglées' },
- zh: { title: '本站房源', hint: '在 Propriété En Vente 发布的酒店/汽车旅馆房源。隐藏和置顶只影响 motelavendre.ca；修改房源内容请到主站后台。', delay: '修改会在 1 分钟内同步到公开网站。', empty: '目前没有已发布的酒店/汽车旅馆房源。', ref: '房源', place: '位置', price: '价格', photos: '照片', published: '发布时间', state: '本站状态', actions: '操作', shown: '显示中', hidden: '已隐藏', pinned: '已置顶', illustrative: '示意图', hide: '隐藏', show: '显示', pin: '置顶', unpin: '取消置顶', view: '查看', catalogue: '主站房源目录暂时无法读取，请稍后再试。', counts: '显示 {shown} · 隐藏 {hidden} · 置顶 {pinned}' }
+ en: { title: 'Listings on this site', hint: 'Hotel and motel listings published on Propriété En Vente. Hiding or pinning only affects motelavendre.ca; edit the listing itself in the main admin.', delay: 'Changes appear on the public site within one minute.', empty: 'No published hotel or motel listings.', ref: 'Listing', place: 'Location', price: 'Price', photos: 'Photos', published: 'Published', state: 'On this site', actions: 'Actions', shown: 'Shown', hidden: 'Hidden', pinned: 'Pinned', illustrative: 'Illustrative photo', hide: 'Hide', show: 'Show', pin: 'Pin to top', unpin: 'Unpin', view: 'View', catalogue: 'The main catalogue is unavailable right now. Try again shortly.', counts: '{shown} shown · {hidden} hidden · {pinned} pinned', statTotal: 'Listings', statShown: 'Shown', statHidden: 'Hidden', statPinned: 'Pinned' },
+ fr: { title: 'Annonces sur ce site', hint: 'Annonces d’hôtels et de motels publiées sur Propriété En Vente. Masquer ou épingler ne concerne que motelavendre.ca; modifiez l’annonce elle-même dans l’administration principale.', delay: 'Les changements apparaissent sur le site public en moins d’une minute.', empty: 'Aucune annonce d’hôtel ou de motel publiée.', ref: 'Annonce', place: 'Lieu', price: 'Prix', photos: 'Photos', published: 'Publication', state: 'Sur ce site', actions: 'Actions', shown: 'Affichée', hidden: 'Masquée', pinned: 'Épinglée', illustrative: 'Photo d’illustration', hide: 'Masquer', show: 'Afficher', pin: 'Épingler en tête', unpin: 'Désépingler', view: 'Voir', catalogue: 'Le catalogue principal est momentanément indisponible. Réessayez dans un instant.', counts: '{shown} affichées · {hidden} masquées · {pinned} épinglées', statTotal: 'Annonces', statShown: 'Affichées', statHidden: 'Masquées', statPinned: 'Épinglées' },
+ zh: { title: '本站房源', hint: '在 Propriété En Vente 发布的酒店/汽车旅馆房源。隐藏和置顶只影响 motelavendre.ca；修改房源内容请到主站后台。', delay: '修改会在 1 分钟内同步到公开网站。', empty: '目前没有已发布的酒店/汽车旅馆房源。', ref: '房源', place: '位置', price: '价格', photos: '照片', published: '发布时间', state: '本站状态', actions: '操作', shown: '显示中', hidden: '已隐藏', pinned: '已置顶', illustrative: '示意图', hide: '隐藏', show: '显示', pin: '置顶', unpin: '取消置顶', view: '查看', catalogue: '主站房源目录暂时无法读取，请稍后再试。', counts: '显示 {shown} · 隐藏 {hidden} · 置顶 {pinned}', statTotal: '房源总数', statShown: '显示中', statHidden: '已隐藏', statPinned: '已置顶' }
 };
 const INVITE = {
  fr: { tab: 'Inviter un membre', title: 'Inviter un administrateur des opérations', text: 'L’invitation donne accès aux demandes, aux comptes acheteurs et aux annonces de Motel à vendre. Elle ne permet pas d’inviter d’autres administrateurs.', email: 'Adresse courriel professionnelle', send: 'Envoyer l’invitation', hint: 'La personne reçoit un courriel pour choisir son mot de passe (lien valide 7 jours). Aucun compte préalable n’est nécessaire.', sent: 'Invitation envoyée à {email}.', sentNoMail: 'Membre ajouté ({email}), mais le courriel n’a pas pu être envoyé. Utilisez « Renvoyer » plus tard.', already: 'Ce compte fait déjà partie de l’équipe.', invalid: 'Adresse invalide, ou c’est votre propre compte.', error: 'L’opération n’a pas pu être finalisée. Réessayez dans un instant.', team: 'Membres de l’équipe', role: 'Rôle', state: 'État', since: 'Depuis', owner: 'Propriétaire', operator: 'Administrateur', activeLabel: 'Actif', pending: 'Invitation en attente', inactive: 'Désactivé', resend: 'Renvoyer', deactivate: 'Désactiver', activate: 'Réactiver', resent: 'Courriel renvoyé à {email}.', confirmDeactivate: 'Désactiver {email} ? Ses sessions sont fermées immédiatement. Vous pourrez le réactiver.', yes: 'Désactiver' },
@@ -103,6 +106,12 @@ const ICONS = {
  download: ['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'M7 10l5 5 5-5', 'M12 15V3'],
  refresh: ['M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8', 'M21 3v5h-5', 'M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16', 'M8 16H3v5'],
  arrowUp: ['M7 7h10v10', 'M7 17 17 7'],
+ search: ['M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z', 'm21 21-4.3-4.3'],
+ logout: ['M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4', 'm16 17 5-5-5-5', 'M21 12H9'],
+ eye: ['M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z', 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'],
+ eyeOff: ['M9.9 4.2A10 10 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-2.2 3.2', 'M6.6 6.6C3.9 8.4 2 12 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6', 'M14.1 14.1a3 3 0 1 1-4.2-4.2', 'm2 2 20 20'],
+ pin: ['M12 17v5', 'M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.8a2 2 0 0 0-1.1-1.8l-1.8-.9a2 2 0 0 1-1.1-1.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z'],
+ bookmark: ['m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'],
  userPlus: ['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', 'M19 8v6', 'M22 11h-6']
 };
 function icon(name, size = 16) {
@@ -111,6 +120,20 @@ function icon(name, size = 16) {
  for (const d of ICONS[name]) { const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); svg.appendChild(p); }
  return svg;
 }
+
+// Site brand mark (assets/brand-mark.svg), drawn in currentColor for the dark sidebar.
+function brandMark(size = 30) {
+ const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg');
+ for (const [k, v] of Object.entries({ width: size, height: size, viewBox: '0 0 48 48', fill: 'none', stroke: 'currentColor', 'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'admin-mark' })) svg.setAttribute(k, v);
+ for (const [d, w, o] of [['M7 44V22a17 17 0 0 1 34 0v22H7Z', 1.6, 1], ['M13 44V22a11 11 0 0 1 22 0v22', 1, .55], ['M17 34V20l7 10 7-10v14', 1.8, 1]]) { const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); p.setAttribute('stroke-width', w); p.setAttribute('opacity', o); svg.appendChild(p); }
+ return svg;
+}
+const initials = text => { const parts = String(text || '').split(/[@\s._-]+/).filter(Boolean); return ((parts[0] || '?')[0] + (parts[1] ? parts[1][0] : '')).toUpperCase(); };
+const avatar = text => h('span', { class: 'admin-avatar', 'aria-hidden': 'true', text: initials(text) });
+// Page header shared by every tab: title, explanation, optional sync note and actions.
+const pageHead = (title, hint, note, ...actions) => h('header', { class: 'admin-page-head' }, h('div', {}, h('h1', { text: title }), hint ? h('p', { text: hint }) : null, note ? h('p', { class: 'admin-sync-note' }, h('span', { class: 'admin-live-dot', 'aria-hidden': 'true' }), note) : null), actions.length ? h('div', { class: 'admin-page-actions' }, actions) : null);
+const stat = (label, value, tone) => h('div', { class: 'admin-stat' + (tone ? ' is-' + tone : '') }, h('span', { text: label }), h('strong', { text: value }));
+const skeleton = (n = 3) => h('div', { class: 'admin-skeleton', role: 'status', 'aria-label': t().loading }, Array.from({ length: n }, () => h('div')));
 
 // ---- Tiny DOM builder (textContent only; no HTML strings) ----
 function h(tag, props, ...children) {
@@ -135,6 +158,8 @@ let staffEmail = '', staffRole = '', gateNotice = '', timers = [], signedIn = nu
 let linkToken = '';
 { const m = /^#(set|invite)=([A-Za-z0-9_-]{43})$/.exec(location.hash); if (m) { linkToken = m[2]; tab = 'enquiries'; try { history.replaceState(null, '', location.pathname); } catch { location.hash = ''; } } }
 const t = () => COPY[lang];
+// Lets the public site show its admin shortcut bar; the bar itself re-checks /api/admin/me.
+const staffFlag = on => { try { on ? localStorage.setItem('mav-staff', '1') : localStorage.removeItem('mav-staff'); } catch {} };
 
 class Failure extends Error { constructor(status, code) { super(code || String(status)); this.status = status; this.code = code; } }
 async function api(path, payload) {
@@ -148,7 +173,7 @@ async function api(path, payload) {
 }
 // A rejected session sends the user back to the sign-in screen; anything else is shown in place.
 function handle(error) {
- if (error && error.status === 401 && error.code === 'signin_required') { signedIn = false; staffEmail = ''; gateNotice = t().expired; render(); return true; }
+ if (error && error.status === 401 && error.code === 'signin_required') { staffFlag(false); signedIn = false; staffEmail = ''; gateNotice = t().expired; render(); return true; }
  return false;
 }
 
@@ -162,7 +187,7 @@ const errorText = error => { const c = t(); return error.code === 'rate' ? c.rat
 
 // kind: 'login' | 'link' | 'set' | 'retry'
 function gate(title, text, kind) {
- const c = t(), children = [langSwitch(), icon('lock', 32), h('h1', { text: title }), h('p', { text: text })];
+ const c = t(), children = [h('div', { class: 'admin-gate-top' }, h('div', { class: 'admin-gate-brand' }, brandMark(36), h('strong', {}, 'Motel à vendre', h('small', { text: c.staffArea }))), langSwitch()), h('h1', { text: title }), h('p', { class: 'admin-gate-lead', text: text })];
  const err = h('p', { role: 'alert', hidden: !gateNotice, text: gateNotice });
  const field = (label, attrs) => { const input = h('input', attrs); return [h('label', {}, label, input), input]; };
  const textLink = (text, onclick) => h('button', { type: 'button', class: 'admin-text-link', onclick, text });
@@ -199,24 +224,29 @@ function gate(title, text, kind) {
  } else if (kind === 'retry') {
   children.push(h('button', { class: 'admin-primary', type: 'button', onclick: start }, icon('refresh', 16), c.refresh));
  }
- children.push(h('a', { href: '/' + lang + '/', text: c.back }));
- return h('main', { class: 'admin-gate' }, children);
+ return h('main', { class: 'admin-gate' }, h('div', { class: 'admin-gate-card' }, children), h('a', { class: 'admin-gate-back', href: '/' + lang + '/' }, icon('back', 14), c.back));
 }
 
 async function signOut() {
- clearTimers(); staffEmail = ''; staffRole = ''; signedIn = false; screen = 'login';
+ clearTimers(); staffFlag(false); staffEmail = ''; staffRole = ''; signedIn = false; screen = 'login';
  try { await api('logout', {}); } catch {}
  render();
 }
 
 async function start() {
  fill(root, h('main', { class: 'admin-gate', 'aria-busy': 'true', text: t().loading }));
- try { const me = await api('me'); staffEmail = me.email; staffRole = me.role; signedIn = true; }
+ try { const me = await api('me'); staffEmail = me.email; staffRole = me.role; signedIn = true; staffFlag(true); }
  catch (error) {
-  if (error.status === 401) { signedIn = false; render(); return; }
+  if (error.status === 401) { staffFlag(false); signedIn = false; render(); return; }
   setDocLang(); fill(root, gate(t().title, t().unavailable, 'retry')); return;
  }
  render();
+}
+
+let pendingBadgeEl = null;
+function refreshPending() {
+ const el = pendingBadgeEl; if (!el) return;
+ api('enquiries?' + new URLSearchParams({ filter: 'pending', offset: '0' })).then(d => { const n = d.enquiries.length; el.textContent = n ? n + (d.more ? '+' : '') : ''; el.hidden = !n; }).catch(() => {});
 }
 
 function render() {
@@ -225,21 +255,30 @@ function render() {
  if (linkToken) { fill(root, gate(c.setTitle, c.setText, 'set')); return; }
  if (signedIn === null) { start(); return; }
  if (!signedIn) { fill(root, screen === 'link' ? gate(c.linkTitle, c.linkText, 'link') : gate(c.loginTitle, c.loginText, 'login')); return; }
- const nav = (id, name, label) => h('button', { type: 'button', class: tab === id ? 'active' : '', 'aria-current': tab === id ? 'page' : null, onclick: () => { tab = id; history.replaceState(null, '', '#' + id); render(); } }, icon(name, 18), label);
- const panel = h('div', { 'aria-live': 'polite' });
- fill(root, h('main', { class: 'admin-app admin-horizontal' },
-  h('header', { class: 'admin-sidebar admin-toolbar' },
-   h('a', { href: '/' + lang + '/', class: 'admin-back' }, icon('back'), c.back),
-   h('div', { class: 'admin-brand' }, icon('shield', 30), h('strong', {}, 'Motel à vendre', h('small', { text: c.title }))),
-   h('nav', { 'aria-label': c.title },
-    h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.work }), nav('enquiries', 'message', INBOX[lang].title)),
-    h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.management }), nav('accounts', 'users', ACCOUNTS[lang].title), nav('listings', 'home', LISTINGS[lang].title), nav('audit', 'history', c.audit), staffRole === 'owner' ? nav('invite', 'userPlus', INVITE[lang].tab) : null)),
-   h('div', { class: 'admin-account' }, langSwitch(), h('span', { class: 'admin-who', text: staffEmail }), h('button', { type: 'button', class: 'admin-secondary', onclick: signOut, text: c.signOut }))),
-  h('section', { class: 'admin-content' },
-   h('header', { class: 'admin-heading' }, h('div', {}, h('span', { text: c.eyebrow }), h('h1', { text: c.title }), h('p', { text: c.intro }))),
-   local ? h('p', { class: 'admin-local', text: c.local }) : null,
-   panel)));
  if (tab === 'invite' && staffRole !== 'owner') tab = 'enquiries';
+ const titles = { enquiries: INBOX[lang].title, accounts: ACCOUNTS[lang].title, listings: LISTINGS[lang].title, audit: c.audit, invite: INVITE[lang].tab };
+ const nav = (id, name, label, badge) => h('button', { type: 'button', class: tab === id ? 'active' : '', 'aria-current': tab === id ? 'page' : null, onclick: () => { tab = id; history.replaceState(null, '', '#' + id); render(); } }, icon(name, 18), h('span', { class: 'admin-nav-label', text: label }), badge || null);
+ const pendingBadge = pendingBadgeEl = h('span', { class: 'admin-nav-badge', hidden: true });
+ const panel = h('div', { class: 'admin-panel-host', 'aria-live': 'polite' });
+ const role = staffRole === 'owner' ? INVITE[lang].owner : INVITE[lang].operator;
+ fill(root, h('div', { class: 'admin-app' },
+  h('aside', { class: 'admin-sidebar' },
+   h('div', { class: 'admin-brand' }, brandMark(32), h('strong', {}, 'Motel à vendre', h('small', { text: c.console }))),
+   h('nav', { 'aria-label': c.title },
+    h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.work }), nav('enquiries', 'message', INBOX[lang].title, pendingBadge)),
+    h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.management }), nav('accounts', 'users', ACCOUNTS[lang].title), nav('listings', 'home', LISTINGS[lang].title), nav('audit', 'history', c.audit), staffRole === 'owner' ? nav('invite', 'userPlus', INVITE[lang].tab) : null)),
+   h('a', { href: '/' + lang + '/', class: 'admin-back', target: '_blank', rel: 'noopener' }, icon('external', 15), c.back)),
+  h('div', { class: 'admin-main' },
+   h('header', { class: 'admin-topbar' },
+    h('div', { class: 'admin-crumbs' }, h('span', { text: c.console }), h('span', { class: 'admin-crumb-sep', 'aria-hidden': 'true', text: '/' }), h('strong', { text: titles[tab] })),
+    h('div', { class: 'admin-account' }, langSwitch(),
+     h('div', { class: 'admin-user' }, avatar(staffEmail), h('span', { class: 'admin-who' }, h('strong', { text: staffEmail }), h('small', { text: role }))),
+     h('button', { type: 'button', class: 'admin-icon-button', title: c.signOut, 'aria-label': c.signOut, onclick: signOut }, icon('logout', 17)))),
+   h('section', { class: 'admin-content' },
+    local ? h('p', { class: 'admin-local' }, icon('shield', 15), c.local) : null,
+    panel))));
+ // Pending count for the sidebar badge (first page only: 50+ when there are more).
+ refreshPending();
  ({ enquiries: enquiriesTab, accounts: accountsTab, listings: listingsTab, audit: auditTab, invite: inviteTab })[tab](panel);
 }
 
@@ -253,7 +292,7 @@ const propertyPath = ref => '/' + lang + '/proprietes/' + ref + '/';
 function enquiriesTab(panel) {
  const tx = INBOX[lang], a = ACTION[lang], pc = PROPERTY[lang];
  let filter = 'active', offset = 0, rows = [], more = false, loading = true, error = false, busy = null, confirmDelete = null, actionError = false, generation = 0, inFlight = false;
- const section = h('section', { class: 'admin-panel buyer-enquiries' });
+ const section = h('section', { class: 'admin-page buyer-enquiries' });
  fill(panel, section);
 
  async function load() {
@@ -267,7 +306,7 @@ function enquiriesTab(panel) {
   if (busy) return; busy = row.id; actionError = false; generation++; draw();
   try { await api('enquiries/review', { id: row.id, revision: row.revision ?? 0, action }); confirmDelete = null; rows = rows.filter(r => r.id !== row.id); }
   catch (e) { if (handle(e)) return; actionError = true; }
-  finally { busy = null; draw(); load(); }
+  finally { busy = null; draw(); load(); refreshPending(); }
  }
  function exportCsv() {
   const cols = ['created_at', 'kind', 'name', 'email', 'phone', 'city', 'address', 'propertyType', 'budgetMin', 'budgetMax', 'expectedPrice', 'requirements', 'timeline', 'service', 'assistance', 'contactLanguage', 'contactMethod', 'contactTime', 'listingReference', 'language'];
@@ -302,7 +341,7 @@ function enquiriesTab(panel) {
   const btn = (cls, name, text, fn) => h('button', { type: 'button', class: 'admin-secondary ' + cls, disabled: !!busy, onclick: fn }, icon(name, 14), text);
   return h('article', { class: 'buyer-enquiry-card', 'aria-labelledby': 'enquiry-person-' + row.id },
    h('header', { class: 'buyer-enquiry-header' },
-    h('div', { class: 'buyer-enquiry-meta' }, h('span', { class: 'buyer-enquiry-status is-' + status, text: a[status] }), p.kind === 'seller' ? h('span', { class: 'buyer-enquiry-reference', text: tx.seller }) : null, h('time', { datetime: row.created_at, title: date(row.created_at) }, icon('clock', 13), shortDate(row.created_at))),
+    h('div', { class: 'buyer-enquiry-meta' }, h('span', { class: 'buyer-enquiry-status is-' + status, text: a[status] }), h('span', { class: 'buyer-enquiry-kind is-' + (p.kind === 'seller' ? 'seller' : 'buyer'), text: p.kind === 'seller' ? tx.seller : tx.buyer }), h('time', { datetime: row.created_at, title: date(row.created_at) }, icon('clock', 13), shortDate(row.created_at))),
     h('div', { class: 'buyer-enquiry-actions' },
      row.deleted_at ? btn('enquiry-restore', 'undo', a.restore, () => review(row, 'restore'))
       : [btn('enquiry-accept', row.review_status === 'accepted' ? 'undo' : 'check', row.review_status === 'accepted' ? a.reopen : a.accept, () => review(row, row.review_status === 'accepted' ? 'reopen' : 'accept')),
@@ -312,7 +351,7 @@ function enquiriesTab(panel) {
     h('button', { type: 'button', class: 'admin-secondary enquiry-delete', disabled: !!busy, onclick: () => review(row, 'delete'), text: a.yes }),
     h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => { confirmDelete = null; draw(); }, text: a.cancel })) : null,
    h('div', { class: 'buyer-enquiry-topline' },
-    h('div', { class: 'buyer-enquiry-person' }, h('h3', { id: 'enquiry-person-' + row.id, text: p.name || '—' }),
+    h('div', { class: 'buyer-enquiry-person' }, avatar(p.name || p.email), h('h3', { id: 'enquiry-person-' + row.id, text: p.name || '—' }),
      p.email ? h('a', { href: 'mailto:' + p.email }, icon('mail', 14), p.email) : null,
      p.phone ? h('span', {}, icon('phone', 14), p.phone) : null),
     property(p)),
@@ -324,25 +363,24 @@ function enquiriesTab(panel) {
  function draw() {
   if (!section.isConnected) return;
   fill(section, 
-   h('div', { class: 'buyer-enquiries-heading' }, h('div', {}, h('h2', { text: tx.title }), h('p', { text: tx.hint }), h('p', { class: 'admin-sync-note', text: tx.autoRefresh })),
-    h('button', { type: 'button', class: 'admin-secondary buyer-enquiry-export', disabled: loading || !rows.length, onclick: exportCsv }, icon('download', 15), pc.export)),
+   pageHead(tx.title, tx.hint, tx.autoRefresh, h('button', { type: 'button', class: 'admin-secondary buyer-enquiry-export', disabled: loading || !rows.length, onclick: exportCsv }, icon('download', 15), pc.export)),
    h('div', { class: 'buyer-enquiry-filters', role: 'group', 'aria-label': tx.title }, ['active', 'pending', 'accepted', 'deleted'].map(key => h('button', { type: 'button', class: 'admin-secondary', 'aria-pressed': String(filter === key), disabled: !!busy, onclick: () => { if (key === filter) return; filter = key; offset = 0; rows = []; loading = true; confirmDelete = null; actionError = false; generation++; inFlight = false; draw(); load(); } }, a[key]))),
-   actionError ? h('p', { role: 'alert', text: a.error }) : null,
-   error ? h('p', { role: 'alert', text: tx.error }) : null,
-   loading && !rows.length ? h('p', { role: 'status', text: tx.loading }) : !rows.length && !error ? h('p', { text: tx.empty }) : rows.length ? h('div', { class: 'buyer-enquiry-list' }, rows.map(card)) : null,
+   actionError ? h('p', { class: 'admin-message error', role: 'alert', text: a.error }) : null,
+   error ? h('p', { class: 'admin-message error', role: 'alert', text: tx.error }) : null,
+   loading && !rows.length ? skeleton(3) : !rows.length && !error ? h('div', { class: 'admin-empty' }, icon('message', 26), h('p', { text: tx.empty })) : rows.length ? h('div', { class: 'buyer-enquiry-list' }, rows.map(card)) : null,
    h('div', { class: 'buyer-enquiry-pagination' },
     h('button', { class: 'admin-secondary', disabled: loading || !!busy || offset === 0, onclick: () => { offset = Math.max(0, offset - 50); loading = true; generation++; inFlight = false; draw(); load(); }, text: COPY[lang].previous }),
     h('button', { class: 'admin-secondary', disabled: loading || !!busy || !more || error, onclick: () => { offset += 50; loading = true; generation++; inFlight = false; draw(); load(); }, text: COPY[lang].next })));
  }
  draw(); load();
- timers.push(setInterval(() => { if (document.visibilityState !== 'hidden' && !busy && confirmDelete === null) load(); }, 15000));
+ timers.push(setInterval(() => { if (document.visibilityState !== 'hidden' && !busy && confirmDelete === null) { load(); refreshPending(); } }, 15000));
 }
 
 // ---- Buyer accounts (D1) ----
 function accountsTab(panel) {
  const c = COPY[lang], tx = ACCOUNTS[lang];
  let filter = 'all', q = '', offset = 0, data = null, error = '', notice = '', busy = null, confirmDelete = null, generation = 0;
- const section = h('section', { class: 'admin-panel buyer-enquiries' });
+ const section = h('section', { class: 'admin-page' });
  fill(panel, section);
  async function load() {
   const version = ++generation;
@@ -360,42 +398,43 @@ function accountsTab(panel) {
  let debounce;
  search.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(() => { q = search.value.trim(); offset = 0; load(); }, 300); });
  const select = h('select', { 'aria-label': tx.status, onchange: () => { filter = select.value; offset = 0; load(); } }, ['all', 'verified', 'unverified'].map(k => h('option', { value: k, text: tx[k] })));
- const controls = h('div', { class: 'admin-search' }, search, select);
+ const controls = h('div', { class: 'admin-search' }, h('label', { class: 'admin-search-field' }, icon('search', 16), search), select);
  function draw() {
   if (!section.isConnected) return;
   const body = [];
-  if (!data && !error) body.push(h('p', { role: 'status', text: c.loading }));
+  const table = [];
+  if (!data && !error) table.push(skeleton(4));
   if (data) {
-   body.push(h('p', { class: 'admin-stats' }, h('span', {}, tx.total + ' ', h('strong', { text: data.totals.total })), h('span', {}, tx.confirmedCount + ' ', h('strong', { text: data.totals.verified })), h('span', {}, tx.unverified + ' ', h('strong', { text: data.totals.total - data.totals.verified }))));
-   if (!data.accounts.length) body.push(h('p', { class: 'admin-empty', text: tx.empty }));
-   else body.push(h('div', { class: 'admin-table-wrap' }, h('table', {},
+   body.push(h('div', { class: 'admin-stats' }, stat(tx.total, data.totals.total), stat(tx.confirmedCount, data.totals.verified, 'ok'), stat(tx.unverified, data.totals.total - data.totals.verified, 'warn')));
+   if (!data.accounts.length) table.push(h('div', { class: 'admin-empty' }, icon('users', 26), h('p', { text: tx.empty })));
+   else table.push(h('div', { class: 'admin-table-wrap' }, h('table', {},
     h('thead', {}, h('tr', {}, [tx.person, tx.status, tx.created, tx.lastSignin, tx.activity, tx.actions].map(x => h('th', { text: x })))),
     h('tbody', {}, data.accounts.map(u => {
      const profile = [u.full_name, u.phone].filter(Boolean).join(' · ');
      const prefs = [u.buyer_budget ? tx.budget + ' ' + money(u.buyer_budget) : '', u.buyer_regions ? tx.regions + ' ' + u.buyer_regions : ''].filter(Boolean).join(' · ');
      return h('tr', {},
-      h('td', {}, h('a', { href: 'mailto:' + u.email, text: u.email }), profile ? h('br') : null, profile ? h('small', { text: profile }) : null, prefs ? h('br') : null, prefs ? h('small', { text: prefs }) : null),
+      h('td', {}, h('div', { class: 'admin-person' }, avatar(u.full_name || u.email), h('div', {}, h('a', { href: 'mailto:' + u.email, text: u.email }), profile ? h('small', { text: profile }) : null, prefs ? h('small', { text: prefs }) : null))),
       h('td', {}, h('span', { class: 'admin-badge' + (u.verified_at ? ' is-ok' : ''), text: u.verified_at ? tx.verified : tx.unverified })),
-      h('td', { text: day(u.created_at * 1000) }),
-      h('td', { text: u.last_signin ? shortDate(u.last_signin * 1000) : tx.never }),
-      h('td', { text: u.saved + ' · ' + u.searches + ' · ' + u.enquiries }),
+      h('td', { class: 'admin-nowrap', text: day(u.created_at * 1000) }),
+      h('td', { class: 'admin-nowrap', text: u.last_signin ? shortDate(u.last_signin * 1000) : tx.never }),
+      h('td', {}, h('div', { class: 'admin-counters' }, [['bookmark', u.saved, tx.saved], ['search', u.searches, tx.searches], ['message', u.enquiries, tx.enquiries]].map(([n, v, label]) => h('span', { title: label, 'aria-label': label + ' ' + v, class: v ? null : 'is-zero' }, icon(n, 13), String(v))))),
       h('td', {}, confirmDelete === u.id
        ? h('div', { class: 'buyer-enquiry-confirm', role: 'group' }, h('p', { text: fmt(tx.confirmDelete, { email: u.email }) }), h('button', { type: 'button', class: 'admin-secondary enquiry-delete', disabled: !!busy, onclick: () => act(u, 'delete'), text: tx.yes }), h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => { confirmDelete = null; draw(); }, text: c.cancel }))
        : h('div', { class: 'admin-row-actions' },
          u.verified_at ? null : h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => act(u, 'confirm') }, icon('check', 14), tx.confirmBtn),
-         h('button', { type: 'button', class: 'admin-secondary is-danger', disabled: !!busy, onclick: () => { confirmDelete = u.id; draw(); } }, icon('trash', 14), tx.deleteBtn),
+         h('button', { type: 'button', class: 'admin-secondary is-danger is-icon', title: tx.deleteBtn, 'aria-label': tx.deleteBtn + ' ' + u.email, disabled: !!busy, onclick: () => { confirmDelete = u.id; draw(); } }, icon('trash', 14)),
          busy === u.id ? h('span', { class: 'buyer-enquiry-saving', role: 'status', text: c.saving }) : null)));
     })))));
-   body.push(h('div', { class: 'buyer-enquiry-pagination' },
+   if (offset > 0 || data.more) table.push(h('div', { class: 'buyer-enquiry-pagination' },
     h('button', { class: 'admin-secondary', disabled: offset === 0, onclick: () => { offset = Math.max(0, offset - 50); load(); }, text: c.previous }),
     h('button', { class: 'admin-secondary', disabled: !data.more, onclick: () => { offset += 50; load(); }, text: c.next })));
   }
   fill(section, 
-   h('div', { class: 'buyer-enquiries-heading' }, h('div', {}, h('h2', { text: tx.title }), h('p', { text: tx.hint }))),
-   controls,
+   pageHead(tx.title, tx.hint),
    notice ? h('p', { class: 'admin-message success', role: 'status', text: notice }) : null,
    error ? h('p', { class: 'admin-message error', role: 'alert', text: error }) : null,
-   body);
+   body,
+   h('div', { class: 'admin-card' }, h('div', { class: 'admin-card-toolbar' }, controls), table));
  }
  draw(); load();
 }
@@ -404,7 +443,7 @@ function accountsTab(panel) {
 function listingsTab(panel) {
  const c = COPY[lang], tx = LISTINGS[lang];
  let listings = null, error = '', busy = null;
- const section = h('section', { class: 'admin-panel buyer-enquiries' });
+ const section = h('section', { class: 'admin-page' });
  fill(panel, section);
  async function load() {
   try { listings = (await api('listings')).listings; error = ''; }
@@ -420,29 +459,28 @@ function listingsTab(panel) {
  function draw() {
   if (!section.isConnected) return;
   const body = [];
-  if (!listings && !error) body.push(h('p', { role: 'status', text: c.loading }));
-  if (listings && !listings.length) body.push(h('p', { class: 'admin-empty', text: tx.empty }));
+  if (!listings && !error) body.push(h('div', { class: 'admin-card' }, skeleton(4)));
+  if (listings && !listings.length) body.push(h('div', { class: 'admin-card' }, h('div', { class: 'admin-empty' }, icon('home', 26), h('p', { text: tx.empty }))));
   if (listings && listings.length) {
-   body.push(h('p', { class: 'admin-stats', text: fmt(tx.counts, { shown: listings.filter(l => !l.hidden).length, hidden: listings.filter(l => l.hidden).length, pinned: listings.filter(l => l.pinned && !l.hidden).length }) }));
-   body.push(h('div', { class: 'admin-table-wrap' }, h('table', {},
+   body.push(h('div', { class: 'admin-stats' }, stat(tx.statTotal, listings.length), stat(tx.statShown, listings.filter(l => !l.hidden).length, 'ok'), stat(tx.statHidden, listings.filter(l => l.hidden).length, 'muted'), stat(tx.statPinned, listings.filter(l => l.pinned && !l.hidden).length, 'accent')));
+   body.push(h('div', { class: 'admin-card' }, h('div', { class: 'admin-table-wrap' }, h('table', { class: 'admin-listings' },
     h('thead', {}, h('tr', {}, [tx.ref, tx.place, tx.price, tx.photos, tx.published, tx.state, tx.actions].map(x => h('th', { text: x })))),
     h('tbody', {}, listings.map(l => h('tr', { class: l.hidden ? 'is-hidden' : null },
      h('td', {}, h('code', { text: '#' + l.reference })),
-     h('td', {}, l.city || '—', l.region ? h('br') : null, l.region ? h('small', { text: l.region }) : null),
-     h('td', { text: l.price === null ? '—' : money(l.price) }),
-     h('td', {}, String(l.photos), l.illustrative ? h('br') : null, l.illustrative ? h('small', { text: tx.illustrative }) : null),
-     h('td', { text: l.published_at ? day(l.published_at) : '—' }),
-     h('td', {}, h('span', { class: 'admin-badge' + (l.hidden ? ' is-muted' : ' is-ok'), text: l.hidden ? tx.hidden : tx.shown }), l.pinned ? ' ' : null, l.pinned ? h('span', { class: 'admin-badge', text: tx.pinned }) : null,
-      l.updated_by ? h('br') : null, l.updated_by ? h('small', { text: l.updated_by + ' · ' + shortDate(l.updated_at * 1000) }) : null),
+     h('td', {}, h('strong', { class: 'admin-cell-title', text: l.city || '—' }), l.region ? h('small', { text: l.region }) : null),
+     h('td', { class: 'is-num', text: l.price === null ? '—' : money(l.price) }),
+     h('td', {}, String(l.photos), l.illustrative ? h('small', { text: tx.illustrative }) : null),
+     h('td', { class: 'admin-nowrap', text: l.published_at ? day(l.published_at) : '—' }),
+     h('td', {}, h('div', { class: 'admin-badges' }, h('span', { class: 'admin-badge' + (l.hidden ? ' is-muted' : ' is-ok'), text: l.hidden ? tx.hidden : tx.shown }), l.pinned ? h('span', { class: 'admin-badge is-accent' }, icon('pin', 11), tx.pinned) : null),
+      l.updated_by ? h('small', { text: l.updated_by + ' · ' + shortDate(l.updated_at * 1000) }) : null),
      h('td', {}, h('div', { class: 'admin-row-actions' },
-      h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => set(l, { hidden: !l.hidden }), text: l.hidden ? tx.show : tx.hide }),
-      h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy || l.hidden, onclick: () => set(l, { pinned: !l.pinned }), text: l.pinned ? tx.unpin : tx.pin }),
+      h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => set(l, { hidden: !l.hidden }) }, icon(l.hidden ? 'eye' : 'eyeOff', 14), l.hidden ? tx.show : tx.hide),
+      h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy || l.hidden, onclick: () => set(l, { pinned: !l.pinned }) }, icon('pin', 14), l.pinned ? tx.unpin : tx.pin),
       l.hidden ? null : h('a', { class: 'admin-secondary', href: propertyPath(l.reference), target: '_blank', rel: 'noopener noreferrer' }, tx.view, icon('arrowUp', 14)),
-      busy === l.reference ? h('span', { class: 'buyer-enquiry-saving', role: 'status', text: c.saving }) : null))))))));
+      busy === l.reference ? h('span', { class: 'buyer-enquiry-saving', role: 'status', text: c.saving }) : null)))))))));
   }
   fill(section, 
-   h('div', { class: 'buyer-enquiries-heading' }, h('div', {}, h('h2', { text: tx.title }), h('p', { text: tx.hint }), h('p', { class: 'admin-sync-note', text: tx.delay })),
-    h('button', { type: 'button', class: 'admin-secondary buyer-enquiry-export', onclick: () => { listings = null; error = ''; draw(); load(); } }, icon('refresh', 15), c.refresh)),
+   pageHead(tx.title, tx.hint, tx.delay, h('button', { type: 'button', class: 'admin-secondary buyer-enquiry-export', onclick: () => { listings = null; error = ''; draw(); load(); } }, icon('refresh', 15), c.refresh)),
    error ? h('p', { class: 'admin-message error', role: 'alert', text: error }) : null,
    body);
  }
@@ -452,13 +490,15 @@ function listingsTab(panel) {
 // ---- Activity log ----
 function auditTab(panel) {
  const c = COPY[lang];
- const section = h('section', { class: 'admin-panel' }, h('h2', { text: c.audit }), h('p', { role: 'status', text: c.loading }));
+ const head = () => pageHead(c.audit, c.auditHint);
+ const section = h('section', { class: 'admin-page' }, head(), h('div', { class: 'admin-card' }, skeleton(5)));
  fill(panel, section);
  api('audit').then(({ events }) => {
-  fill(section, h('h2', { text: c.audit }), !events.length ? h('p', { class: 'admin-empty', text: c.emptyAudit }) : h('div', { class: 'admin-table-wrap' }, h('table', {},
+  const tone = a => /delete|deactivate|hide/.test(a) ? 'danger' : /accept|activate|confirm|show|password/.test(a) ? 'ok' : 'neutral';
+  fill(section, head(), h('div', { class: 'admin-card' }, !events.length ? h('div', { class: 'admin-empty' }, icon('history', 26), h('p', { text: c.emptyAudit })) : h('div', { class: 'admin-table-wrap' }, h('table', {},
    h('thead', {}, h('tr', {}, [c.date, c.action, c.actor, c.target].map(x => h('th', { text: x })))),
-   h('tbody', {}, events.map(e => h('tr', {}, h('td', { text: shortDate(e.at * 1000) }), h('td', { text: c.actions[e.action] || e.action }), h('td', { text: e.actor }), h('td', {}, h('code', { text: e.target }))))))));
- }).catch(e => { if (!handle(e)) fill(section, h('h2', { text: c.audit }), h('p', { class: 'admin-message error', role: 'alert', text: c.error })); });
+   h('tbody', {}, events.map(e => h('tr', {}, h('td', { class: 'admin-nowrap', text: shortDate(e.at * 1000) }), h('td', {}, h('span', { class: 'admin-event is-' + tone(e.action), text: c.actions[e.action] || e.action })), h('td', {}, h('div', { class: 'admin-person is-compact' }, avatar(e.actor), h('span', { text: e.actor }))), h('td', {}, h('code', { text: e.target })))))))));
+ }).catch(e => { if (!handle(e)) fill(section, head(), h('p', { class: 'admin-message error', role: 'alert', text: c.error })); });
 }
 
 // ---- Invite a member (owner only) ----
@@ -466,8 +506,8 @@ function inviteTab(panel) {
  const c = COPY[lang], tx = INVITE[lang];
  let members = null, message = null, busy = false, confirm = null;
  const input = h('input', { type: 'email', required: true, maxlength: 150, autocomplete: 'off' });
- const section = h('section', { class: 'admin-panel admin-invite' }), list = h('section', { class: 'admin-panel buyer-enquiries' });
- fill(panel, section, list);
+ const section = h('section', { class: 'admin-card admin-invite' }), list = h('section', { class: 'admin-card' });
+ fill(panel, h('section', { class: 'admin-page' }, pageHead(tx.tab, tx.text), h('div', { class: 'admin-invite-layout' }, section, list)));
  async function loadTeam() { try { members = (await api('team')).members; } catch (e) { if (handle(e)) return; members = []; } drawTeam(); }
  async function act(m, action) {
   busy = true; message = null; drawTeam();
@@ -477,14 +517,14 @@ function inviteTab(panel) {
  }
  function drawTeam() {
   if (!list.isConnected) return;
-  fill(list, h('h2', {}, tx.team, ' ', members ? h('span', { class: 'admin-count', text: members.length }) : null),
-   !members ? h('p', { role: 'status', text: c.loading }) : h('div', { class: 'admin-table-wrap' }, h('table', {},
+  fill(list, h('h2', { class: 'admin-card-title' }, tx.team, members ? h('span', { class: 'admin-count', text: members.length }) : null),
+   !members ? skeleton(3) : h('div', { class: 'admin-table-wrap' }, h('table', {},
     h('thead', {}, h('tr', {}, [tx.email, tx.role, tx.state, tx.since, ''].map(x => h('th', { text: x })))),
     h('tbody', {}, members.map(m => h('tr', { class: m.active ? null : 'is-hidden' },
-     h('td', { text: m.email }),
+     h('td', {}, h('div', { class: 'admin-person is-compact' }, avatar(m.email), h('span', { text: m.email }))),
      h('td', { text: tx[m.role] || m.role }),
      h('td', {}, h('span', { class: 'admin-badge' + (!m.active ? ' is-muted' : m.pending ? '' : ' is-ok'), text: !m.active ? tx.inactive : m.pending ? tx.pending : tx.activeLabel })),
-     h('td', { text: day(m.created_at * 1000) }),
+     h('td', { class: 'admin-nowrap', text: day(m.created_at * 1000) }),
      h('td', {}, m.role === 'owner' ? null : confirm === m.id
       ? h('div', { class: 'buyer-enquiry-confirm', role: 'group' }, h('p', { text: fmt(tx.confirmDeactivate, { email: m.email }) }), h('button', { type: 'button', class: 'admin-secondary enquiry-delete', disabled: busy, onclick: () => act(m, 'deactivate'), text: tx.yes }), h('button', { type: 'button', class: 'admin-secondary', disabled: busy, onclick: () => { confirm = null; drawTeam(); }, text: c.cancel }))
       : h('div', { class: 'admin-row-actions' },
@@ -501,8 +541,8 @@ function inviteTab(panel) {
   busy = false; draw();
  } }, h('label', { class: 'admin-field' }, tx.email, input), h('p', { class: 'admin-help', text: tx.hint }), submit);
  function draw() {
-  submit.disabled = busy; input.disabled = busy; submit.textContent = busy ? c.loading : tx.send;
-  fill(section, icon('userPlus', 28), h('h2', { text: tx.title }), h('p', { text: tx.text }),
+  submit.disabled = busy; input.disabled = busy; fill(submit, icon('mail', 15), busy ? c.loading : tx.send);
+  fill(section, h('span', { class: 'admin-card-icon' }, icon('userPlus', 20)), h('h2', { class: 'admin-card-title', text: tx.title }),
    message ? h('p', { class: 'admin-message ' + (message.error ? 'error' : 'success'), role: message.error ? 'alert' : 'status', text: message.text }) : null,
    form);
  }

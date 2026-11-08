@@ -215,3 +215,23 @@ function analyticsSource(){try{const u=new URL(location.href),v=u.searchParams.g
 function recordMetric(event,reference=""){let qa=false;try{if(new URLSearchParams(location.search).get('qa')==='1')sessionStorage.setItem('mav-qa','1');qa=sessionStorage.getItem('mav-qa')==='1';}catch{}if(qa||!config.metricsEndpoint||!["motelavendre.ca","www.motelavendre.ca"].includes(location.hostname)||navigator.doNotTrack==="1"||navigator.globalPrivacyControl===true)return;try{fetch(config.metricsEndpoint,{method:"POST",headers:{"Content-Type":"application/json",apikey:config.publishableKey},body:JSON.stringify({event,language,source:analyticsSource(),reference}),credentials:"omit",referrerPolicy:"no-referrer",keepalive:true}).catch(()=>{});}catch{}}
 try{sessionStorage.setItem("mav-source",analyticsSource());}catch{}
 recordMetric(page==="property"?"property_view":page==="guide"?"guide_view":"page_view",activeProperty?.reference||"");
+// Staff shortcut: only browsers where someone signed in to /admin/ carry the mav-staff flag.
+// The flag only decides whether to ask; the bar appears after /api/admin/me confirms an active session.
+(function staffBar(){
+ let flagged=false;try{flagged=localStorage.getItem('mav-staff')==='1';}catch{}
+ if(!flagged||!document.body)return;
+ fetch('/api/admin/me',{credentials:'same-origin',headers:{Accept:'application/json'}}).then(r=>{
+  if(r.status===401){try{localStorage.removeItem('mav-staff');}catch{}return null;}
+  return r.ok?r.json():null;
+ }).then(me=>{
+  if(!me||!me.email||document.querySelector('.staff-bar'))return;
+  const bar=document.createElement('div');bar.className='staff-bar';bar.setAttribute('role','region');bar.setAttribute('aria-label','Admin');
+  const who=document.createElement('span');who.className='staff-bar-who';
+  const label=document.createElement('span');label.dataset.i18n='staffBar';label.textContent=t('staffBar');
+  const email=document.createElement('strong');email.textContent=me.email;who.append(label,email);
+  const link=document.createElement('a');link.className='staff-bar-open';link.href='/admin/';
+  const text=document.createElement('span');text.dataset.i18n='staffOpen';text.textContent=t('staffOpen');
+  link.append(text,document.createTextNode(' →'));
+  bar.append(who,link);document.body.prepend(bar);
+ }).catch(()=>{});
+})();

@@ -55,8 +55,20 @@
  function show(mode){
   const user=account.user;
   $('#account-guest').hidden=!!user||mode==='recovery';$('#account-member').hidden=!user||mode==='recovery';$('#form-new-password').hidden=mode!=='recovery';
-  if(user&&mode!=='recovery'){$('#account-email').textContent=user.email;loadMember();}
+  if(user&&mode!=='recovery'){$('#account-email').textContent=user.email;$('#account-avatar').textContent=(user.email||'?').slice(0,1).toUpperCase();$('#account-browse').href=App.pageURL?App.pageURL(App.language()):'../';showSection(section);loadMember();}
  }
+
+ // Dashboard: one panel at a time, chosen from the side menu; the choice is kept for this tab.
+ const sections=['overview','profile','saved','searches','history','data'];
+ let section='overview';try{const s=sessionStorage.getItem('mav-account-section');if(sections.includes(s))section=s;}catch{}
+ function showSection(name,focus=false){
+  if(!sections.includes(name))name='overview';section=name;try{sessionStorage.setItem('mav-account-section',name);}catch{}
+  for(const panel of $('.account-panels').querySelectorAll('[data-panel]'))panel.hidden=panel.dataset.panel!==name;
+  for(const item of $('.account-nav').querySelectorAll('[data-account-section]')){if(item.dataset.accountSection===name)item.setAttribute('aria-current','page');else item.removeAttribute('aria-current');}
+  if(focus){const h=$('[data-panel="'+name+'"] h2');if(h){h.tabIndex=-1;h.focus({preventScroll:true});}if(window.matchMedia&&window.matchMedia('(max-width: 860px)').matches)$('.account-panels').scrollIntoView({block:'start',behavior:'smooth'});}
+ }
+ const setCount=(key,n)=>{$('#count-'+key).textContent=n?String(n):'';$('#stat-'+key).textContent=String(n);};
+ $('.account-dashboard').addEventListener('click',event=>{const go=event.target.closest&&event.target.closest('[data-account-section]');if(go){event.preventDefault();showSection(go.dataset.accountSection,true);}});
 
  async function loadMember(){
   try{
@@ -72,16 +84,16 @@
  function renderSaved(refs){
   const list=$('#account-saved'),items=refs.map(ref=>({ref,p:App.byReference(ref)}));
   list.innerHTML=items.map(({ref,p})=>`<li><span><strong>${e(p?App.nameOf(p):'#'+ref)}</strong><small>${e(p?p.city+' · '+App.money(p.price):t('propertyUnavailable'))}</small></span><span class="account-row-actions">${p?`<a class="text-link" href="${e(App.pageURL(App.language(),'property',ref))}">${e(t('acctOpen'))}</a>`:''}<button class="quiet-button" data-remove-saved="${e(ref)}">${e(t('acctRemove'))}</button></span></li>`).join('');
-  $('#account-saved-empty').hidden=items.length>0;
+  $('#account-saved-empty').hidden=items.length>0;setCount('saved',items.length);
  }
  function renderSearches(rows){
   $('#account-searches').innerHTML=rows.map(r=>`<li><span><strong>${e(r.name)}</strong><small>${e(new Date(r.created_at).toLocaleDateString(document.documentElement.lang,{dateStyle:'medium',timeZone:'America/Toronto'}))}</small></span><span class="account-row-actions"><label class="account-switch"><input type="checkbox" data-search-alerts="${e(r.id)}"${r.alerts?' checked':''}><span>${e(t('acctAlerts'))}</span></label><a class="text-link" href="${e(App.shareURL(r.criteria||{}))}">${e(t('acctOpen'))}</a><button class="quiet-button" data-remove-search="${e(r.id)}">${e(t('acctRemove'))}</button></span></li>`).join('');
-  $('#account-searches-empty').hidden=rows.length>0;
+  $('#account-searches-empty').hidden=rows.length>0;setCount('searches',rows.length);
  }
  function renderHistory(rows){
   const purposes={info:'purposeInfo',viewing:'purposeViewing',documents:'purposeDocuments'};
   $('#account-history').innerHTML=rows.map(r=>{const p=r.listing_reference?App.byReference(r.listing_reference):null;return `<li><span><strong>${e(t(r.kind==='seller'?'acctHistorySeller':'acctHistoryBuyer'))}${r.kind==='buyer'?' · '+e(t(purposes[r.purpose]||'purposeInfo')):''}</strong><small>${e(new Date(r.sent_at).toLocaleString(document.documentElement.lang,{dateStyle:'medium',timeStyle:'short',timeZone:'America/Toronto'}))}${r.listing_reference?' · '+e(p?App.nameOf(p):'#'+r.listing_reference):''}</small></span><span class="receipt-code">${e(r.id.slice(0,8))}</span></li>`;}).join('');
-  $('#account-history-empty').hidden=rows.length>0;
+  $('#account-history-empty').hidden=rows.length>0;setCount('history',rows.length);
  }
 
  $('.account-tabs').addEventListener('click',event=>{const tab=event.target.closest('[data-account-tab]');if(tab){selectTab(tab.dataset.accountTab);say('');}});
