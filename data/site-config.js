@@ -13,7 +13,8 @@ const MAV_SITE = {
   },
   "siteOrigin": "https://motelavendre.ca",
   "socialLinks": {
-    "Facebook": "https://www.facebook.com/profile.php?id=61596159879012"
+    "Facebook": "https://www.facebook.com/profile.php?id=61596159879012",
+    "X": "https://x.com/MotelAvendre"
   },
   "directEnquiries": true,
   "metricsEndpoint": "https://usngcexxobcpjncuwaxo.supabase.co/functions/v1/motel-services/events",
