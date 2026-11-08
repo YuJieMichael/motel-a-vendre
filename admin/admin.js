@@ -158,6 +158,8 @@ let staffEmail = '', staffRole = '', gateNotice = '', timers = [], signedIn = nu
 let linkToken = '';
 { const m = /^#(set|invite)=([A-Za-z0-9_-]{43})$/.exec(location.hash); if (m) { linkToken = m[2]; tab = 'enquiries'; try { history.replaceState(null, '', location.pathname); } catch { location.hash = ''; } } }
 const t = () => COPY[lang];
+// Lets the public site show its admin shortcut bar; the bar itself re-checks /api/admin/me.
+const staffFlag = on => { try { on ? localStorage.setItem('mav-staff', '1') : localStorage.removeItem('mav-staff'); } catch {} };
 
 class Failure extends Error { constructor(status, code) { super(code || String(status)); this.status = status; this.code = code; } }
 async function api(path, payload) {
@@ -171,7 +173,7 @@ async function api(path, payload) {
 }
 // A rejected session sends the user back to the sign-in screen; anything else is shown in place.
 function handle(error) {
- if (error && error.status === 401 && error.code === 'signin_required') { signedIn = false; staffEmail = ''; gateNotice = t().expired; render(); return true; }
+ if (error && error.status === 401 && error.code === 'signin_required') { staffFlag(false); signedIn = false; staffEmail = ''; gateNotice = t().expired; render(); return true; }
  return false;
 }
 
@@ -226,16 +228,16 @@ function gate(title, text, kind) {
 }
 
 async function signOut() {
- clearTimers(); staffEmail = ''; staffRole = ''; signedIn = false; screen = 'login';
+ clearTimers(); staffFlag(false); staffEmail = ''; staffRole = ''; signedIn = false; screen = 'login';
  try { await api('logout', {}); } catch {}
  render();
 }
 
 async function start() {
  fill(root, h('main', { class: 'admin-gate', 'aria-busy': 'true', text: t().loading }));
- try { const me = await api('me'); staffEmail = me.email; staffRole = me.role; signedIn = true; }
+ try { const me = await api('me'); staffEmail = me.email; staffRole = me.role; signedIn = true; staffFlag(true); }
  catch (error) {
-  if (error.status === 401) { signedIn = false; render(); return; }
+  if (error.status === 401) { staffFlag(false); signedIn = false; render(); return; }
   setDocLang(); fill(root, gate(t().title, t().unavailable, 'retry')); return;
  }
  render();
