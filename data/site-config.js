@@ -12,6 +12,10 @@ const MAV_SITE = {
     "turnstileSiteKey": "0x4AAAAAAFyRNFa_q4G6kz_j"
   },
   "siteOrigin": "https://motelavendre.ca",
+  "socialLinks": {
+    "Facebook": "https://www.facebook.com/profile.php?id=61596159879012",
+    "X": "https://x.com/MotelAvendre"
+  },
   "directEnquiries": true,
   "metricsEndpoint": "https://usngcexxobcpjncuwaxo.supabase.co/functions/v1/motel-services/events",
   "coverOverrides": {

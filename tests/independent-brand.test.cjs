@@ -8,10 +8,14 @@ const associated=/Propriété En Vente|proprieteenvente\.ca|主站|site principa
 
 test('all local and production pages keep customer navigation and branding on Motel à vendre',()=>{
  const pages=JSON.parse(read('data/page-manifest.json'));
+ const socialLinks=Object.values(site.socialLinks).map(C.escapeHTML);
  for(const prefix of ['', 'release/public/'])for(const p of pages){
   const html=read(prefix+p.file);assert.doesNotMatch(html,associated,prefix+p.file);
   assert.doesNotMatch(html,/data-main-|main-enquiry-link|\bundefined\b/);
-  for(const [,href]of html.matchAll(/<a\b[^>]*href="(https?:[^\"]+)"/g)){
+  const social=html.match(/<nav class="footer-social"[^>]*>[\s\S]*?<\/nav>/)?.[0];
+  assert.ok(social,p.file+' social links');
+  assert.deepEqual([...social.matchAll(/href="([^"]+)"/g)].map(([,href])=>href),socialLinks);
+  for(const [,href]of html.replace(social,'').matchAll(/<a\b[^>]*href="(https?:[^\"]+)"/g)){
    assert.equal(new URL(href).hostname,'motelavendre.ca',p.file+' -> '+href);
   }
  }
