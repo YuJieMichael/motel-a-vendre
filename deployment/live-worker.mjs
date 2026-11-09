@@ -3,6 +3,7 @@ import Routes from '../lib/site-routes.cjs';
 import {loadCatalogue as loadSourceCatalogue,applyListingSettings} from './live-catalogue.mjs';
 import {template,translations,site,fallback} from './runtime-inputs.mjs';
 import {responseHeaders} from './worker.mjs';
+import {withGoogleAdsCsp} from './google-ads-csp.mjs';
 import {createAccountApi} from './account-api.mjs';
 import {runAlerts} from './account-alerts.mjs';
 import {createAdminApi} from './admin-api.mjs';
@@ -94,7 +95,7 @@ export async function handleLiveRequest(request,env){
  const hash=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(json)))));
  const third=kind==='account'&&turnstile?' '+turnstileOrigin:'';
  const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'"+third+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"+(third?'; frame-src'+third:'');
- return wrapped(new Response(request.method==='HEAD'?null:html,{headers:{'Content-Type':'text/html; charset=utf-8','X-Catalogue-Status':status,'X-Catalogue-Checked-At':catalogue.updatedAt,...(kind==='account'?{'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'}:{})}}),csp);
+ return wrapped(new Response(request.method==='HEAD'?null:html,{headers:{'Content-Type':'text/html; charset=utf-8','X-Catalogue-Status':status,'X-Catalogue-Checked-At':catalogue.updatedAt,...(kind==='account'?{'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'}:{})}}),kind==='account'?csp:withGoogleAdsCsp(csp,site.googleAds));
 }
 // Daily saved-search alerts (Cron Trigger in wrangler.jsonc).
 export async function handleScheduled(event,env,ctx){

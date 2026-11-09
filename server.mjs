@@ -7,7 +7,7 @@ import vm from 'node:vm';
 import Routes from './lib/site-routes.cjs';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const port=Number(process.env.PORT||5173);
-const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8','.ico':'image/x-icon','.webmanifest':'application/manifest+json; charset=utf-8'};
+const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp','.svg':'image/svg+xml','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8','.ico':'image/x-icon','.webmanifest':'application/manifest+json; charset=utf-8'};
 const pageManifest=JSON.parse(fs.readFileSync(path.join(root,'data/page-manifest.json'),'utf8'));
 const publicFiles=new Set([...pageManifest.map(p=>p.file),'styles.css','responsive.css','property.css','direction.css','app.js','i18n.js','lib/catalogue-core.js','lib/enquiry-core.js','lib/property-view.js','lib/account-core.js','lib/account-view.js','account.js','admin/index.html','admin/admin.js','admin/admin.css','data/catalogue-data.js','data/site-config.js','robots.txt','sitemap.xml','favicon.ico','apple-touch-icon.png','manifest.webmanifest']);
 // Local account API: same handler as production, SQLite file instead of D1, emails printed here.
