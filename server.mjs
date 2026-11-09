@@ -18,12 +18,13 @@ if(site.account&&site.account.enabled===true){
   fs.mkdirSync(path.join(root,'.local'),{recursive:true});
   accountEnv={ACCOUNTS:openLocalD1(path.join(root,'.local/accounts.sqlite'),path.join(root,'d1/migrations')),ACCOUNT_MAIL_LOG:m=>console.log(`\n[local email] to ${m.to}: ${m.subject}\n${m.text.replace('https://motelavendre.ca',`http://127.0.0.1:${port}`)}\n`)};
   accountApi=createAccountApi({siteOrigin:'https://motelavendre.ca'});
-  // Staff workspace: real staff sign-in (Supabase), local D1 accounts and listing settings.
+  // Staff workspace: local D1 staff, accounts, listings and settings.
   const {createAdminApi}=await import('./deployment/admin-api.mjs');adminApi=createAdminApi({site});
   const {createEnquiryIntake}=await import('./deployment/enquiry-intake.mjs');const intake=createEnquiryIntake({site});enquiryIntake=(request,env)=>intake(request,env,{local:true});
 }
 async function handleAccount(req,res,api=accountApi){
-  const chunks=[];for await(const c of req){chunks.push(c);if(chunks.reduce((n,x)=>n+x.length,0)>16384){res.writeHead(413);res.end();return;}}
+  const max=req.url.startsWith('/api/admin/listings/')?2200000:16384;
+  const chunks=[];for await(const c of req){chunks.push(c);if(chunks.reduce((n,x)=>n+x.length,0)>max){res.writeHead(413);res.end();return;}}
   const body=['GET','HEAD'].includes(req.method)?undefined:Buffer.concat(chunks);
   const response=await api(new Request(`http://127.0.0.1:${port}${req.url}`,{method:req.method,headers:req.headers,body}),accountEnv);
   for(const [k,v] of response.headers)if(k!=='set-cookie')res.setHeader(k,v);
@@ -33,6 +34,8 @@ async function handleAccount(req,res,api=accountApi){
 }
 const server=http.createServer((req,res)=>{
   if(enquiryIntake&&req.url==='/api/enquiry'){handleAccount(req,res,enquiryIntake).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
+  if(accountEnv&&req.url==='/api/events'){import('./deployment/metrics.mjs').then(m=>handleAccount(req,res,m.recordEvent)).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
+  if(accountEnv&&req.url.startsWith('/assets/listings/')){import('./deployment/listings.mjs').then(async m=>{const rel=req.url.slice(1).split('?')[0],o=m.PHOTO_PATH.test(rel)?await m.photoStore(accountEnv).get(m.photoKey(rel)):null;if(!o){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':o.contentType});res.end(Buffer.from(o.bytes));}).catch(()=>{res.writeHead(500);res.end();});return;}
   if(adminApi&&req.url.startsWith('/api/admin/')){handleAccount(req,res,adminApi).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
   if(accountApi&&req.url.startsWith('/api/account/')){handleAccount(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
   if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);res.end('Method not allowed');return;}

@@ -18,7 +18,7 @@ test('public asset content, conditional responses and HEAD survive security head
  const cached=await handleRequest(new Request('https://motelavendre.ca/fr/'),{ASSETS:{fetch:async()=>new Response(null,{status:304})}});assert.equal(cached.status,304);
 });
 test('security policy keeps executable code local and enquiry traffic bounded',()=>{
- assert.match(policy,/script-src 'self'/);assert.doesNotMatch(policy,/unsafe-inline|unsafe-eval|https:\/\/\*/);assert.match(policy,/connect-src 'self' https:\/\/usngcexxobcpjncuwaxo\.supabase\.co/);assert.match(policy,/frame-ancestors 'none'/);
+ assert.match(policy,/script-src 'self'/);assert.doesNotMatch(policy,/unsafe-inline|unsafe-eval|https:\/\/\*/);assert.match(policy,/connect-src 'self';/);assert.doesNotMatch(policy,/supabase/);assert.match(policy,/frame-ancestors 'none'/);
 });
 test('missing property URLs retain real error status and cannot be indexed',async()=>{
  const r=await handleRequest(new Request('https://motelavendre.ca/fr/proprietes/999999/'),{ASSETS:{fetch:async()=>new Response('not found',{status:404})}});assert.equal(r.status,404);assert.equal(r.headers.get('x-robots-tag'),'noindex, nofollow');
@@ -43,7 +43,7 @@ test('release enquiry capability is explicit and CSP hashes match structured dat
  const headers=fs.readFileSync(path.join(release,'public/_headers'),'utf8');assert.ok(headers.split('\n').every(l=>l.length<=2000));assert.match(headers,/frame-ancestors 'none'/);
 });
 test('account traffic stays same-origin and no-store survives security headers',async()=>{
- assert.match(policy,/connect-src 'self' https:\/\/usngcexxobcpjncuwaxo\.supabase\.co;/);
+ assert.match(policy,/connect-src 'self';/);
  const r=await handleRequest(new Request('https://motelavendre.ca/fr/compte/'),{ASSETS:{fetch:async()=>new Response('x',{headers:{'Cache-Control':'no-store'}})}});assert.equal(r.headers.get('cache-control'),'no-store');
  const pub=await handleRequest(new Request('https://motelavendre.ca/styles.css'),{ASSETS:{fetch:async()=>new Response('x',{headers:{'Cache-Control':'public, max-age=31536000'}})}});assert.equal(pub.headers.get('cache-control'),'public, max-age=0, must-revalidate');
 });

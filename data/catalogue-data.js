@@ -2,8 +2,8 @@
 const MAV_CATALOGUE = {
   "schemaVersion": 1,
   "mode": "main-snapshot",
-  "updatedAt": "2026-11-05T16:35:26.142Z",
-  "source": "proprieteenvente.ca",
+  "updatedAt": "2026-11-09T16:13:46.900Z",
+  "source": "motelavendre.ca",
   "items": [
     {
       "id": "main-100045",
@@ -276,9 +276,9 @@ const MAV_CATALOGUE = {
       "parking": null,
       "tenure": null,
       "season": "unknown",
-      "image": "assets/main/100028-001.webp",
+      "image": "assets/covers/100028.webp",
       "photos": [
-        "assets/main/100028-001.webp"
+        "assets/covers/100028.webp"
       ],
       "facts": [
         {
@@ -439,9 +439,9 @@ const MAV_CATALOGUE = {
       "parking": null,
       "tenure": null,
       "season": "unknown",
-      "image": "assets/main/100030-001.webp",
+      "image": "assets/covers/100030.webp",
       "photos": [
-        "assets/main/100030-001.webp"
+        "assets/covers/100030.webp"
       ],
       "facts": [
         {
@@ -551,9 +551,9 @@ const MAV_CATALOGUE = {
       "parking": null,
       "tenure": null,
       "season": "unknown",
-      "image": "assets/main/100013-001.webp",
+      "image": "assets/covers/100013.webp",
       "photos": [
-        "assets/main/100013-001.webp"
+        "assets/covers/100013.webp"
       ],
       "facts": [
         {
@@ -690,9 +690,9 @@ const MAV_CATALOGUE = {
       "parking": null,
       "tenure": null,
       "season": "unknown",
-      "image": "assets/main/100024-001.webp",
+      "image": "assets/covers/100024.webp",
       "photos": [
-        "assets/main/100024-001.webp"
+        "assets/covers/100024.webp"
       ],
       "facts": [
         {

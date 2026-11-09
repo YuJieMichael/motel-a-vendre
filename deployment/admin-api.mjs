@@ -1,9 +1,9 @@
 // Staff workspace API, served at /api/admin/* (motelavendre.ca/admin/).
-// Fully independent of the main site: staff accounts, sessions, invitations, enquiries,
-// buyer accounts and listing display settings all live in this site's D1 (binding ACCOUNTS).
-// The only outside read is the public listing catalogue, for the listings tab.
-import { publicRowsURL } from './live-catalogue.mjs';
+// Fully independent: staff accounts, sessions, invitations, enquiries, buyer accounts,
+// listings and their display settings live in this site's D1 (binding ACCOUNTS);
+// including listing photos (listing_photos). Nothing outside this site is read.
 import { hashPassword, verifyPassword } from './account-api.mjs';
+import { itemFromInput, sellerFromInput, nextReference, rowView, photoKey, photoTypeOf, newPhotoPath, photoStore, ListingError, FREE_DAYS, PHOTO_MAX_BYTES, PHOTOS_PER_LISTING } from './listings.mjs';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const REF = /^\d{1,12}$/, TOKEN = /^[A-Za-z0-9_-]{43}$/;
@@ -85,9 +85,9 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
   const link = (kind, token) => `${site.siteOrigin}/admin/#${kind}=${token}`;
   const passwordProblem = (password, email) => typeof password !== 'string' || password.length < 10 || password.length > 128 || password.toLowerCase() === String(email).toLowerCase() || /^(.)\1+$/.test(password);
 
-  async function body(request) {
+  async function body(request, max = 4096) {
     const text = await request.text();
-    if (text.length > 4096) throw new AdminError(413, 'invalid_input');
+    if (text.length > max) throw new AdminError(413, 'invalid_input');
     try { const v = JSON.parse(text); if (v && typeof v === 'object' && !Array.isArray(v)) return v; } catch {}
     throw new AdminError(400, 'invalid_input');
   }
@@ -111,24 +111,100 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
   }
 
   async function listListings(db) {
-    let rows;
-    try {
-      const r = await fetchImpl(publicRowsURL(site), { headers: { apikey: site.publishableKey }, signal: AbortSignal.timeout(8000), redirect: 'manual' });
-      if (!r.ok) throw Error(String(r.status));
-      rows = await r.json();
-      if (!Array.isArray(rows)) throw Error('shape');
-    } catch { throw new AdminError(503, 'catalogue_unavailable'); }
-    const settings = new Map((await db.prepare('SELECT listing_reference,hidden,pinned,updated_at,updated_by FROM listing_settings').all()).results.map(s => [s.listing_reference, s]));
-    const listings = rows.filter(r => REF.test(String(r.listing_number))).map(r => {
-      const ref = String(r.listing_number), s = settings.get(ref);
-      return { reference: ref, city: String(r.city || ''), region: String(r.region || ''), price: Number.isFinite(Number(r.price)) ? Number(r.price) : null,
-        photos: Array.isArray(r.photo_paths) ? new Set(r.photo_paths).size : 0, illustrative: !!r.photoIllustrative, published_at: r.published_at || null,
-        hidden: !!s?.hidden, pinned: !!s?.pinned, updated_at: s?.updated_at || null, updated_by: s?.updated_by || '' };
-    });
-    listings.sort((a, b) => (b.pinned - a.pinned) || String(b.published_at || '').localeCompare(String(a.published_at || '')));
-    return { listings };
+    const settings = new Map((await db.prepare('SELECT listing_reference,hidden,pinned FROM listing_settings').all()).results.map(r => [r.listing_reference, r]));
+    const rows = (await db.prepare(`SELECT reference,status,item,free_listing,free_until,seller_name,seller_email,seller_language,published_at,updated_at,updated_by,revision
+      FROM listings ORDER BY CASE status WHEN 'draft' THEN 0 WHEN 'published' THEN 1 ELSE 2 END, updated_at DESC LIMIT 500`).all()).results;
+    const listings = rows.map(r => rowView(r, settings));
+    listings.sort((a, b) => (a.status === 'draft') - (b.status === 'draft') || (b.pinned - a.pinned) || 0);
+    return { listings, freeDays: FREE_DAYS };
   }
+  async function saveListing(db, input, actor) {
+    let ref = input.reference === undefined || input.reference === '' ? null : String(input.reference);
+    const current = ref ? await db.prepare('SELECT * FROM listings WHERE reference=?1').bind(ref).first() : null;
+    if (ref && !current) throw new AdminError(404, 'not_found');
+    if (current && current.revision !== input.revision) throw new AdminError(409, 'revision_conflict');
+    if (!ref) ref = await nextReference(db);
+    let item, seller;
+    try { item = itemFromInput(input, ref, current ? JSON.parse(current.item) : null); seller = sellerFromInput(input); }
+    catch (e) { if (e instanceof ListingError) throw new AdminError(e.status, e.code); throw new AdminError(400, 'invalid_input'); }
+    const t = sec(), free = input.free === true;
+    // Free period: starts at first publication; clearing the box removes it.
+    const freeUntil = !free ? null : current?.free_until || (current?.status === 'published' ? t + FREE_DAYS * 86400 : null);
+    if (free && !seller.email) throw new AdminError(400, 'missing_seller_email');
+    const steps = [];
+    if (current) {
+      steps.push(db.prepare(`UPDATE listings SET item=?2,free_until=?3,seller_name=?4,seller_email=?5,seller_language=?6,updated_at=?7,updated_by=?8,revision=revision+1,free_listing=?10
+        WHERE reference=?1 AND revision=?9`).bind(ref, JSON.stringify(item), freeUntil, seller.name, seller.email, seller.language, t, actor, current.revision, free ? 1 : 0));
+      steps.push(audit(db, actor, 'listing_update', ref));
+    } else {
+      steps.push(db.prepare(`INSERT INTO listings(reference,status,item,free_listing,free_until,seller_name,seller_email,seller_language,created_at,updated_at,updated_by)
+        VALUES(?1,'draft',?2,?8,NULL,?3,?4,?5,?6,?6,?7)`).bind(ref, JSON.stringify(item), seller.name, seller.email, seller.language, t, actor, free ? 1 : 0));
+      steps.push(audit(db, actor, 'listing_create', ref));
+    }
+    await db.batch(steps);
+    // Photos removed in this edit are deleted from storage.
+    if (current) {
+      const before = JSON.parse(current.item).photos || [], kept = new Set(item.photos);
+      const gone = before.filter(p => !kept.has(p)).map(photoKey).filter(Boolean);
+      if (gone.length) try { await photoStore(envRef).delete(gone); } catch {}
+    }
+    onListingsChanged();
+    return { listing: rowView(await db.prepare('SELECT * FROM listings WHERE reference=?1').bind(ref).first(), null) };
+  }
+  async function changeStatus(db, input, actor) {
+    const ref = String(input.reference || ''), action = input.action;
+    if (!REF.test(ref) || !['publish', 'unpublish', 'renew'].includes(action) || !Number.isInteger(input.revision)) throw new AdminError(400, 'invalid_input');
+    const row = await db.prepare('SELECT * FROM listings WHERE reference=?1').bind(ref).first();
+    if (!row) throw new AdminError(404, 'not_found');
+    if (row.revision !== input.revision) throw new AdminError(409, 'revision_conflict');
+    const t = sec(), item = JSON.parse(row.item);
+    if (action !== 'unpublish' && !item.photos.length) throw new AdminError(400, 'photo_required');
+    let status = row.status, freeUntil = row.free_until, published = row.published_at, reset = false;
+    if (action === 'publish') {
+      if (row.status === 'published') throw new AdminError(409, 'revision_conflict');
+      if (row.status === 'expired') throw new AdminError(400, 'renew_required');
+      status = 'published'; published = published || t;
+      if (row.free_listing === 1 && freeUntil === null) freeUntil = t + FREE_DAYS * 86400;
+    } else if (action === 'unpublish') {
+      if (row.status !== 'published') throw new AdminError(409, 'revision_conflict');
+      status = 'draft';
+    } else {
+      if (row.free_listing !== 1 || freeUntil === null) throw new AdminError(400, 'not_free');
+      freeUntil = Math.max(freeUntil, t) + FREE_DAYS * 86400; status = 'published'; published = published || t; reset = true;
+    }
+    await db.batch([
+      db.prepare(`UPDATE listings SET status=?2,free_until=?3,published_at=?4,updated_at=?5,updated_by=?6,revision=revision+1
+        ${reset ? ',reminder_sent_at=NULL,expiry_notice_sent_at=NULL' : ''} WHERE reference=?1 AND revision=?7`).bind(ref, status, freeUntil, published, t, actor, row.revision),
+      audit(db, actor, 'listing_' + action, ref)
+    ]);
+    onListingsChanged();
+    return { listing: rowView(await db.prepare('SELECT * FROM listings WHERE reference=?1').bind(ref).first(), null) };
+  }
+  async function uploadPhoto(db, request, params) {
+    const ref = params.get('reference') || '';
+    if (!REF.test(ref)) throw new AdminError(400, 'invalid_input');
 
+    const row = await db.prepare('SELECT item FROM listings WHERE reference=?1').bind(ref).first();
+    if (!row) throw new AdminError(404, 'not_found');
+    if ((JSON.parse(row.item).photos || []).length >= PHOTOS_PER_LISTING) throw new AdminError(400, 'too_many_photos');
+    const declared = Number(request.headers.get('content-length') || 0);
+    if (declared > PHOTO_MAX_BYTES) throw new AdminError(413, 'photo_too_large');
+    const bytes = new Uint8Array(await request.arrayBuffer());
+    if (!bytes.length || bytes.length > PHOTO_MAX_BYTES) throw new AdminError(413, 'photo_too_large');
+    const ext = photoTypeOf(bytes); if (!ext) throw new AdminError(415, 'photo_format');
+    const path = newPhotoPath(ref, ext);
+    await photoStore(envRef).put(photoKey(path), bytes, ext === 'webp' ? 'image/webp' : 'image/jpeg');
+    return { path };
+  }
+  async function stats(db, params) {
+    const days = Math.max(1, Math.min(90, Number.parseInt(params.get('days') || '30', 10) || 30));
+    const since = new Date(now() - (days - 1) * 86400000).toISOString().slice(0, 10);
+    const byEvent = (await db.prepare('SELECT event,sum(count) AS n FROM metric_counts WHERE day>=?1 GROUP BY event').bind(since).all()).results;
+    const bySource = (await db.prepare('SELECT source,sum(count) AS n FROM metric_counts WHERE day>=?1 GROUP BY source ORDER BY n DESC').bind(since).all()).results;
+    const byListing = (await db.prepare("SELECT reference,sum(count) AS n FROM metric_counts WHERE day>=?1 AND event='property_view' AND reference<>'' GROUP BY reference ORDER BY n DESC LIMIT 20").bind(since).all()).results;
+    const byDay = (await db.prepare("SELECT day,sum(count) AS n FROM metric_counts WHERE day>=?1 AND event IN ('page_view','property_view','guide_view') GROUP BY day ORDER BY day").bind(since).all()).results;
+    return { days, since, byEvent, bySource, byListing, byDay };
+  }
   async function listEnquiries(db, params) {
     const filter = ['active', 'pending', 'accepted', 'deleted'].includes(params.get('filter')) ? params.get('filter') : 'active';
     const offset = Math.max(0, Math.min(100000, Number.parseInt(params.get('offset') || '0', 10) || 0));
@@ -139,7 +215,9 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
     return { enquiries: rows.slice(0, PAGE).map(r => ({ ...r, created_at: new Date(r.created_at * 1000).toISOString(), deleted_at: r.deleted_at ? new Date(r.deleted_at * 1000).toISOString() : null, payload: JSON.parse(r.payload) })), more: rows.length > PAGE, pending: Number(counts.pending) };
   }
 
+  let envRef = {};
   return async function adminApi(request, env) {
+    envRef = env || {};
     const url = new URL(request.url), route = url.pathname.replace(/^\/api\/admin\//, ''), secure = url.protocol === 'https:';
     const is = (method, name) => request.method === method && route === name;
     try {
@@ -149,7 +227,8 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
       if (request.method !== 'GET') {
         const origin = request.headers.get('origin');
         if (request.headers.get('x-mav-admin') !== '1' || (origin && origin !== site.siteOrigin && !/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(origin))) throw new AdminError(403, 'forbidden');
-        if (!/^application\/json\b/.test(request.headers.get('content-type') || '')) throw new AdminError(415, 'invalid_input');
+        const photo = route === 'listings/photo';
+        if (!/^application\/json\b/.test(request.headers.get('content-type') || '') && !(photo && /^image\/(webp|jpeg)\b/.test(request.headers.get('content-type') || ''))) throw new AdminError(415, 'invalid_input');
       }
       const ip = request.headers.get('cf-connecting-ip') || 'local';
 
@@ -235,6 +314,10 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
       }
 
       if (is('GET', 'listings')) return json(200, await listListings(db));
+      if (is('POST', 'listings/save')) return json(200, await saveListing(db, await body(request, 64000), actor));
+      if (is('POST', 'listings/status')) return json(200, await changeStatus(db, await body(request), actor));
+      if (is('POST', 'listings/photo')) return json(200, await uploadPhoto(db, request, url.searchParams));
+      if (is('GET', 'stats')) return json(200, await stats(db, url.searchParams));
       if (is('POST', 'listings')) {
         const input = await body(request), ref = String(input.reference || '');
         if (!REF.test(ref) || (input.hidden !== undefined && typeof input.hidden !== 'boolean') || (input.pinned !== undefined && typeof input.pinned !== 'boolean') || (input.hidden === undefined && input.pinned === undefined)) throw new AdminError(400, 'invalid_input');

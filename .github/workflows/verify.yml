@@ -21,5 +21,3 @@ jobs:
         run: npm run build
       - name: Verify frontend and Worker
         run: npm test
-      - name: Verify mocked backend
-        run: npm run test:backend

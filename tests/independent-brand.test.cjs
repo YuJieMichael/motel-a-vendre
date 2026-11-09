@@ -38,10 +38,10 @@ test('empty catalogue and newly synced partial listings have a usable on-site ne
  }
 });
 
-test('production enquiries use the existing intake without an external hand-off or claimed live check',()=>{
+test('production enquiries use this site\'s own intake without an external hand-off',()=>{
  const release=vm.runInNewContext(read('release/public/data/site-config.js')+';MAV_SITE');
  const manifest=JSON.parse(read('release/manifest.json'));
- assert.equal(release.endpoint,site.endpoint);assert.equal(release.publishableKey,site.publishableKey);
+ assert.equal(release.endpoint,undefined);assert.equal(release.publishableKey,undefined);assert.equal(release.intake,'site');
  assert.equal(release.enquiryMode,'direct');assert.equal(E.canSubmit(release,release.siteOrigin),true);
  assert.equal(manifest.intake.enabled,true);
  assert.ok(['not-run','non-writing-live-check','site-intake'].includes(manifest.intake.verification));
@@ -49,9 +49,10 @@ test('production enquiries use the existing intake without an external hand-off 
  for(const p of ['deployment/worker.mjs','deployment/live-worker.mjs','release/public/_headers'])assert.doesNotMatch(read(p),/form-action[^;\n"]*proprieteenvente/);
 });
 
-test('own-site account controls, privacy contact and source synchronization stay available',()=>{
+test('own-site account controls, privacy contact and own listings stay available',()=>{
  assert.equal(site.account.enabled,true);assert.equal(site.account.mailFrom,'Motel à vendre <compte@mail.motelavendre.ca>');
- assert.ok(site.account.privacyContact);assert.match(read('deployment/live-catalogue.mjs'),/published_listings/);
+ assert.ok(site.account.privacyContact);assert.match(read('deployment/live-catalogue.mjs'),/FROM listings WHERE status='published'/);
+ for(const f of ['deployment/live-catalogue.mjs','deployment/admin-api.mjs','deployment/live-worker.mjs','data/site-config.js','app.js','lib/enquiry-core.js'])assert.doesNotMatch(read(f),/supabase|published_listings|publishableKey/i,f);
  for(const [lang,route]of [['fr','compte'],['en','account'],['zh','account']]){
   const html=read(lang+'/'+route+'/index.html');
   for(const id of ['form-signin','form-signup','signup-consent','form-recover','form-new-password','account-export','account-delete-open','form-delete'])assert.ok(html.includes('id="'+id+'"'));

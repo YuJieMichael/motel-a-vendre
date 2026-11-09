@@ -361,3 +361,22 @@ html[lang='zh-Hans'] .buyer-enquiry-property-label { letter-spacing: .02em; }
   .buyer-enquiry-fields { grid-template-columns: 1fr; }
   .admin-gate-card { padding: 24px 20px; }
 }
+
+/* Listing editor (listings tab) */
+.admin-listing-form { display: grid; gap: 16px; }
+.admin-listing-section { padding: 20px; display: grid; gap: 14px; }
+.admin-listing-section h2 { margin: 0; font-size: 15px; }
+.admin-listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.admin-field.is-wide { grid-column: 1 / -1; }
+.admin-field input, .admin-field select, .admin-field textarea { font: inherit; font-weight: 400; padding: 8px 10px; border: 1px solid var(--line, #d9dee3); border-radius: 8px; background: #fff; color: inherit; width: 100%; box-sizing: border-box; }
+.admin-field textarea { resize: vertical; line-height: 1.5; }
+.admin-listing-copy { border: 1px solid var(--line, #d9dee3); border-radius: 10px; padding: 12px 14px 14px; display: grid; gap: 10px; margin: 0; }
+.admin-listing-copy legend { font-weight: 700; font-size: 13px; padding: 0 6px; }
+.admin-check { display: flex; gap: 8px; align-items: flex-start; font-size: 13.5px; }
+.admin-check input { margin-top: 3px; }
+.admin-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.admin-photo-grid figure { margin: 0; border: 1px solid var(--line, #d9dee3); border-radius: 10px; overflow: hidden; background: #f6f7f8; }
+.admin-photo-grid img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.admin-photo-grid figcaption { display: flex; gap: 4px; align-items: center; justify-content: flex-end; padding: 4px 6px; }
+.admin-photo-grid figcaption strong { margin-right: auto; color: #b8860b; }
+.admin-page-actions { display: flex; gap: 12px; align-items: center; }
