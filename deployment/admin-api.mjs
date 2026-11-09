@@ -1,9 +1,9 @@
 // Staff workspace API, served at /api/admin/* (motelavendre.ca/admin/).
 // Fully independent: staff accounts, sessions, invitations, enquiries, buyer accounts,
 // listings and their display settings live in this site's D1 (binding ACCOUNTS);
-// listing photos live in R2 (binding PHOTOS). Nothing outside this site is read.
+// including listing photos (listing_photos). Nothing outside this site is read.
 import { hashPassword, verifyPassword } from './account-api.mjs';
-import { itemFromInput, sellerFromInput, nextReference, rowView, photoKey, photoTypeOf, newPhotoPath, ListingError, FREE_DAYS, PHOTO_MAX_BYTES, PHOTOS_PER_LISTING } from './listings.mjs';
+import { itemFromInput, sellerFromInput, nextReference, rowView, photoKey, photoTypeOf, newPhotoPath, photoStore, ListingError, FREE_DAYS, PHOTO_MAX_BYTES, PHOTOS_PER_LISTING } from './listings.mjs';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const REF = /^\d{1,12}$/, TOKEN = /^[A-Za-z0-9_-]{43}$/;
@@ -146,7 +146,7 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
     if (current) {
       const before = JSON.parse(current.item).photos || [], kept = new Set(item.photos);
       const gone = before.filter(p => !kept.has(p)).map(photoKey).filter(Boolean);
-      if (gone.length && envRef.PHOTOS) try { await envRef.PHOTOS.delete(gone); } catch {}
+      if (gone.length) try { await photoStore(envRef).delete(gone); } catch {}
     }
     onListingsChanged();
     return { listing: rowView(await db.prepare('SELECT * FROM listings WHERE reference=?1').bind(ref).first(), null) };
@@ -183,7 +183,7 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
   async function uploadPhoto(db, request, params) {
     const ref = params.get('reference') || '';
     if (!REF.test(ref)) throw new AdminError(400, 'invalid_input');
-    if (!envRef.PHOTOS) throw new AdminError(503, 'photos_unavailable');
+
     const row = await db.prepare('SELECT item FROM listings WHERE reference=?1').bind(ref).first();
     if (!row) throw new AdminError(404, 'not_found');
     if ((JSON.parse(row.item).photos || []).length >= PHOTOS_PER_LISTING) throw new AdminError(400, 'too_many_photos');
@@ -193,7 +193,7 @@ export function createAdminApi({ site, now = () => Date.now(), fetchImpl = (...a
     if (!bytes.length || bytes.length > PHOTO_MAX_BYTES) throw new AdminError(413, 'photo_too_large');
     const ext = photoTypeOf(bytes); if (!ext) throw new AdminError(415, 'photo_format');
     const path = newPhotoPath(ref, ext);
-    await envRef.PHOTOS.put(photoKey(path), bytes, { httpMetadata: { contentType: ext === 'webp' ? 'image/webp' : 'image/jpeg', cacheControl: 'public, max-age=31536000, immutable' } });
+    await photoStore(envRef).put(photoKey(path), bytes, ext === 'webp' ? 'image/webp' : 'image/jpeg');
     return { path };
   }
   async function stats(db, params) {

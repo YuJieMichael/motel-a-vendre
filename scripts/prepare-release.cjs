@@ -51,8 +51,6 @@ async function prepare({direct=false}={}){
   wrangler.d1_databases=[{binding:'ACCOUNTS',database_name:'motel-a-vendre-accounts',database_id:config.account.d1DatabaseId,migrations_dir:'../d1/migrations'}];
   // MAIL_FROM is public configuration; RESEND_API_KEY stays a Worker secret set in the dashboard.
   wrangler.vars={MAIL_FROM:config.account.mailFrom};
-  // Listing photos uploaded from the admin (create the bucket once: wrangler r2 bucket create motel-a-vendre-photos).
-  wrangler.r2_buckets=[{binding:'PHOTOS',bucket_name:'motel-a-vendre-photos'}];
   wrangler.triggers={crons:['17 13 * * *']};
  }
  fs.writeFileSync(path.join(release,'wrangler.jsonc'),JSON.stringify(wrangler,null,2)+'\n');

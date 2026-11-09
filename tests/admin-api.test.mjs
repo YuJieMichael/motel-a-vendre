@@ -13,8 +13,8 @@ const site={siteOrigin:ORIGIN};
 function setup(){
  const mails=[],outside=[];
  const fetchImpl=async url=>{url=String(url);outside.push(url);throw Error('unexpected '+url);};
- const stored=new Map();
- const env={ACCOUNTS:openLocalD1(':memory:',migrations),ACCOUNT_MAIL_LOG:m=>mails.push(m),PHOTOS:{put:async(k,b)=>{stored.set(k,b);},get:async k=>stored.get(k)?{body:stored.get(k)}:null,delete:async ks=>{for(const k of [].concat(ks))stored.delete(k);}}};
+ const env={ACCOUNTS:openLocalD1(':memory:',migrations),ACCOUNT_MAIL_LOG:m=>mails.push(m)};
+ const stored={get size(){return env.ACCOUNTS.raw.prepare('SELECT count(*) n FROM listing_photos').get().n;}};
  let changed=0;
  const api=createAdminApi({site,fetchImpl,onListingsChanged:()=>changed++});
  const client=(ip='203.0.113.9')=>{let jar='';const call=async(method,route,body,extra={})=>{
@@ -121,7 +121,7 @@ test('staff create a listing as a draft, upload photos to R2, then publish it wi
  // photo upload: binary body, checked magic bytes, stored in R2
  const send=(bytes,type)=>t.api(new Request(ORIGIN+'/api/admin/listings/photo?reference='+ref,{method:'POST',headers:{'cf-connecting-ip':'203.0.113.9',cookie:o.jar(),'x-mav-admin':'1','content-type':type,origin:ORIGIN},body:bytes}),t.env);
  assert.equal((await send(new Uint8Array([1,2,3,4,5,6,7,8,9,10,11,12,13]),'image/webp')).status,415);
- assert.equal((await send(new Uint8Array(2*1024*1024+1),'image/webp')).status,413);
+ assert.equal((await send(new Uint8Array(1500001),'image/webp')).status,413);
  const up=await send(webp,'image/webp');assert.equal(up.status,200);const {path:photo}=await up.json();
  assert.match(photo,/^assets\/listings\/200001\/[a-f0-9]{24}\.webp$/);assert.equal(t.stored.size,1);
  r=await o.call('POST','listings/save',{...form({photos:[photo]}),reference:ref,revision:0});assert.equal(r.status,200);

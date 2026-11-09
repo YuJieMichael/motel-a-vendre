@@ -1,9 +1,9 @@
-// Listings owned by Motel à vendre: D1 table `listings` (binding ACCOUNTS), photos in R2 (binding PHOTOS).
+// Listings owned by Motel à vendre: D1 tables `listings` and `listing_photos` (binding ACCOUNTS).
 // Each row stores one catalogue item validated by lib/catalogue-core.js before it is saved.
 import Core from '../lib/catalogue-core.js';
 
 export const FREE_DAYS = 30, REMINDER_DAYS = 7;
-export const PHOTO_MAX_BYTES = 2 * 1024 * 1024, PHOTOS_PER_LISTING = 30;
+export const PHOTO_MAX_BYTES = 1500000, PHOTOS_PER_LISTING = 30;
 const LANGS = ['fr', 'en', 'zh'], TYPES = ['motel', 'hotel', 'inn', 'hotel-motel'];
 const REF = /^\d{1,12}$/, EMAIL = /^[^\s@<>()",;:]{1,64}@[^\s@<>()",;:]+\.[^\s@<>()",;:]{2,}$/;
 export const PHOTO_PATH = /^assets\/listings\/(\d{1,12})\/([a-f0-9]{24})\.(webp|jpg)$/;
@@ -94,6 +94,15 @@ export function photoTypeOf(bytes) {
   if (bytes.length > 12 && String.fromCharCode(...bytes.slice(0, 4)) === 'RIFF' && String.fromCharCode(...bytes.slice(8, 12)) === 'WEBP') return 'webp';
   if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'jpg';
   return null;
+}
+// Photo storage in D1 (free; no separate bucket). Same small interface the admin and Worker use.
+export function photoStore(env) {
+  const db = env && env.ACCOUNTS; if (!db) return null;
+  return {
+    put: (key, bytes, contentType) => db.prepare('INSERT INTO listing_photos(key,content_type,bytes,created_at) VALUES(?1,?2,?3,?4)').bind(key, contentType, bytes, Math.floor(Date.now() / 1000)).run(),
+    get: async key => { const row = await db.prepare('SELECT content_type,bytes FROM listing_photos WHERE key=?1').bind(key).first(); return row ? { contentType: row.content_type, bytes: new Uint8Array(row.bytes) } : null; },
+    delete: async keys => { for (const key of [].concat(keys)) await db.prepare('DELETE FROM listing_photos WHERE key=?1').bind(key).run(); }
+  };
 }
 export function newPhotoPath(reference, ext) {
   const id = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join('');

@@ -1,7 +1,7 @@
 import createRenderer from '../lib/page-renderer.cjs';
 import Routes from '../lib/site-routes.cjs';
 import {loadCatalogue as loadSourceCatalogue,applyListingSettings,invalidateCatalogue} from './live-catalogue.mjs';
-import {runListingLifecycle,PHOTO_PATH,photoKey} from './listings.mjs';
+import {runListingLifecycle,PHOTO_PATH,photoKey,photoStore} from './listings.mjs';
 import {recordEvent} from './metrics.mjs';
 import {template,translations,site,fallback} from './runtime-inputs.mjs';
 import {responseHeaders} from './worker.mjs';
@@ -52,11 +52,18 @@ export async function handleLiveRequest(request,env){
   return wrapped(await recordEvent(request,env));
  }
  if(url.pathname.startsWith('/assets/listings/')&&['GET','HEAD'].includes(request.method)){
-  // Listing photos uploaded from the admin, stored in R2 (binding PHOTOS).
+  // Listing photos uploaded from the admin, stored in D1 (listing_photos). Names are unique and never reused,
+  // so the edge cache keeps them and D1 is read about once per photo per location.
   const key=PHOTO_PATH.test(url.pathname.slice(1))?photoKey(url.pathname.slice(1)):null;
-  const object=key&&env&&env.PHOTOS?await env.PHOTOS.get(key):null;
-  if(!object)return wrapped(new Response('Not found',{status:404}));
-  return wrapped(new Response(request.method==='HEAD'?null:object.body,{headers:{'Content-Type':object.httpMetadata?.contentType||'image/webp','Cache-Control':'public, max-age=31536000, immutable'}}));
+  if(!key)return wrapped(new Response('Not found',{status:404}));
+  const cache=globalThis.caches?.default,cacheKey=new Request(site.siteOrigin+url.pathname);
+  let hit=null;try{hit=cache&&await cache.match(cacheKey);}catch{}
+  if(hit)return wrapped(new Response(request.method==='HEAD'?null:hit.body,{headers:hit.headers}));
+  const photo=await photoStore(env)?.get(key);
+  if(!photo)return wrapped(new Response('Not found',{status:404}));
+  const fresh=new Response(photo.bytes,{headers:{'Content-Type':photo.contentType,'Cache-Control':'public, max-age=31536000, immutable'}});
+  if(cache)try{await cache.put(cacheKey,fresh.clone());}catch{}
+  return wrapped(new Response(request.method==='HEAD'?null:fresh.body,{headers:fresh.headers}));
  }
  if(url.pathname.startsWith('/api/admin/')){
   // Staff workspace API. HTTPS on the canonical host only.

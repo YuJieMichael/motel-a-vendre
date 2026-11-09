@@ -40,7 +40,7 @@ For an approved production update, review the generated release manifest, routes
 
 Motel à vendre owns its listings. They live in this site's D1 (`ACCOUNTS`, table `listings`, migration `0005_own_listings.sql`) and are managed in the staff workspace (**Listings** tab). Nothing is read from another site or database. Migration 0005 imports the six listings published on 2026-11-09 (same content as the live catalogue that day, with the approved illustrative covers); imported photos stay static assets under `assets/main/` and `assets/covers/`.
 
-Photos added from the admin are resized and converted to WebP **in the browser** (max. 1600 px, keeps the Worker within the Free-plan CPU limit), then uploaded to the R2 bucket `motel-a-vendre-photos` (binding `PHOTOS`) under `listings/<reference>/<random>.webp`. The Worker serves them at `/assets/listings/...` with a one-year immutable cache. Removing a photo from a listing deletes it from R2 when the listing is saved.
+Photos added from the admin are resized and converted to WebP **in the browser** (max. 1600 px, keeps the Worker within the Free-plan CPU limit), then stored in D1 table `listing_photos` (max. 1.5 MB each; D1 rows are limited to 2 MB). The Worker serves them at `/assets/listings/...` with a one-year immutable cache and keeps them in the edge cache, so D1 is read about once per photo per location. Removing a photo from a listing deletes it when the listing is saved. No R2 bucket or payment method is needed.
 
 The public catalogue reads published rows from D1 (in-memory copy for one minute, cleared immediately after a staff change). On a D1 error the last good copy is kept (`stale`), otherwise the bundled `data/catalogue.json` snapshot is served (`fallback`); `/api/catalogue` reports the status. The sitemap is dynamic. Root requests redirect to French. Keep the public Google verification HTML file available during rebuilds.
 
@@ -93,6 +93,5 @@ Direct enquiries: `directEnquiries: true` makes `prepare:release` verify the int
 
 Deploy (listings release, 1.11.0), in this order:
 
-1. Create the R2 bucket once: dashboard → R2 → Create bucket `motel-a-vendre-photos` (or `npx wrangler r2 bucket create motel-a-vendre-photos`). The deploy fails if the bucket does not exist.
-2. Apply D1 migration `0005_own_listings.sql` to `motel-a-vendre-accounts` (`npx wrangler d1 migrations apply motel-a-vendre-accounts --remote`, or paste it into the dashboard console and record it in `d1_migrations`).
-3. Merge to `main`, then check that the Workers build for that commit succeeded, `/api/catalogue` reports `live` with six listings, and an admin photo upload works.
+1. Apply D1 migration `0005_own_listings.sql` to `motel-a-vendre-accounts` (`npx wrangler d1 migrations apply motel-a-vendre-accounts --remote`, or paste it into the dashboard console and record it in `d1_migrations`).
+2. Merge to `main`, then check that the Workers build for that commit succeeded, `/api/catalogue` reports `live` with six listings, and an admin photo upload works.

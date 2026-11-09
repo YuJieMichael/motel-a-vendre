@@ -1,6 +1,6 @@
 -- Motel à vendre owns its listings (independent of the main site's database).
 -- Each row stores one validated catalogue item (lib/catalogue-core.js validateCatalogue).
--- Photos uploaded from the admin live in R2 (binding PHOTOS) under listings/<reference>/;
+-- Photos uploaded from the admin live in D1 table listing_photos (key listings/<reference>/...);
 -- imported listings keep their existing static assets (assets/main/, assets/covers/).
 CREATE TABLE listings (
   reference TEXT PRIMARY KEY CHECK (reference NOT GLOB '*[^0-9]*' AND length(reference) BETWEEN 1 AND 12),
@@ -21,6 +21,15 @@ CREATE TABLE listings (
 );
 CREATE INDEX listings_status_idx ON listings(status, published_at DESC);
 CREATE INDEX listings_free_idx ON listings(free_until) WHERE free_until IS NOT NULL;
+
+-- Photos uploaded from the admin (WebP or JPEG, resized in the browser). D1 rows are limited
+-- to 2 MB, so uploads are capped at 1.5 MB; the Worker serves them with a long cache.
+CREATE TABLE listing_photos (
+  key TEXT PRIMARY KEY CHECK (length(key) <= 80),
+  content_type TEXT NOT NULL CHECK (content_type IN ('image/webp','image/jpeg')),
+  bytes BLOB NOT NULL CHECK (length(bytes) <= 1500000),
+  created_at INTEGER NOT NULL
+);
 
 -- Aggregate visit counts (no names, emails, URLs or query strings).
 CREATE TABLE metric_counts (
