@@ -110,7 +110,7 @@ const translations = {
     "detailNote": "资料来自公开房源目录。未公开信息与当前在售状态请向 Motel à vendre 团队核实。",
     "buyerTitle": "谈谈你的收购计划",
     "sellerFormTitle": "准备出售意向",
-    "sellerMessage": "请填写物业所在地、类型、客房数与出售计划。",
+    "sellerMessage": "请填写物业所在地、类型、客房数与出售计划。审核通过后首月免费展示 30 天。",
     "buyerMessage": "请告诉我们你的收购需求与希望了解的信息。",
     "storageError": "浏览器无法保存数据。请允许本地存储，或使用下载草稿保留信息。",
     "savedOnly": "已收藏",
@@ -271,7 +271,7 @@ const translations = {
     "scopeTag": "魁北克 / 加元 / 法 · 英 · 中",
     "noScript": "关闭 JavaScript 时仍可查看房源并切换语言。筛选、收藏和在本站发送咨询需要启用 JavaScript。",
     "currencyNote": "挂牌报价均以加元显示。",
-    "sellerStripText": "告诉我们物业所在城市、客房数量和出售时间安排。",
+    "sellerStripText": "首月免费展示：告诉我们物业所在城市、客房数量和出售时间安排，团队审核后帮您上架，免费展示 30 天，不绑信用卡，到期不续期则自动下架、不收费。",
     "sellerGuideLabel": "出售资料清单",
     "guideTitle": "资料与核验清单 | Motel à vendre"
   },
@@ -386,7 +386,7 @@ const translations = {
     "detailNote": "Information comes from the public catalogue. Confirm unpublished details and current availability with the Motel à vendre team.",
     "buyerTitle": "Tell us about your acquisition",
     "sellerFormTitle": "Prepare your selling enquiry",
-    "sellerMessage": "Share the location, property type, room count and your selling plans.",
+    "sellerMessage": "Share the location, property type, room count and your selling plans. Once approved, your listing is displayed free for the first 30 days.",
     "buyerMessage": "Tell us about your buying requirements and what you would like to know.",
     "storageError": "Browser storage is unavailable. Allow local storage, or download your draft to keep a copy.",
     "savedOnly": "Saved",
@@ -547,7 +547,7 @@ const translations = {
     "scopeTag": "QUÉBEC / CAD / FR · EN · 中文",
     "noScript": "Property pages and language links work without JavaScript. Enable it to filter, save favourites or send an enquiry on this website.",
     "currencyNote": "Asking prices in Canadian dollars.",
-    "sellerStripText": "Tell us the city, room count and your selling timeframe.",
+    "sellerStripText": "First month free: tell us the city, room count and your selling timeframe. After review, the team publishes your listing free for 30 days. No credit card; if it is not extended, it is removed at no charge.",
     "sellerGuideLabel": "Prepare a sale",
     "guideTitle": "Documents and checks | Motel à vendre"
   },
@@ -662,7 +662,7 @@ const translations = {
     "detailNote": "Renseignements issus du catalogue public. Les données non publiées et la disponibilité sont à confirmer auprès de l’équipe Motel à vendre.",
     "buyerTitle": "Parlons de votre acquisition",
     "sellerFormTitle": "Préparer votre projet de vente",
-    "sellerMessage": "Précisez l’emplacement, le type de propriété, le nombre de chambres et votre projet de vente.",
+    "sellerMessage": "Précisez l’emplacement, le type de propriété, le nombre de chambres et votre projet de vente. Après approbation, votre annonce est affichée gratuitement pendant les 30 premiers jours.",
     "buyerMessage": "Décrivez vos critères d’achat et les renseignements souhaités.",
     "storageError": "Le stockage du navigateur est indisponible. Autorisez-le ou téléchargez votre brouillon pour en conserver une copie.",
     "savedOnly": "Favoris",
@@ -823,7 +823,7 @@ const translations = {
     "scopeTag": "QUÉBEC / CAD / FR · EN · 中文",
     "noScript": "Les fiches et les liens de langue restent accessibles sans JavaScript. Activez JavaScript pour filtrer, enregistrer des favoris ou envoyer une demande sur ce site.",
     "currencyNote": "Prix demandés en dollars canadiens.",
-    "sellerStripText": "Indiquez la ville, le nombre de chambres et votre calendrier de vente.",
+    "sellerStripText": "Premier mois gratuit : indiquez la ville, le nombre de chambres et votre calendrier de vente. Après vérification, l’équipe publie votre annonce gratuitement pendant 30 jours. Aucune carte de crédit; sans prolongation, l’annonce est retirée sans frais.",
     "sellerGuideLabel": "Préparer une vente",
     "guideTitle": "Documents et vérifications | Motel à vendre"
   }
