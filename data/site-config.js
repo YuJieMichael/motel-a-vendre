@@ -12,6 +12,7 @@ const MAV_SITE = {
     "turnstileSiteKey": "0x4AAAAAAFyRNFa_q4G6kz_j"
   },
   "siteOrigin": "https://motelavendre.ca",
+  "googleAds": { "tagId": "", "buyer": "", "seller": "" },
   "socialLinks": {
     "Facebook": "https://www.facebook.com/profile.php?id=61596159879012",
     "Instagram": "https://www.instagram.com/motelavendre/",
