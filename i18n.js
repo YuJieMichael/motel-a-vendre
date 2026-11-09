@@ -272,6 +272,9 @@ const translations = {
     "noScript": "关闭 JavaScript 时仍可查看房源并切换语言。筛选、收藏和在本站发送咨询需要启用 JavaScript。",
     "currencyNote": "挂牌报价均以加元显示。",
     "sellerStripText": "首月免费展示：告诉我们物业所在城市、客房数量和出售时间安排，团队审核后帮您上架，免费展示 30 天，不绑信用卡，到期不续期则自动下架、不收费。",
+    "promoBadge": "首月免费",
+    "promoText": "业主自售 Motel／酒店：审核通过后免费展示 30 天，不绑信用卡。",
+    "promoCta": "免费挂旅馆",
     "sellerGuideLabel": "出售资料清单",
     "guideTitle": "资料与核验清单 | Motel à vendre"
   },
@@ -548,6 +551,9 @@ const translations = {
     "noScript": "Property pages and language links work without JavaScript. Enable it to filter, save favourites or send an enquiry on this website.",
     "currencyNote": "Asking prices in Canadian dollars.",
     "sellerStripText": "First month free: tell us the city, room count and your selling timeframe. After review, the team publishes your listing free for 30 days. No credit card; if it is not extended, it is removed at no charge.",
+    "promoBadge": "First month free",
+    "promoText": "Selling your motel or hotel? Listed free for 30 days once approved, no credit card.",
+    "promoCta": "List for free",
     "sellerGuideLabel": "Prepare a sale",
     "guideTitle": "Documents and checks | Motel à vendre"
   },
@@ -824,6 +830,9 @@ const translations = {
     "noScript": "Les fiches et les liens de langue restent accessibles sans JavaScript. Activez JavaScript pour filtrer, enregistrer des favoris ou envoyer une demande sur ce site.",
     "currencyNote": "Prix demandés en dollars canadiens.",
     "sellerStripText": "Premier mois gratuit : indiquez la ville, le nombre de chambres et votre calendrier de vente. Après vérification, l’équipe publie votre annonce gratuitement pendant 30 jours. Aucune carte de crédit; sans prolongation, l’annonce est retirée sans frais.",
+    "promoBadge": "Premier mois gratuit",
+    "promoText": "Vendez votre motel ou hôtel : annonce affichée gratuitement 30 jours, sans carte de crédit.",
+    "promoCta": "Publier gratuitement",
     "sellerGuideLabel": "Préparer une vente",
     "guideTitle": "Documents et vérifications | Motel à vendre"
   }

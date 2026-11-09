@@ -218,3 +218,12 @@ html{scroll-padding-top:112px}
  .site-header.wrap{height:auto}
  .header-social{grid-column:1/-1;grid-row:3;justify-self:start}
 }
+
+/* Homepage free-first-month promo: walnut and sand, matching the Motel à vendre palette. */
+.home-free-promo{display:inline-flex;align-items:center;gap:12px;max-width:100%;margin:0 0 18px;padding:6px 16px 6px 6px;background:#f3e9dd;border:1px solid var(--accent);border-radius:999px;color:#4a3626;font:500 14px/1.45 var(--sans);text-align:left;transition:background .2s,border-color .2s}
+.home-free-promo:hover{background:#efe0cf;border-color:#c4a382}
+.home-free-promo-badge{flex-shrink:0;background:var(--brass);color:var(--white);border-radius:999px;padding:4px 11px;font-size:12px;font-weight:650;letter-spacing:.04em}
+.home-free-promo-text{min-width:0}
+.home-free-promo-cta{flex-shrink:0;display:inline-flex;gap:6px;color:var(--brass);font-weight:650;white-space:nowrap}
+.home-free-promo:hover .home-free-promo-cta{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:640px){.home-free-promo{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;border-radius:12px;padding:10px 12px;font-size:13px}.home-free-promo-text{grid-column:1/-1;grid-row:2}.home-free-promo-cta{grid-column:2;grid-row:1;justify-self:start}}
