@@ -45,8 +45,7 @@ async function prepare({direct=false}={}){
  fs.writeFileSync(path.join(release,'worker.mjs'),workerSource);
  fs.copyFileSync(path.join(root,'deployment/entry.mjs'),path.join(release,'entry.mjs'));
  const policy="default-src 'self'; script-src 'self' "+hashes.join(' ')+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(config.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
- const {withGoogleAdsCsp}=await import('../deployment/google-ads-csp.mjs');
- const headerLines=['/*','  X-Content-Type-Options: nosniff','  X-Frame-Options: DENY','  Referrer-Policy: strict-origin-when-cross-origin','  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()','  Cache-Control: public, max-age=0, must-revalidate','  Content-Security-Policy: '+withGoogleAdsCsp(policy,config.googleAds)];
+ const headerLines=['/*','  X-Content-Type-Options: nosniff','  X-Frame-Options: DENY','  Referrer-Policy: strict-origin-when-cross-origin','  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()','  Cache-Control: public, max-age=0, must-revalidate','  Content-Security-Policy: '+policy];
  headerLines.push('/admin/*','  X-Robots-Tag: noindex, nofollow');if(headerLines.some(line=>line.length>2000))throw Error('Review CSP header size before publishing');fs.writeFileSync(path.join(publicDir,'_headers'),headerLines.join('\n')+'\n');
  const runtime=path.join(release,'runtime');fs.mkdirSync(runtime,{recursive:true});
  for(const file of ['catalogue-core.js','property-view.js','account-view.js','page-renderer.cjs','guide-content.js','site-routes.cjs'])fs.copyFileSync(path.join(root,'lib',file),path.join(runtime,file));
