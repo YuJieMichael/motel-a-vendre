@@ -12,10 +12,14 @@ test('all local and production pages keep customer navigation and branding on Mo
  for(const prefix of ['', 'release/public/'])for(const p of pages){
   const html=read(prefix+p.file);assert.doesNotMatch(html,associated,prefix+p.file);
   assert.doesNotMatch(html,/data-main-|main-enquiry-link|\bundefined\b/);
-  const social=html.match(/<nav class="footer-social"[^>]*>[\s\S]*?<\/nav>/)?.[0];
-  assert.ok(social,p.file+' social links');
-  assert.deepEqual([...social.matchAll(/href="([^"]+)"/g)].map(([,href])=>href),socialLinks);
-  for(const [,href]of html.replace(social,'').matchAll(/<a\b[^>]*href="(https?:[^\"]+)"/g)){
+  const socialNavs=[...html.matchAll(/<nav class="(header|footer)-social"[^>]*>[\s\S]*?<\/nav>/g)];
+  assert.deepEqual(socialNavs.map(([,placement])=>placement),['header','footer'],p.file+' social links');
+  let rest=html;
+  for(const [social]of socialNavs){
+   assert.deepEqual([...social.matchAll(/href="([^"]+)"/g)].map(([,href])=>href),socialLinks);
+   rest=rest.replace(social,'');
+  }
+  for(const [,href]of rest.matchAll(/<a\b[^>]*href="(https?:[^\"]+)"/g)){
    assert.equal(new URL(href).hostname,'motelavendre.ca',p.file+' -> '+href);
   }
  }

@@ -200,9 +200,21 @@ html{scroll-padding-top:112px}
 .account-stat strong{font-size:26px}
 }
 
-.footer-social{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.footer-social a{display:grid;place-items:center;width:44px;height:44px;border:1px solid #ffffff6b;border-radius:50%;color:#fff}
+.header-social,.footer-social{display:flex;align-items:center;gap:6px}
+.header-social{flex-shrink:0}
+.header-social a,.footer-social a{display:grid;place-items:center;width:44px;height:44px;border:1px solid;border-radius:50%}
+.header-social a{color:var(--ink);border-color:var(--line)}
+.header-social a:hover,.header-social a:focus-visible{border-color:currentColor}
+.header-social a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.header-social svg,.footer-social svg{width:20px;height:20px;display:block}
+.footer-social{flex-wrap:wrap;gap:8px}
+.footer-social a{border-color:#ffffff6b;color:#fff}
 .footer-social a:hover,.footer-social a:focus-visible{background:#ffffff26;border-color:currentColor}
 .footer-social a:focus-visible{outline:2px solid #f6d59a;outline-offset:3px}
-.footer-social svg{width:20px;height:20px;display:block}
 .site-footer .brand-footer .brand-mark{filter:none;opacity:1}
+
+@media(max-width:1000px){
+ html{scroll-padding-top:168px}
+ .site-header.wrap{height:auto}
+ .header-social{grid-column:1/-1;grid-row:3;justify-self:start}
+}
