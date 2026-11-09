@@ -19,7 +19,7 @@ const COPY = {
   error: 'Impossible de charger les données. Réessayez après avoir vérifié votre connexion et vos droits d’accès.', unavailable: 'Service momentanément indisponible. Réessayez dans un instant.',
   previous: 'Précédent', next: 'Suivant', cancel: 'Annuler', saving: 'Enregistrement…', saveError: 'Enregistrement impossible. Les données ont été actualisées.',
   status: 'Rôle', audit: 'Journal des opérations', emptyAudit: 'Aucune opération à afficher.', date: 'Date', action: 'Opération', actor: 'Compte responsable', target: 'Élément',
-  actions: { staff_invite: 'Membre invité', staff_deactivate: 'Membre désactivé', staff_activate: 'Membre réactivé', staff_resend: 'Courriel renvoyé', staff_password: 'Mot de passe défini', enquiry_accept: 'Demande acceptée', enquiry_reopen: 'Demande remise à traiter', enquiry_delete: 'Demande supprimée', enquiry_restore: 'Demande restaurée', account_confirm: 'Compte confirmé manuellement', account_delete: 'Compte supprimé', listing_hide: 'Annonce masquée', listing_show: 'Annonce affichée', listing_pin: 'Annonce épinglée', listing_unpin: 'Annonce désépinglée' },
+  actions: { listing_create: 'Annonce créée', listing_update: 'Annonce modifiée', listing_publish: 'Annonce publiée', listing_unpublish: 'Annonce retirée', listing_renew: 'Annonce prolongée de 30 jours', listing_expire: 'Période gratuite terminée (retrait automatique)', staff_invite: 'Membre invité', staff_deactivate: 'Membre désactivé', staff_activate: 'Membre réactivé', staff_resend: 'Courriel renvoyé', staff_password: 'Mot de passe défini', enquiry_accept: 'Demande acceptée', enquiry_reopen: 'Demande remise à traiter', enquiry_delete: 'Demande supprimée', enquiry_restore: 'Demande restaurée', account_confirm: 'Compte confirmé manuellement', account_delete: 'Compte supprimé', listing_hide: 'Annonce masquée', listing_show: 'Annonce affichée', listing_pin: 'Annonce épinglée', listing_unpin: 'Annonce désépinglée' },
   local: 'Aperçu local : toutes les données viennent de la base locale de ce poste. Les courriels restent dans le journal local.',
   auditHint: 'Les 200 dernières opérations effectuées par l’équipe dans cet espace.', console: 'Administration', menu: 'Menu', staffArea: 'Espace réservé à l’équipe'
  },
@@ -33,7 +33,7 @@ const COPY = {
   error: 'Could not load data. Check your connection and access rights, then try again.', unavailable: 'Service temporarily unavailable. Try again shortly.',
   previous: 'Previous', next: 'Next', cancel: 'Cancel', saving: 'Saving…', saveError: 'Could not save. The data has been refreshed.',
   status: 'Role', audit: 'Activity log', emptyAudit: 'No activity to show.', date: 'Date', action: 'Action', actor: 'Account', target: 'Item',
-  actions: { staff_invite: 'Staff invited', staff_deactivate: 'Member deactivated', staff_activate: 'Member reactivated', staff_resend: 'Email resent', staff_password: 'Password set', enquiry_accept: 'Enquiry accepted', enquiry_reopen: 'Enquiry marked pending', enquiry_delete: 'Enquiry deleted', enquiry_restore: 'Enquiry restored', account_confirm: 'Account confirmed manually', account_delete: 'Account deleted', listing_hide: 'Listing hidden', listing_show: 'Listing shown', listing_pin: 'Listing pinned', listing_unpin: 'Listing unpinned' },
+  actions: { listing_create: 'Listing created', listing_update: 'Listing edited', listing_publish: 'Listing published', listing_unpublish: 'Listing unpublished', listing_renew: 'Listing extended by 30 days', listing_expire: 'Free period ended (removed automatically)', staff_invite: 'Staff invited', staff_deactivate: 'Member deactivated', staff_activate: 'Member reactivated', staff_resend: 'Email resent', staff_password: 'Password set', enquiry_accept: 'Enquiry accepted', enquiry_reopen: 'Enquiry marked pending', enquiry_delete: 'Enquiry deleted', enquiry_restore: 'Enquiry restored', account_confirm: 'Account confirmed manually', account_delete: 'Account deleted', listing_hide: 'Listing hidden', listing_show: 'Listing shown', listing_pin: 'Listing pinned', listing_unpin: 'Listing unpinned' },
   local: 'Local preview: all data comes from this computer’s local database. Emails stay in the local log.',
   auditHint: 'The most recent actions taken by the team in this workspace.', console: 'Admin', menu: 'Menu', staffArea: 'Team-only area'
  },
@@ -47,7 +47,7 @@ const COPY = {
   error: '无法加载资料。请检查网络和账号权限后重试。', unavailable: '服务暂时不可用，请稍后再试。',
   previous: '上一页', next: '下一页', cancel: '取消', saving: '正在保存…', saveError: '保存失败，已重新获取最新数据。',
   status: '角色', audit: '操作记录', emptyAudit: '暂无操作记录。', date: '时间', action: '操作', actor: '操作账号', target: '对象',
-  actions: { staff_invite: '邀请团队成员', staff_deactivate: '停用成员', staff_activate: '重新启用成员', staff_resend: '重新发送邮件', staff_password: '设置密码', enquiry_accept: '通过咨询', enquiry_reopen: '咨询改为待处理', enquiry_delete: '删除咨询', enquiry_restore: '恢复咨询', account_confirm: '手动确认账户', account_delete: '删除账户', listing_hide: '隐藏房源', listing_show: '显示房源', listing_pin: '置顶房源', listing_unpin: '取消置顶' },
+  actions: { listing_create: '新建房源', listing_update: '修改房源', listing_publish: '发布房源', listing_unpublish: '下架房源', listing_renew: '房源续期 30 天', listing_expire: '免费期结束（自动下架）', staff_invite: '邀请团队成员', staff_deactivate: '停用成员', staff_activate: '重新启用成员', staff_resend: '重新发送邮件', staff_password: '设置密码', enquiry_accept: '通过咨询', enquiry_reopen: '咨询改为待处理', enquiry_delete: '删除咨询', enquiry_restore: '恢复咨询', account_confirm: '手动确认账户', account_delete: '删除账户', listing_hide: '隐藏房源', listing_show: '显示房源', listing_pin: '置顶房源', listing_unpin: '取消置顶' },
   local: '本地预览：所有数据来自本机的本地数据库，邮件只写入本地日志。',
   auditHint: '团队成员在后台中最近的操作记录。', console: '管理后台', menu: '菜单', staffArea: '仅限团队成员'
  }
@@ -74,9 +74,33 @@ const ACCOUNTS = {
  zh: { title: '买家账户', hint: '在 motelavendre.ca 注册的账户。未确认邮箱的账户会在 7 天后自动删除。', search: '按邮箱、姓名或电话搜索', all: '全部', verified: '已确认', unverified: '未确认', total: '账户总数', confirmedCount: '已确认', empty: '没有符合条件的账户。', person: '账户', status: '状态', created: '注册时间', lastSignin: '最近登录', activity: '收藏 · 搜索 · 咨询', actions: '操作', confirmBtn: '手动确认', deleteBtn: '删除', confirmDelete: '永久删除 {email}？其资料、收藏、保存的搜索和咨询记录都会被清除，无法恢复。', yes: '永久删除', confirmed: '账户已确认，买家现在可以登录了。', deleted: '账户已删除。', never: '从未', budget: '预算', regions: '意向地区', saved: '收藏房源', searches: '保存的搜索', enquiries: '咨询' }
 };
 const LISTINGS = {
- en: { title: 'Listings on this site', hint: 'Hotel and motel listings published on Propriété En Vente. Hiding or pinning only affects motelavendre.ca; edit the listing itself in the main admin.', delay: 'Changes appear on the public site within one minute.', empty: 'No published hotel or motel listings.', ref: 'Listing', place: 'Location', price: 'Price', photos: 'Photos', published: 'Published', state: 'On this site', actions: 'Actions', shown: 'Shown', hidden: 'Hidden', pinned: 'Pinned', illustrative: 'Illustrative photo', hide: 'Hide', show: 'Show', pin: 'Pin to top', unpin: 'Unpin', view: 'View', catalogue: 'The main catalogue is unavailable right now. Try again shortly.', counts: '{shown} shown · {hidden} hidden · {pinned} pinned', statTotal: 'Listings', statShown: 'Shown', statHidden: 'Hidden', statPinned: 'Pinned' },
- fr: { title: 'Annonces sur ce site', hint: 'Annonces d’hôtels et de motels publiées sur Propriété En Vente. Masquer ou épingler ne concerne que motelavendre.ca; modifiez l’annonce elle-même dans l’administration principale.', delay: 'Les changements apparaissent sur le site public en moins d’une minute.', empty: 'Aucune annonce d’hôtel ou de motel publiée.', ref: 'Annonce', place: 'Lieu', price: 'Prix', photos: 'Photos', published: 'Publication', state: 'Sur ce site', actions: 'Actions', shown: 'Affichée', hidden: 'Masquée', pinned: 'Épinglée', illustrative: 'Photo d’illustration', hide: 'Masquer', show: 'Afficher', pin: 'Épingler en tête', unpin: 'Désépingler', view: 'Voir', catalogue: 'Le catalogue principal est momentanément indisponible. Réessayez dans un instant.', counts: '{shown} affichées · {hidden} masquées · {pinned} épinglées', statTotal: 'Annonces', statShown: 'Affichées', statHidden: 'Masquées', statPinned: 'Épinglées' },
- zh: { title: '本站房源', hint: '在 Propriété En Vente 发布的酒店/汽车旅馆房源。隐藏和置顶只影响 motelavendre.ca；修改房源内容请到主站后台。', delay: '修改会在 1 分钟内同步到公开网站。', empty: '目前没有已发布的酒店/汽车旅馆房源。', ref: '房源', place: '位置', price: '价格', photos: '照片', published: '发布时间', state: '本站状态', actions: '操作', shown: '显示中', hidden: '已隐藏', pinned: '已置顶', illustrative: '示意图', hide: '隐藏', show: '显示', pin: '置顶', unpin: '取消置顶', view: '查看', catalogue: '主站房源目录暂时无法读取，请稍后再试。', counts: '显示 {shown} · 隐藏 {hidden} · 置顶 {pinned}', statTotal: '房源总数', statShown: '显示中', statHidden: '已隐藏', statPinned: '已置顶' }
+ en: { title: 'Listings', hint: 'Hotels and motels on motelavendre.ca. Listings, photos and settings are stored on this site only.', delay: 'Changes appear on the public site within one minute.', empty: 'No listings yet.', ref: 'Listing', place: 'Location', price: 'Price', photos: 'Photos', status: 'Status', state: 'On the site', actions: 'Actions', shown: 'Shown', hidden: 'Hidden', pinned: 'Pinned', illustrative: 'Illustration', hide: 'Hide', show: 'Show', pin: 'Pin to top', unpin: 'Unpin', view: 'View', counts: '{shown} shown · {hidden} hidden · {pinned} pinned', statTotal: 'Listings', statShown: 'Published', statHidden: 'Drafts', statPinned: 'Free until…',
+  draft: 'Draft', published: 'Published', expired: 'Expired', freeUntil: 'Free until {date}', add: 'New listing', edit: 'Edit', publish: 'Publish', unpublish: 'Unpublish', renew: 'Extend 30 days',
+  editTitle: 'Edit listing #{ref}', newTitle: 'New listing', back: 'Back to listings', save: 'Save', saved: 'Saved.', type: 'Type', types: { motel: 'Motel', hotel: 'Hotel', inn: 'Inn', 'hotel-motel': 'Hotel / motel' },
+  city: 'City', region: 'Region (optional, set from the city)', priceField: 'Asking price (CAD)', rooms: 'Guest rooms', acres: 'Land (acres)', parking: 'Parking spaces', season: 'Operation', seasons: { unknown: 'Not specified', 'year-round': 'Year-round', seasonal: 'Seasonal' }, freehold: 'Freehold (land included)', illustrativeField: 'The photos are illustrations, not the actual property',
+  copyTitle: 'Text', copyHint: 'French is required. English and Chinese are optional: when empty, the French text is shown.', short: 'Summary (1–2 sentences)', description: 'Description', features: 'Highlights (one per line, up to 12)',
+  photosTitle: 'Photos', photosHint: 'The first photo is the cover. Photos are converted to WebP in your browser (max. 1600 px) before upload.', photosFirst: 'Save the listing once before adding photos.', addPhotos: 'Add photos', uploading: 'Uploading {n}…', up: 'Move up', down: 'Move down', remove: 'Remove', noPhotos: 'No photos yet. A listing needs at least one photo to be published.',
+  sellerTitle: 'Seller and free first month', sellerHint: 'Private: never shown on the site. Used for the reminder 7 days before the free period ends and the notice when the listing is removed.', sellerName: 'Seller name', sellerEmail: 'Seller email', sellerLang: 'Email language', free: 'Free first month: publish for 30 days, then remove automatically (no charge)', freeNote: 'The 30 days start when the listing is published.',
+  errors: { missing_short: 'Add a French summary.', missing_description: 'Add a French description.', missing_city: 'Add the city.', invalid_type: 'Choose a type.', missing_seller_email: 'A free listing needs the seller’s email (for the reminder).', invalid_seller_email: 'Check the seller’s email.', photo_required: 'Add at least one photo before publishing.', renew_required: 'This free listing expired: use “Extend 30 days”.', revision_conflict: 'Someone else changed this listing. The list was refreshed.', photo_too_large: 'Photo too large (2 MB max after conversion).', photo_format: 'Unsupported photo format.', too_many_photos: 'Up to 30 photos per listing.', photos_unavailable: 'Photo storage is not set up yet.', invalid_photo: 'A photo path is not valid.' },
+  statsTitle: 'Visits', statsHint: 'Aggregate counts for the last 30 days: no names, emails or addresses are recorded.', pageViews: 'Page views', propertyViews: 'Listing views', guideViews: 'Guide views', sources: 'Sources', topListings: 'Most viewed listings', noStats: 'No visits recorded yet.' },
+ fr: { title: 'Annonces', hint: 'Hôtels et motels sur motelavendre.ca. Les annonces, photos et réglages sont stockés sur ce site uniquement.', delay: 'Les changements apparaissent sur le site public en moins d’une minute.', empty: 'Aucune annonce pour l’instant.', ref: 'Annonce', place: 'Lieu', price: 'Prix', photos: 'Photos', status: 'Statut', state: 'Sur le site', actions: 'Actions', shown: 'Affichée', hidden: 'Masquée', pinned: 'Épinglée', illustrative: 'Illustration', hide: 'Masquer', show: 'Afficher', pin: 'Épingler en tête', unpin: 'Désépingler', view: 'Voir', counts: '{shown} affichées · {hidden} masquées · {pinned} épinglées', statTotal: 'Annonces', statShown: 'Publiées', statHidden: 'Brouillons', statPinned: 'Gratuites',
+  draft: 'Brouillon', published: 'Publiée', expired: 'Expirée', freeUntil: 'Gratuite jusqu’au {date}', add: 'Nouvelle annonce', edit: 'Modifier', publish: 'Publier', unpublish: 'Retirer', renew: 'Prolonger de 30 jours',
+  editTitle: 'Modifier l’annonce no {ref}', newTitle: 'Nouvelle annonce', back: 'Retour aux annonces', save: 'Enregistrer', saved: 'Enregistré.', type: 'Type', types: { motel: 'Motel', hotel: 'Hôtel', inn: 'Auberge', 'hotel-motel': 'Hôtel / motel' },
+  city: 'Ville', region: 'Région (facultatif, déduite de la ville)', priceField: 'Prix demandé ($ CA)', rooms: 'Chambres', acres: 'Terrain (acres)', parking: 'Places de stationnement', season: 'Exploitation', seasons: { unknown: 'Non précisée', 'year-round': 'À l’année', seasonal: 'Saisonnière' }, freehold: 'Propriété (terrain inclus)', illustrativeField: 'Les photos sont des illustrations, pas la propriété réelle',
+  copyTitle: 'Textes', copyHint: 'Le français est obligatoire. L’anglais et le chinois sont facultatifs : vides, le texte français est affiché.', short: 'Résumé (1 à 2 phrases)', description: 'Description', features: 'Points forts (un par ligne, 12 au maximum)',
+  photosTitle: 'Photos', photosHint: 'La première photo sert de couverture. Les photos sont converties en WebP dans votre navigateur (1600 px max.) avant l’envoi.', photosFirst: 'Enregistrez l’annonce une première fois avant d’ajouter des photos.', addPhotos: 'Ajouter des photos', uploading: 'Envoi de {n}…', up: 'Monter', down: 'Descendre', remove: 'Retirer', noPhotos: 'Aucune photo. Une annonce doit avoir au moins une photo pour être publiée.',
+  sellerTitle: 'Vendeur et premier mois gratuit', sellerHint: 'Privé : jamais affiché sur le site. Sert au rappel envoyé 7 jours avant la fin de la période gratuite et à l’avis de retrait.', sellerName: 'Nom du vendeur', sellerEmail: 'Courriel du vendeur', sellerLang: 'Langue des courriels', free: 'Premier mois gratuit : publiée 30 jours, puis retirée automatiquement (sans frais)', freeNote: 'Les 30 jours commencent à la publication.',
+  errors: { missing_short: 'Ajoutez un résumé en français.', missing_description: 'Ajoutez une description en français.', missing_city: 'Indiquez la ville.', invalid_type: 'Choisissez un type.', missing_seller_email: 'Une annonce gratuite exige le courriel du vendeur (pour le rappel).', invalid_seller_email: 'Vérifiez le courriel du vendeur.', photo_required: 'Ajoutez au moins une photo avant de publier.', renew_required: 'Cette annonce gratuite a expiré : utilisez « Prolonger de 30 jours ».', revision_conflict: 'Quelqu’un d’autre a modifié cette annonce. La liste a été actualisée.', photo_too_large: 'Photo trop lourde (2 Mo max. après conversion).', photo_format: 'Format de photo non pris en charge.', too_many_photos: '30 photos au maximum par annonce.', photos_unavailable: 'Le stockage des photos n’est pas encore configuré.', invalid_photo: 'Un chemin de photo n’est pas valide.' },
+  statsTitle: 'Visites', statsHint: 'Comptes globaux des 30 derniers jours : aucun nom, courriel ni adresse n’est enregistré.', pageViews: 'Pages vues', propertyViews: 'Fiches consultées', guideViews: 'Guides consultés', sources: 'Sources', topListings: 'Annonces les plus vues', noStats: 'Aucune visite enregistrée pour l’instant.' },
+ zh: { title: '房源', hint: 'motelavendre.ca 上的酒店和汽车旅馆。房源、照片和设置都只保存在本站。', delay: '修改会在 1 分钟内同步到公开网站。', empty: '还没有房源。', ref: '房源', place: '位置', price: '价格', photos: '照片', status: '状态', state: '网站显示', actions: '操作', shown: '显示中', hidden: '已隐藏', pinned: '已置顶', illustrative: '示意图', hide: '隐藏', show: '显示', pin: '置顶', unpin: '取消置顶', view: '查看', counts: '显示 {shown} · 隐藏 {hidden} · 置顶 {pinned}', statTotal: '房源总数', statShown: '已发布', statHidden: '草稿', statPinned: '免费中',
+  draft: '草稿', published: '已发布', expired: '已到期', freeUntil: '免费至 {date}', add: '新建房源', edit: '编辑', publish: '发布', unpublish: '下架', renew: '续期 30 天',
+  editTitle: '编辑房源 #{ref}', newTitle: '新建房源', back: '返回房源列表', save: '保存', saved: '已保存。', type: '类型', types: { motel: '汽车旅馆', hotel: '酒店', inn: '度假屋', 'hotel-motel': '酒店／汽车旅馆' },
+  city: '城市', region: '地区（选填，默认按城市自动填写）', priceField: '要价（加元）', rooms: '客房数', acres: '土地（英亩）', parking: '车位数', season: '经营方式', seasons: { unknown: '未注明', 'year-round': '全年经营', seasonal: '季节性经营' }, freehold: '产权（含土地）', illustrativeField: '照片为示意图，不是实际物业',
+  copyTitle: '文字介绍', copyHint: '法文必填。英文和中文选填，不填时网站显示法文内容。', short: '摘要（1–2 句）', description: '详细介绍', features: '亮点（每行一条，最多 12 条）',
+  photosTitle: '照片', photosHint: '第一张为封面。照片会先在您的浏览器里转成 WebP（最长边 1600 像素）再上传。', photosFirst: '请先保存一次房源，再添加照片。', addPhotos: '添加照片', uploading: '正在上传 {n}…', up: '上移', down: '下移', remove: '删除', noPhotos: '还没有照片。房源至少要有一张照片才能发布。',
+  sellerTitle: '卖家与首月免费', sellerHint: '仅后台可见，不会在网站显示。用于免费期结束前 7 天的提醒邮件和下架通知。', sellerName: '卖家姓名', sellerEmail: '卖家邮箱', sellerLang: '邮件语言', free: '首月免费：发布后展示 30 天，到期自动下架（不收费）', freeNote: '30 天从发布当天开始计算。',
+  errors: { missing_short: '请填写法文摘要。', missing_description: '请填写法文详细介绍。', missing_city: '请填写城市。', invalid_type: '请选择类型。', missing_seller_email: '免费房源需要填写卖家邮箱（用于发提醒）。', invalid_seller_email: '请检查卖家邮箱。', photo_required: '发布前请至少添加一张照片。', renew_required: '这条免费房源已到期，请用“续期 30 天”。', revision_conflict: '其他人刚修改了这条房源，列表已刷新。', photo_too_large: '照片太大（转换后最大 2 MB）。', photo_format: '不支持的照片格式。', too_many_photos: '每条房源最多 30 张照片。', photos_unavailable: '照片存储还没有配置好。', invalid_photo: '照片路径无效。' },
+  statsTitle: '访问统计', statsHint: '近 30 天的汇总次数，不记录姓名、邮箱或地址。', pageViews: '页面浏览', propertyViews: '房源浏览', guideViews: '指南浏览', sources: '来源', topListings: '浏览最多的房源', noStats: '还没有访问记录。' }
 };
 const INVITE = {
  fr: { tab: 'Inviter un membre', title: 'Inviter un administrateur des opérations', text: 'L’invitation donne accès aux demandes, aux comptes acheteurs et aux annonces de Motel à vendre. Elle ne permet pas d’inviter d’autres administrateurs.', email: 'Adresse courriel professionnelle', send: 'Envoyer l’invitation', hint: 'La personne reçoit un courriel pour choisir son mot de passe (lien valide 7 jours). Aucun compte préalable n’est nécessaire.', sent: 'Invitation envoyée à {email}.', sentNoMail: 'Membre ajouté ({email}), mais le courriel n’a pas pu être envoyé. Utilisez « Renvoyer » plus tard.', already: 'Ce compte fait déjà partie de l’équipe.', invalid: 'Adresse invalide, ou c’est votre propre compte.', error: 'L’opération n’a pas pu être finalisée. Réessayez dans un instant.', team: 'Membres de l’équipe', role: 'Rôle', state: 'État', since: 'Depuis', owner: 'Propriétaire', operator: 'Administrateur', activeLabel: 'Actif', pending: 'Invitation en attente', inactive: 'Désactivé', resend: 'Renvoyer', deactivate: 'Désactiver', activate: 'Réactiver', resent: 'Courriel renvoyé à {email}.', confirmDeactivate: 'Désactiver {email} ? Ses sessions sont fermées immédiatement. Vous pourrez le réactiver.', yes: 'Désactiver' },
@@ -152,7 +176,7 @@ const fmt = (s, vars) => s.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
 
 // ---- State ----
 let lang = (() => { try { const v = localStorage.getItem('mav_admin_lang'); if (COPY[v]) return v; } catch {} const n = (navigator.language || '').toLowerCase(); return n.startsWith('zh') ? 'zh' : n.startsWith('en') ? 'en' : 'fr'; })();
-let tab = ['enquiries', 'accounts', 'listings', 'audit', 'invite'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'enquiries';
+let tab = ['enquiries', 'accounts', 'listings', 'stats', 'audit', 'invite'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'enquiries';
 let staffEmail = '', staffRole = '', gateNotice = '', timers = [], signedIn = null, screen = 'login';
 // Email links land here as #set=TOKEN (password link) or #invite=TOKEN. Capture and clear at once.
 let linkToken = '';
@@ -256,7 +280,7 @@ function render() {
  if (signedIn === null) { start(); return; }
  if (!signedIn) { fill(root, screen === 'link' ? gate(c.linkTitle, c.linkText, 'link') : gate(c.loginTitle, c.loginText, 'login')); return; }
  if (tab === 'invite' && staffRole !== 'owner') tab = 'enquiries';
- const titles = { enquiries: INBOX[lang].title, accounts: ACCOUNTS[lang].title, listings: LISTINGS[lang].title, audit: c.audit, invite: INVITE[lang].tab };
+ const titles = { enquiries: INBOX[lang].title, accounts: ACCOUNTS[lang].title, listings: LISTINGS[lang].title, stats: LISTINGS[lang].statsTitle, audit: c.audit, invite: INVITE[lang].tab };
  const nav = (id, name, label, badge) => h('button', { type: 'button', class: tab === id ? 'active' : '', 'aria-current': tab === id ? 'page' : null, onclick: () => { tab = id; history.replaceState(null, '', '#' + id); render(); } }, icon(name, 18), h('span', { class: 'admin-nav-label', text: label }), badge || null);
  const pendingBadge = pendingBadgeEl = h('span', { class: 'admin-nav-badge', hidden: true });
  const panel = h('div', { class: 'admin-panel-host', 'aria-live': 'polite' });
@@ -266,7 +290,7 @@ function render() {
    h('div', { class: 'admin-brand' }, brandMark(32), h('strong', {}, 'Motel à vendre', h('small', { text: c.console }))),
    h('nav', { 'aria-label': c.title },
     h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.work }), nav('enquiries', 'message', INBOX[lang].title, pendingBadge)),
-    h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.management }), nav('accounts', 'users', ACCOUNTS[lang].title), nav('listings', 'home', LISTINGS[lang].title), nav('audit', 'history', c.audit), staffRole === 'owner' ? nav('invite', 'userPlus', INVITE[lang].tab) : null)),
+    h('div', { class: 'admin-nav-section' }, h('span', { class: 'admin-nav-heading', text: c.management }), nav('accounts', 'users', ACCOUNTS[lang].title), nav('listings', 'home', LISTINGS[lang].title), nav('stats', 'eye', LISTINGS[lang].statsTitle), nav('audit', 'history', c.audit), staffRole === 'owner' ? nav('invite', 'userPlus', INVITE[lang].tab) : null)),
    h('a', { href: '/' + lang + '/', class: 'admin-back', target: '_blank', rel: 'noopener' }, icon('external', 15), c.back)),
   h('div', { class: 'admin-main' },
    h('header', { class: 'admin-topbar' },
@@ -279,7 +303,7 @@ function render() {
     panel))));
  // Pending count for the sidebar badge (first page only: 50+ when there are more).
  refreshPending();
- ({ enquiries: enquiriesTab, accounts: accountsTab, listings: listingsTab, audit: auditTab, invite: inviteTab })[tab](panel);
+ ({ enquiries: enquiriesTab, accounts: accountsTab, listings: listingsTab, stats: statsTab, audit: auditTab, invite: inviteTab })[tab](panel);
 }
 
 const date = v => new Date(v).toLocaleString(LOCALES[lang]);
@@ -440,51 +464,175 @@ function accountsTab(panel) {
 }
 
 // ---- Listings on this site (main catalogue + D1 display settings) ----
+const LISTING_LANGS = ['fr', 'en', 'zh'], LISTING_LANG_NAMES = { fr: 'Français', en: 'English', zh: '中文' };
+
+// Browser-side resize + WebP conversion keeps the Worker's CPU use low (no server-side image work).
+async function preparePhoto(file) {
+ const bitmap = await createImageBitmap(file);
+ const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+ const canvas = document.createElement('canvas');
+ canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
+ canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+ const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.82));
+ if (blob && blob.type === 'image/webp') return blob;
+ return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85)); // browsers without WebP encoding
+}
+async function uploadPhoto(reference, blob) {
+ let r;
+ try { r = await fetch('/api/admin/listings/photo?reference=' + encodeURIComponent(reference), { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': blob.type, 'X-MAV-Admin': '1' }, body: blob }); }
+ catch { throw new Failure(0, 'network'); }
+ const data = await r.json().catch(() => ({}));
+ if (!r.ok) throw new Failure(r.status, data.error);
+ return data.path;
+}
+
 function listingsTab(panel) {
  const c = COPY[lang], tx = LISTINGS[lang];
- let listings = null, error = '', busy = null;
+ let listings = null, error = '', notice = '', busy = null, editing = null;
  const section = h('section', { class: 'admin-page' });
  fill(panel, section);
+ const failMessage = e => tx.errors[e.code] || (e.status === 503 ? c.unavailable : c.error);
  async function load() {
   try { listings = (await api('listings')).listings; error = ''; }
-  catch (e) { if (handle(e)) return; error = e.code === 'catalogue_unavailable' ? tx.catalogue : e.status === 503 ? c.unavailable : c.error; }
+  catch (e) { if (handle(e)) return; error = failMessage(e); }
   draw();
  }
  async function set(item, change) {
-  busy = item.reference; draw();
-  try { const r = await api('listings', { reference: item.reference, ...change }); Object.assign(item, r); }
+  busy = item.reference; notice = ''; draw();
+  try { await api('listings', { reference: item.reference, ...change }); }
   catch (e) { if (handle(e)) return; error = c.saveError; }
   busy = null; load();
  }
+ async function status(item, action) {
+  busy = item.reference; notice = ''; error = ''; draw();
+  try { await api('listings/status', { reference: item.reference, revision: item.revision, action }); }
+  catch (e) { if (handle(e)) return; error = failMessage(e); }
+  busy = null; load();
+ }
+ const freeText = l => l.free_until ? fmt(tx.freeUntil, { date: day(l.free_until * 1000) }) : null;
+ function table() {
+  return h('div', { class: 'admin-card' }, h('div', { class: 'admin-table-wrap' }, h('table', { class: 'admin-listings' },
+   h('thead', {}, h('tr', {}, [tx.ref, tx.place, tx.price, tx.photos, tx.status, tx.state, tx.actions].map(x => h('th', { text: x })))),
+   h('tbody', {}, listings.map(l => h('tr', { class: l.hidden || l.status !== 'published' ? 'is-hidden' : null },
+    h('td', {}, h('code', { text: '#' + l.reference })),
+    h('td', {}, h('strong', { class: 'admin-cell-title', text: l.item.city || '—' }), h('small', { text: tx.types[l.item.type] + (l.item.region ? ' · ' + l.item.region : '') })),
+    h('td', { class: 'is-num', text: l.item.price === null ? '—' : money(l.item.price) }),
+    h('td', {}, String(l.item.photos.length), l.item.illustrative ? h('small', { text: tx.illustrative }) : null),
+    h('td', {}, h('div', { class: 'admin-badges' }, h('span', { class: 'admin-badge' + (l.status === 'published' ? ' is-ok' : l.status === 'expired' ? ' is-muted' : ''), text: tx[l.status] })),
+     freeText(l) ? h('small', { text: freeText(l) }) : null),
+    h('td', {}, h('div', { class: 'admin-badges' }, h('span', { class: 'admin-badge' + (l.hidden ? ' is-muted' : ' is-ok'), text: l.hidden ? tx.hidden : tx.shown }), l.pinned ? h('span', { class: 'admin-badge is-accent' }, icon('pin', 11), tx.pinned) : null),
+     l.updated_by ? h('small', { text: l.updated_by + ' · ' + shortDate(l.updated_at * 1000) }) : null),
+    h('td', {}, h('div', { class: 'admin-row-actions' },
+     h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => { editing = { listing: l }; notice = ''; error = ''; draw(); } }, tx.edit),
+     l.status === 'draft' ? h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => status(l, 'publish') }, icon('check', 14), tx.publish) : null,
+     l.status === 'published' ? h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => status(l, 'unpublish') }, tx.unpublish) : null,
+     l.free && l.status !== 'draft' ? h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => status(l, 'renew') }, icon('refresh', 14), tx.renew) : null,
+     l.status === 'published' ? h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => set(l, { hidden: !l.hidden }) }, icon(l.hidden ? 'eye' : 'eyeOff', 14), l.hidden ? tx.show : tx.hide) : null,
+     l.status === 'published' ? h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy || l.hidden, onclick: () => set(l, { pinned: !l.pinned }) }, icon('pin', 14), l.pinned ? tx.unpin : tx.pin) : null,
+     l.status === 'published' && !l.hidden ? h('a', { class: 'admin-secondary', href: propertyPath(l.reference), target: '_blank', rel: 'noopener noreferrer' }, tx.view, icon('arrowUp', 14)) : null,
+     busy === l.reference ? h('span', { class: 'buyer-enquiry-saving', role: 'status', text: c.saving }) : null))))))));
+ }
+ function editor() {
+  const l = editing.listing, item = l ? l.item : { type: 'motel', city: '', region: '', price: null, rooms: null, acres: null, parking: null, season: 'unknown', tenure: null, illustrative: false, photos: [], copy: {} };
+  const photos = editing.photos || (editing.photos = [...item.photos]);
+  const input = (name, value, attrs = {}) => h('input', { name, value: value ?? '', ...attrs });
+  const field = (label, control, wide) => h('label', { class: 'admin-field' + (wide ? ' is-wide' : '') }, h('span', { text: label }), control);
+  const select = (name, options, value) => { const s = h('select', { name }, Object.entries(options).map(([v, label]) => h('option', { value: v, text: label }))); s.value = value; return s; };
+  const area = (name, value, rows) => { const a = h('textarea', { name, rows }); a.value = value || ''; return a; };
+  const own = item.copy || {};
+  const form = h('form', { class: 'admin-listing-form', onsubmit: async e => {
+   e.preventDefault(); const f = new FormData(form), n = k => f.get(k) === '' ? null : Number(f.get(k));
+   const payload = { type: f.get('type'), city: f.get('city'), region: f.get('region'), price: n('price'), rooms: n('rooms'), acres: n('acres'), parking: n('parking'), season: f.get('season'), tenure: f.get('tenure') ? 'freehold' : null, illustrative: !!f.get('illustrative'), photos,
+    copy: Object.fromEntries(LISTING_LANGS.map(x => [x, { short: f.get('short_' + x), description: f.get('description_' + x), features: f.get('features_' + x) }])),
+    seller: { name: f.get('seller_name'), email: f.get('seller_email'), language: f.get('seller_language') }, free: !!f.get('free') };
+   if (l) { payload.reference = l.reference; payload.revision = l.revision; }
+   busy = 'save'; error = ''; notice = ''; draw();
+   try { const r = await api('listings/save', payload); editing = { listing: r.listing }; notice = tx.saved; }
+   catch (err) { if (handle(err)) return; error = failMessage(err); if (err.code === 'revision_conflict') { editing = null; load(); } }
+   busy = null; draw();
+  } });
+  const copyBlocks = LISTING_LANGS.map(x => h('fieldset', { class: 'admin-listing-copy' }, h('legend', { text: LISTING_LANG_NAMES[x] + (x === 'fr' ? ' *' : '') }),
+   field(tx.short, area('short_' + x, l && (x === 'fr' || own[x]?.short !== own.fr?.short) ? own[x]?.short : '', 2), true),
+   field(tx.description, area('description_' + x, l && (x === 'fr' || own[x]?.description !== own.fr?.description) ? own[x]?.description : '', 6), true),
+   field(tx.features, area('features_' + x, l && (x === 'fr' || JSON.stringify(own[x]?.features) !== JSON.stringify(own.fr?.features)) ? (own[x]?.features || []).join('\n') : '', 4), true)));
+  const photoList = h('div', { class: 'admin-photo-grid' }, photos.length ? photos.map((p, i) => h('figure', {},
+   h('img', { src: '/' + p, alt: '', loading: 'lazy' }),
+   h('figcaption', {}, i === 0 ? h('strong', { text: '★' }) : null,
+    h('button', { type: 'button', class: 'admin-icon-button', title: tx.up, 'aria-label': tx.up, disabled: i === 0, onclick: () => { [photos[i - 1], photos[i]] = [photos[i], photos[i - 1]]; draw(); } }, '↑'),
+    h('button', { type: 'button', class: 'admin-icon-button', title: tx.down, 'aria-label': tx.down, disabled: i === photos.length - 1, onclick: () => { [photos[i + 1], photos[i]] = [photos[i], photos[i + 1]]; draw(); } }, '↓'),
+    h('button', { type: 'button', class: 'admin-icon-button', title: tx.remove, 'aria-label': tx.remove, onclick: () => { photos.splice(i, 1); draw(); } }, icon('trash', 14))))) : h('p', { class: 'admin-help', text: tx.noPhotos }));
+  const picker = h('input', { type: 'file', accept: 'image/*', multiple: true, hidden: true, onchange: async e => {
+   const files = [...e.target.files]; e.target.value = '';
+   for (let i = 0; i < files.length; i++) {
+    busy = fmt(tx.uploading, { n: (i + 1) + '/' + files.length }); error = ''; draw();
+    try { photos.push(await uploadPhoto(l.reference, await preparePhoto(files[i]))); }
+    catch (err) { if (handle(err)) return; error = failMessage(err); break; }
+   }
+   busy = null; draw();
+  } });
+  const seller = (l && l.seller) || { name: '', email: '', language: 'fr' };
+  fill(form,
+   h('div', { class: 'admin-card admin-listing-section' }, h('div', { class: 'admin-listing-grid' },
+    field(tx.type, select('type', tx.types, item.type)), field(tx.city + ' *', input('city', item.city, { required: true, maxlength: 120 })), field(tx.region, input('region', l ? item.region : '', { maxlength: 120 })),
+    field(tx.priceField, input('price', item.price, { type: 'number', min: 0, step: 1 })), field(tx.rooms, input('rooms', item.rooms, { type: 'number', min: 1, step: 1 })), field(tx.acres, input('acres', item.acres, { type: 'number', min: 0, step: 'any' })),
+    field(tx.parking, input('parking', item.parking, { type: 'number', min: 0, step: 1 })), field(tx.season, select('season', tx.seasons, item.season))),
+    h('label', { class: 'admin-check' }, h('input', { type: 'checkbox', name: 'tenure', checked: item.tenure === 'freehold' }), tx.freehold),
+    h('label', { class: 'admin-check' }, h('input', { type: 'checkbox', name: 'illustrative', checked: !!item.illustrative }), tx.illustrativeField)),
+   h('div', { class: 'admin-card admin-listing-section' }, h('h2', { text: tx.copyTitle }), h('p', { class: 'admin-help', text: tx.copyHint }), copyBlocks),
+   h('div', { class: 'admin-card admin-listing-section' }, h('h2', { text: tx.photosTitle }), h('p', { class: 'admin-help', text: l ? tx.photosHint : tx.photosFirst }), photoList,
+    l ? h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => picker.click() }, icon('download', 14), tx.addPhotos) : null, picker),
+   h('div', { class: 'admin-card admin-listing-section' }, h('h2', { text: tx.sellerTitle }), h('p', { class: 'admin-help', text: tx.sellerHint }), h('div', { class: 'admin-listing-grid' },
+    field(tx.sellerName, input('seller_name', seller.name, { maxlength: 120, autocomplete: 'off' })), field(tx.sellerEmail, input('seller_email', seller.email, { type: 'email', maxlength: 254, autocomplete: 'off' })),
+    field(tx.sellerLang, select('seller_language', LISTING_LANG_NAMES, seller.language))),
+    h('label', { class: 'admin-check' }, h('input', { type: 'checkbox', name: 'free', checked: l ? !!l.free : false }), tx.free),
+    h('p', { class: 'admin-help', text: l && l.free_until ? freeText(l) : tx.freeNote })),
+   h('div', { class: 'admin-page-actions' }, h('button', { type: 'submit', class: 'admin-primary', disabled: !!busy }, busy === 'save' ? c.saving : tx.save),
+    typeof busy === 'string' && busy !== 'save' ? h('span', { class: 'buyer-enquiry-saving', role: 'status', text: busy }) : null));
+  return form;
+ }
  function draw() {
   if (!section.isConnected) return;
+  const messages = [error ? h('p', { class: 'admin-message error', role: 'alert', text: error }) : null, notice ? h('p', { class: 'admin-message', role: 'status', text: notice }) : null];
+  if (editing) {
+   const l = editing.listing;
+   fill(section, pageHead(l ? fmt(tx.editTitle, { ref: l.reference }) : tx.newTitle, l ? tx[l.status] + (freeText(l) ? ' · ' + freeText(l) : '') : '', null,
+    h('button', { type: 'button', class: 'admin-secondary', onclick: () => { editing = null; error = ''; notice = ''; listings = null; draw(); load(); } }, icon('back', 15), tx.back)), messages, editor());
+   return;
+  }
   const body = [];
   if (!listings && !error) body.push(h('div', { class: 'admin-card' }, skeleton(4)));
   if (listings && !listings.length) body.push(h('div', { class: 'admin-card' }, h('div', { class: 'admin-empty' }, icon('home', 26), h('p', { text: tx.empty }))));
   if (listings && listings.length) {
-   body.push(h('div', { class: 'admin-stats' }, stat(tx.statTotal, listings.length), stat(tx.statShown, listings.filter(l => !l.hidden).length, 'ok'), stat(tx.statHidden, listings.filter(l => l.hidden).length, 'muted'), stat(tx.statPinned, listings.filter(l => l.pinned && !l.hidden).length, 'accent')));
-   body.push(h('div', { class: 'admin-card' }, h('div', { class: 'admin-table-wrap' }, h('table', { class: 'admin-listings' },
-    h('thead', {}, h('tr', {}, [tx.ref, tx.place, tx.price, tx.photos, tx.published, tx.state, tx.actions].map(x => h('th', { text: x })))),
-    h('tbody', {}, listings.map(l => h('tr', { class: l.hidden ? 'is-hidden' : null },
-     h('td', {}, h('code', { text: '#' + l.reference })),
-     h('td', {}, h('strong', { class: 'admin-cell-title', text: l.city || '—' }), l.region ? h('small', { text: l.region }) : null),
-     h('td', { class: 'is-num', text: l.price === null ? '—' : money(l.price) }),
-     h('td', {}, String(l.photos), l.illustrative ? h('small', { text: tx.illustrative }) : null),
-     h('td', { class: 'admin-nowrap', text: l.published_at ? day(l.published_at) : '—' }),
-     h('td', {}, h('div', { class: 'admin-badges' }, h('span', { class: 'admin-badge' + (l.hidden ? ' is-muted' : ' is-ok'), text: l.hidden ? tx.hidden : tx.shown }), l.pinned ? h('span', { class: 'admin-badge is-accent' }, icon('pin', 11), tx.pinned) : null),
-      l.updated_by ? h('small', { text: l.updated_by + ' · ' + shortDate(l.updated_at * 1000) }) : null),
-     h('td', {}, h('div', { class: 'admin-row-actions' },
-      h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy, onclick: () => set(l, { hidden: !l.hidden }) }, icon(l.hidden ? 'eye' : 'eyeOff', 14), l.hidden ? tx.show : tx.hide),
-      h('button', { type: 'button', class: 'admin-secondary', disabled: !!busy || l.hidden, onclick: () => set(l, { pinned: !l.pinned }) }, icon('pin', 14), l.pinned ? tx.unpin : tx.pin),
-      l.hidden ? null : h('a', { class: 'admin-secondary', href: propertyPath(l.reference), target: '_blank', rel: 'noopener noreferrer' }, tx.view, icon('arrowUp', 14)),
-      busy === l.reference ? h('span', { class: 'buyer-enquiry-saving', role: 'status', text: c.saving }) : null)))))))));
+   body.push(h('div', { class: 'admin-stats' }, stat(tx.statTotal, listings.length), stat(tx.statShown, listings.filter(l => l.status === 'published').length, 'ok'), stat(tx.statHidden, listings.filter(l => l.status === 'draft').length, 'muted'), stat(tx.statPinned, listings.filter(l => l.free && l.status === 'published').length, 'accent')));
+   body.push(table());
   }
-  fill(section, 
-   pageHead(tx.title, tx.hint, tx.delay, h('button', { type: 'button', class: 'admin-secondary buyer-enquiry-export', onclick: () => { listings = null; error = ''; draw(); load(); } }, icon('refresh', 15), c.refresh)),
-   error ? h('p', { class: 'admin-message error', role: 'alert', text: error }) : null,
-   body);
+  fill(section,
+   pageHead(tx.title, tx.hint, tx.delay,
+    h('button', { type: 'button', class: 'admin-primary', onclick: () => { editing = { listing: null }; error = ''; notice = ''; draw(); } }, tx.add),
+    h('button', { type: 'button', class: 'admin-secondary buyer-enquiry-export', onclick: () => { listings = null; error = ''; draw(); load(); } }, icon('refresh', 15), c.refresh)),
+   messages, body);
  }
  draw(); load();
+}
+
+function statsTab(panel) {
+ const c = COPY[lang], tx = LISTINGS[lang];
+ const section = h('section', { class: 'admin-page' });
+ fill(panel, section);
+ let data = null, error = '';
+ (async () => { try { data = await api('stats?days=30'); } catch (e) { if (handle(e)) return; error = e.status === 503 ? c.unavailable : c.error; } draw(); })();
+ function draw() {
+  if (!section.isConnected) return;
+  const total = name => Number((data.byEvent.find(r => r.event === name) || {}).n || 0);
+  const list = (title, rows, label) => h('div', { class: 'admin-card' }, h('h2', { class: 'admin-card-title', text: title }),
+   rows.length ? h('div', { class: 'admin-table-wrap' }, h('table', {}, h('tbody', {}, rows.map(r => h('tr', {}, h('td', { text: label(r) }), h('td', { class: 'is-num', text: String(r.n) })))))) : h('p', { class: 'admin-help', text: tx.noStats }));
+  fill(section, pageHead(tx.statsTitle, tx.statsHint),
+   error ? h('p', { class: 'admin-message error', role: 'alert', text: error }) : null,
+   !data && !error ? h('div', { class: 'admin-card' }, skeleton(3)) : null,
+   data ? [h('div', { class: 'admin-stats' }, stat(tx.pageViews, total('page_view')), stat(tx.propertyViews, total('property_view'), 'ok'), stat(tx.guideViews, total('guide_view'), 'accent')),
+    list(tx.sources, data.bySource, r => r.source), list(tx.topListings, data.byListing, r => '#' + r.reference)] : null);
+ }
+ draw();
 }
 
 // ---- Activity log ----
@@ -549,6 +697,6 @@ function inviteTab(panel) {
  draw(); drawTeam(); loadTeam();
 }
 
-window.addEventListener('hashchange', () => { const link = /^#(set|invite)=([A-Za-z0-9_-]{43})$/.exec(location.hash); if (link) { linkToken = link[2]; try { history.replaceState(null, '', location.pathname); } catch {} render(); return; } const v = location.hash.slice(1); if (v !== tab && ['enquiries', 'accounts', 'listings', 'audit', 'invite'].includes(v)) { tab = v; render(); } });
+window.addEventListener('hashchange', () => { const link = /^#(set|invite)=([A-Za-z0-9_-]{43})$/.exec(location.hash); if (link) { linkToken = link[2]; try { history.replaceState(null, '', location.pathname); } catch {} render(); return; } const v = location.hash.slice(1); if (v !== tab && ['enquiries', 'accounts', 'listings', 'stats', 'audit', 'invite'].includes(v)) { tab = v; render(); } });
 render();
 })();

@@ -1,5 +1,5 @@
 // Enquiry intake at POST /api/enquiry, stored in this site's D1 (binding ACCOUNTS).
-// Validation follows supabase/functions/_shared/enquiry.ts (parseEnquiry), limited to
+// Validation mirrors the platform's original enquiry rules (parseEnquiry), limited to
 // hotel/motel enquiries. Each new enquiry is emailed to the active owner(s).
 const LIMITS = { requestId: 36, kind: 6, language: 2, name: 120, email: 254, phone: 40, city: 200, address: 300, listingReference: 36, propertyType: 20, daycareSubsidy: 20, budgetMin: 10, budgetMax: 10, expectedPrice: 10, timeline: 200, service: 6, assistance: 100, contactLanguage: 2, contactMethod: 5, contactTime: 200, requirements: 3000, website: 200 };
 const UUID4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;

@@ -1,6 +1,8 @@
 import createRenderer from '../lib/page-renderer.cjs';
 import Routes from '../lib/site-routes.cjs';
-import {loadCatalogue as loadSourceCatalogue,applyListingSettings} from './live-catalogue.mjs';
+import {loadCatalogue as loadSourceCatalogue,applyListingSettings,invalidateCatalogue} from './live-catalogue.mjs';
+import {runListingLifecycle,PHOTO_PATH,photoKey} from './listings.mjs';
+import {recordEvent} from './metrics.mjs';
 import {template,translations,site,fallback} from './runtime-inputs.mjs';
 import {responseHeaders} from './worker.mjs';
 import {withGoogleAdsCsp} from './google-ads-csp.mjs';
@@ -21,8 +23,8 @@ async function listingSettings(env){
  try{settingsCache.rows=(await env.ACCOUNTS.prepare('SELECT listing_reference,hidden,pinned FROM listing_settings').all()).results||[];}catch{/* table not migrated yet: show everything */}
  settingsCache.at=Date.now();return settingsCache.rows;
 }
-async function loadCatalogue(site,fallback,env){const result=await loadSourceCatalogue(site,fallback);return {...result,catalogue:applyListingSettings(result.catalogue,await listingSettings(env))};}
-const adminApi=createAdminApi({site,onListingsChanged:()=>{settingsCache.at=0;}});
+async function loadCatalogue(site,fallback,env){const result=await loadSourceCatalogue(site,fallback,{db:env&&env.ACCOUNTS});return {...result,catalogue:applyListingSettings(result.catalogue,await listingSettings(env))};}
+const adminApi=createAdminApi({site,onListingsChanged:()=>{settingsCache.at=0;invalidateCatalogue();}});
 const enquiryIntake=createEnquiryIntake({site});
 const turnstile=accountsEnabled&&/^0x[A-Za-z0-9_-]{10,}$/.test(site.account.turnstileSiteKey||'');
 const turnstileOrigin='https://challenges.cloudflare.com';
@@ -44,6 +46,18 @@ export async function handleLiveRequest(request,env){
   let lookup=()=>null;try{const {catalogue}=await loadCatalogue(site,fallback,env);lookup=ref=>catalogue.items.find(p=>p.reference===ref)||null;}catch{}
   return wrapped(await enquiryIntake(request,env,{catalogueLookup:lookup,local}));
  }
+ if(url.pathname==='/api/events'){
+  // Aggregate page counts in this site's D1; refused off the canonical host.
+  if(!local&&(url.hostname!=='motelavendre.ca'||url.protocol!=='https:'))return wrapped(new Response(null,{status:403}));
+  return wrapped(await recordEvent(request,env));
+ }
+ if(url.pathname.startsWith('/assets/listings/')&&['GET','HEAD'].includes(request.method)){
+  // Listing photos uploaded from the admin, stored in R2 (binding PHOTOS).
+  const key=PHOTO_PATH.test(url.pathname.slice(1))?photoKey(url.pathname.slice(1)):null;
+  const object=key&&env&&env.PHOTOS?await env.PHOTOS.get(key):null;
+  if(!object)return wrapped(new Response('Not found',{status:404}));
+  return wrapped(new Response(request.method==='HEAD'?null:object.body,{headers:{'Content-Type':object.httpMetadata?.contentType||'image/webp','Cache-Control':'public, max-age=31536000, immutable'}}));
+ }
  if(url.pathname.startsWith('/api/admin/')){
   // Staff workspace API. HTTPS on the canonical host only.
   if(!accountsEnabled)return wrapped(Response.json({error:'unavailable'},{status:404,headers:{'Cache-Control':'no-store'}}));
@@ -56,20 +70,11 @@ export async function handleLiveRequest(request,env){
  if(url.pathname==='/googleb6173475a8eadbeb.html')return wrapped(new Response(request.method==='HEAD'?null:'google-site-verification: googleb6173475a8eadbeb.html',{headers:{'Content-Type':'text/html; charset=utf-8'}}));
  const oldTarget=Routes.legacyTarget(url.pathname);if(oldTarget){const target=new URL(oldTarget,local?url.origin:site.siteOrigin);target.search=url.search;return wrapped(Response.redirect(target.href,301));}
  const route=/^\/(fr|en|zh)(?:\/(.*))?$/.exec(url.pathname);
- const dynamic=['/data/catalogue-data.js','/api/catalogue','/sitemap.xml'].includes(url.pathname)||url.pathname.startsWith('/assets/centris/');
+ const dynamic=['/data/catalogue-data.js','/api/catalogue','/sitemap.xml'].includes(url.pathname);
  if(!route&&!dynamic)return wrapped(await env.ASSETS.fetch(request));
  const {catalogue,status}=await loadCatalogue(site,fallback,env);
  if(url.pathname==='/data/catalogue-data.js')return wrapped(new Response(request.method==='HEAD'?null:'const MAV_CATALOGUE = '+JSON.stringify(catalogue).replace(/</g,'\\u003c')+';\n',{headers:{'Content-Type':'application/javascript; charset=utf-8','X-Catalogue-Status':status}}));
  if(url.pathname==='/api/catalogue')return wrapped(new Response(request.method==='HEAD'?null:JSON.stringify({catalogue,status,refreshIntervalSeconds:300}),{headers:{'Content-Type':'application/json; charset=utf-8','X-Catalogue-Status':status}}));
- if(url.pathname.startsWith('/assets/centris/')){
-  const relative=url.pathname.slice(1);
-  if(!/^assets\/centris\/\d{7,8}\/\d{3}\.webp$/.test(relative)||!catalogue.items.some(p=>p.photos.includes(relative)))return wrapped(new Response('Not found',{status:404}));
-  try{
-   const image=await fetch('https://proprieteenvente.ca'+url.pathname.slice('/assets'.length),{method:request.method,redirect:'manual',signal:AbortSignal.timeout(10000),cf:{cacheTtl:3600,cacheEverything:true}});
-   if(!image.ok||!/^image\/webp\b/.test(image.headers.get('content-type')||''))throw Error('Image unavailable');
-   return wrapped(new Response(image.body,{headers:{'Content-Type':'image/webp','Cache-Control':'public, max-age=3600'}}));
-  }catch{return wrapped(new Response('Image unavailable',{status:502}));}
- }
  const renderer=createRenderer({template,translations,catalogue,site,indexable:true});
  if(url.pathname==='/sitemap.xml'){
   const urls=[];
@@ -94,12 +99,15 @@ export async function handleLiveRequest(request,env){
  const json=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1];
  const hash=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(json)))));
  const third=kind==='account'&&turnstile?' '+turnstileOrigin:'';
- const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'"+third+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' "+new URL(site.endpoint).origin+"; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"+(third?'; frame-src'+third:'');
+ const csp="default-src 'self'; script-src 'self' 'sha256-"+hash+"'"+third+"; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"+(third?'; frame-src'+third:'');
  return wrapped(new Response(request.method==='HEAD'?null:html,{headers:{'Content-Type':'text/html; charset=utf-8','X-Catalogue-Status':status,'X-Catalogue-Checked-At':catalogue.updatedAt,...(kind==='account'?{'Cache-Control':'no-store','X-Robots-Tag':'noindex, nofollow'}:{})}}),kind==='account'?csp:withGoogleAdsCsp(csp,site.googleAds));
 }
-// Daily saved-search alerts (Cron Trigger in wrangler.jsonc).
+// Daily Cron Trigger (wrangler.jsonc): free-listing expiry and reminders first, then saved-search alerts.
 export async function handleScheduled(event,env,ctx){
  if(!accountsEnabled||!env.ACCOUNTS)return;
- ctx.waitUntil((async()=>{const {catalogue,status}=await loadCatalogue(site,fallback,env);if(status!=='live'){console.log('account-alerts skipped: catalogue',status);return;}await runAlerts(env,{site,catalogue});})());
+ ctx.waitUntil((async()=>{
+  try{await runListingLifecycle(env,{replyTo:site.ownerEmail||''});invalidateCatalogue();}catch(error){console.warn('listing lifecycle failed:',String(error?.message||error).slice(0,140));}
+  const {catalogue,status}=await loadCatalogue(site,fallback,env);if(status!=='live'){console.log('account-alerts skipped: catalogue',status);return;}await runAlerts(env,{site,catalogue});
+ })());
 }
 export default {fetch:handleLiveRequest,scheduled:handleScheduled};

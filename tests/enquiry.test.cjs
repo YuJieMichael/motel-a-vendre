@@ -8,8 +8,7 @@ const E = require('../lib/enquiry-core.js');
 const requestId = '1eab8fca-c2a5-4d89-802f-f4335f34ff94';
 const otherId = '729b093c-a9f9-45a2-8bf7-0645b2493ea2';
 const config = {
-  endpoint: 'https://project-example.supabase.co/functions/v1/submit-enquiry',
-  publishableKey: 'sb_publishable_local_mock_key_123456',
+  intake: 'site',
   allowedOrigins: ['http://127.0.0.1:5173', 'https://motelavendre.ca']
 };
 const origin = 'http://127.0.0.1:5173';
@@ -29,18 +28,15 @@ test('enquiry core exposes the same buildless browser and CommonJS API', () => {
   assert.equal(context.MAVEnquiry.canSubmit(config, origin), true);
 });
 
-test('submission requires the exact configured origin and a safe public endpoint/key', () => {
+test('submission requires the exact configured origin and the site intake', () => {
   assert.equal(E.canSubmit(config, origin), true);
   assert.equal(E.canSubmit(config, 'https://motelavendre.ca'), true);
   for (const candidate of ['null', 'file://', 'http://127.0.0.1:5175', 'https://motelavendre.ca.evil', 'https://motelavendre.ca/', 'https://user:pass@motelavendre.ca']) {
     assert.equal(E.canSubmit(config, candidate), false, candidate);
   }
-  for (const endpoint of ['http://project.supabase.co/functions/v1/submit-enquiry', 'https://project.supabase.co.evil/functions/v1/submit-enquiry', 'https://project.supabase.co/functions/v1/other', config.endpoint + '?email=private', config.endpoint + '#x', 'https://user:pass@project.supabase.co/functions/v1/submit-enquiry']) {
-    assert.equal(E.canSubmit({ ...config, endpoint }, origin), false, endpoint);
-  }
-  for (const publishableKey of ['', 'sb_secret_private', 'eyJhbGciOiJIUzI1NiJ9.legacy', 'sb_publishable_with spaces']) {
-    assert.equal(E.canSubmit({ ...config, publishableKey }, origin), false);
-  }
+  // Only this site's own /api/enquiry is supported; any other intake setting disables sending.
+  for (const intake of [undefined, '', 'supabase', 'SITE']) assert.equal(E.canSubmit({ ...config, intake }, origin), false, String(intake));
+  assert.equal(E.canSubmit({ allowedOrigins: config.allowedOrigins, endpoint: 'https://project.supabase.co/functions/v1/submit-enquiry', publishableKey: 'sb_publishable_local_mock_key_123456' }, origin), false);
   assert.equal(E.canSubmit({ ...config, allowedOrigins: [] }, origin), false);
 });
 
@@ -139,14 +135,13 @@ test('successful API collection uses POST JSON, no contact URL data, and does no
   assert.deepEqual(result, { ok: true });
   assert.equal(calls.length, 1);
   const [url, options] = calls[0];
-  assert.equal(url, config.endpoint);
+  assert.equal(url, '/api/enquiry');
   assert.ok(!url.includes(payload.email));
   assert.equal(options.method, 'POST');
-  assert.equal(options.headers.apikey, config.publishableKey);
+  assert.equal(options.headers.apikey, undefined);
   assert.equal(options.headers['Content-Type'], 'application/json');
   assert.equal(options.credentials, 'omit');
   assert.equal(options.redirect, 'error');
-  assert.equal(options.referrerPolicy, 'no-referrer');
   assert.equal(options.signal, controller.signal);
   assert.equal(JSON.parse(options.body).requestId, requestId);
 });

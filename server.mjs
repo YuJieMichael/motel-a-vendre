@@ -13,17 +13,25 @@ const publicFiles=new Set([...pageManifest.map(p=>p.file),'styles.css','responsi
 // Local account API: same handler as production, SQLite file instead of D1, emails printed here.
 const site=vm.runInNewContext(fs.readFileSync(path.join(root,'data/site-config.js'),'utf8')+';MAV_SITE');
 let accountApi=null,accountEnv=null,adminApi=null,enquiryIntake=null;
+// Local stand-in for the R2 photo bucket: files under .local/photos (ignored by Git).
+function localPhotos(dir){
+  const file=key=>path.join(dir,key.replace(/[^A-Za-z0-9_./-]/g,''));
+  return {put:async(key,bytes,o)=>{fs.mkdirSync(path.dirname(file(key)),{recursive:true});fs.writeFileSync(file(key),bytes);},
+    get:async key=>fs.existsSync(file(key))?{body:fs.readFileSync(file(key)),httpMetadata:{contentType:key.endsWith('.jpg')?'image/jpeg':'image/webp'}}:null,
+    delete:async keys=>{for(const k of [].concat(keys))try{fs.unlinkSync(file(k));}catch{}}};
+}
 if(site.account&&site.account.enabled===true){
   const {createAccountApi}=await import('./deployment/account-api.mjs'),{openLocalD1}=await import('./deployment/local-d1.mjs');
   fs.mkdirSync(path.join(root,'.local'),{recursive:true});
-  accountEnv={ACCOUNTS:openLocalD1(path.join(root,'.local/accounts.sqlite'),path.join(root,'d1/migrations')),ACCOUNT_MAIL_LOG:m=>console.log(`\n[local email] to ${m.to}: ${m.subject}\n${m.text.replace('https://motelavendre.ca',`http://127.0.0.1:${port}`)}\n`)};
+  accountEnv={ACCOUNTS:openLocalD1(path.join(root,'.local/accounts.sqlite'),path.join(root,'d1/migrations')),PHOTOS:localPhotos(path.join(root,'.local/photos')),ACCOUNT_MAIL_LOG:m=>console.log(`\n[local email] to ${m.to}: ${m.subject}\n${m.text.replace('https://motelavendre.ca',`http://127.0.0.1:${port}`)}\n`)};
   accountApi=createAccountApi({siteOrigin:'https://motelavendre.ca'});
-  // Staff workspace: real staff sign-in (Supabase), local D1 accounts and listing settings.
+  // Staff workspace: local D1 staff, accounts, listings and settings.
   const {createAdminApi}=await import('./deployment/admin-api.mjs');adminApi=createAdminApi({site});
   const {createEnquiryIntake}=await import('./deployment/enquiry-intake.mjs');const intake=createEnquiryIntake({site});enquiryIntake=(request,env)=>intake(request,env,{local:true});
 }
 async function handleAccount(req,res,api=accountApi){
-  const chunks=[];for await(const c of req){chunks.push(c);if(chunks.reduce((n,x)=>n+x.length,0)>16384){res.writeHead(413);res.end();return;}}
+  const max=req.url.startsWith('/api/admin/listings/')?2200000:16384;
+  const chunks=[];for await(const c of req){chunks.push(c);if(chunks.reduce((n,x)=>n+x.length,0)>max){res.writeHead(413);res.end();return;}}
   const body=['GET','HEAD'].includes(req.method)?undefined:Buffer.concat(chunks);
   const response=await api(new Request(`http://127.0.0.1:${port}${req.url}`,{method:req.method,headers:req.headers,body}),accountEnv);
   for(const [k,v] of response.headers)if(k!=='set-cookie')res.setHeader(k,v);
@@ -33,6 +41,8 @@ async function handleAccount(req,res,api=accountApi){
 }
 const server=http.createServer((req,res)=>{
   if(enquiryIntake&&req.url==='/api/enquiry'){handleAccount(req,res,enquiryIntake).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
+  if(accountEnv&&req.url==='/api/events'){import('./deployment/metrics.mjs').then(m=>handleAccount(req,res,m.recordEvent)).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
+  if(accountEnv&&req.url.startsWith('/assets/listings/')){import('./deployment/listings.mjs').then(async m=>{const rel=req.url.slice(1).split('?')[0],o=m.PHOTO_PATH.test(rel)?await accountEnv.PHOTOS.get(m.photoKey(rel)):null;if(!o){res.writeHead(404);res.end();return;}res.writeHead(200,{'Content-Type':o.httpMetadata.contentType});res.end(o.body);}).catch(()=>{res.writeHead(500);res.end();});return;}
   if(adminApi&&req.url.startsWith('/api/admin/')){handleAccount(req,res,adminApi).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
   if(accountApi&&req.url.startsWith('/api/account/')){handleAccount(req,res).catch(()=>{if(!res.headersSent)res.writeHead(500);res.end();});return;}
   if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);res.end('Method not allowed');return;}

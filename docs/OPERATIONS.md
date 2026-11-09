@@ -36,38 +36,19 @@ For an offline local review only, set `MAV_INTAKE_CHECK=offline` before preparin
 
 For an approved production update, review the generated release manifest, routes and intake mode first, then use the official Wrangler CLI with `release/wrangler.jsonc`. The deployed build used Wrangler **4.151.1**, with compatibility date **2026-10-19**. Authentication belongs to the operator's credential store, never this repository.
 
-## Catalogue, images and indexing
+## Listings, photos and indexing
 
-Public navigation has four page types: catalogue home, property details, a practical document/FAQ guide, and the private buyer account. Former localized team URLs redirect permanently to the catalogue; former seller URLs redirect to the seller checklist in the guide. The shared mappings in `lib/site-routes.cjs` run before catalogue refresh and preserve query parameters. Local preview uses the same redirects. These retired pages are excluded from both static and dynamic sitemaps.
+Motel à vendre owns its listings. They live in this site's D1 (`ACCOUNTS`, table `listings`, migration `0005_own_listings.sql`) and are managed in the staff workspace (**Listings** tab). Nothing is read from another site or database. Migration 0005 imports the six listings published on 2026-11-09 (same content as the live catalogue that day, with the approved illustrative covers); imported photos stay static assets under `assets/main/` and `assets/covers/`.
 
-The Worker reads only `published_listings` with the public browser key and a restricted field selection. Normal live-cache freshness is five minutes. On a source failure it uses the dated validated fallback, backs off for one minute and reports its state through `/api/catalogue`. Withdrawn listings return 404; uncertain unknown references during an outage return 503.
+Photos added from the admin are resized and converted to WebP **in the browser** (max. 1600 px, keeps the Worker within the Free-plan CPU limit), then uploaded to the R2 bucket `motel-a-vendre-photos` (binding `PHOTOS`) under `listings/<reference>/<random>.webp`. The Worker serves them at `/assets/listings/...` with a one-year immutable cache. Removing a photo from a listing deletes it from R2 when the listing is saved.
 
-The sitemap is dynamic. Root requests redirect to French. Page canonical URLs, language alternates, structured data and security headers are generated per route. Keep the public Google verification HTML file available during rebuilds.
+The public catalogue reads published rows from D1 (in-memory copy for one minute, cleared immediately after a staff change). On a D1 error the last good copy is kept (`stale`), otherwise the bundled `data/catalogue.json` snapshot is served (`fallback`); `/api/catalogue` reports the status. The sitemap is dynamic. Root requests redirect to French. Keep the public Google verification HTML file available during rebuilds.
 
-`data/catalogue.json` and `data/source-manifest.json` are public snapshots, not private exports. Optional `scripts/sync-main.cjs` reads public records only. Its configuration file must contain only a public project URL and publishable key. Syncing a review file also downloads public images and updates the local source manifest; it is not a deployment.
+**Free first month.** A listing saved with “Free first month” and the seller's email is published for 30 days from its publication date. The daily Cron Trigger (`17 13 * * *` UTC) emails the seller 7 days before the end, unpublishes the listing at the end (status `expired`, audited as `listing_expire`) and sends one removal notice. Emails come from `MAIL_FROM` with the owner (`ownerEmail` in `data/site-config.js`) as reply-to. Nothing is ever charged. Staff use **Extend 30 days** to renew. Imported listings are not free and never expire.
 
-`data/illustrative-covers.json` records the attribution and hashes of the four approved illustrative covers. Keep illustration labels visible. Confidential property images are not part of this repository. The three older PNGs are retained for the demo test fixtures.
+**Visit counts.** The public pages post bounded aggregate events to `/api/events` (D1 `metric_counts`: day, event, language, broad source, listing reference, count). No names, emails, URLs, query strings or IP addresses are stored. Do Not Track, Global Privacy Control and `?qa=1` are respected in the browser. Staff see 30-day totals in the **Visits** tab.
 
-## Supabase backend
-
-`supabase/functions/motel-services` handles `/enquiry` and `/events`. Local preview requests on `http://127.0.0.1:5173` exercise validation without database writes. Production intake allows only the two exact Motel HTTPS origins, validates the browser application key and request payload, and calls service-only SQL functions.
-
-The function uses these environment variables, managed in Supabase:
-
-| Name | Purpose |
-| --- | --- |
-| `SUPABASE_URL` | Server project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server-only database client credential |
-| `SUPABASE_PUBLISHABLE_KEY` | Accepted public browser key |
-| `SUPABASE_PUBLISHABLE_KEYS` | Optional JSON map of accepted browser keys |
-| `SUPABASE_ANON_KEY` | Optional legacy public browser key |
-| `ENQUIRY_RATE_SALT` | Optional server-side rate hash salt; otherwise the service key is used |
-
-Never place server secrets in frontend configuration, Git, a workflow log or screenshots. `verify_jwt = false` is intentional for this anonymous public intake: the handler checks the application key itself, enforces exact origins, bounds request bodies, validates the payload, and applies database rate limits. A browser key is public and is not a substitute for private-data authorization. Anonymous browser clients cannot read the private metric tables or call the collection RPCs.
-
-The migration is an **extension of the existing platform**, not an empty-project bootstrap. It requires the existing `private` schema, `public.enquiries`, `public.published_listings`, and `public.collect_enquiry(uuid,jsonb,text)`. It adds isolated Motel metrics, deduplication receipts, and service-role-only RPCs. Those objects are already deployed; do not blindly reapply this migration to production.
-
-The existing platform notification job sends enquiry emails. No recipient mailbox, email-provider credential, main-site notification implementation or private acceptance evidence is stored in this repository. A successful API receipt proves collection; actual mailbox delivery is a separate operational check requiring explicit permission for a real message.
+`data/illustrative-covers.json` records the attribution and hashes of the approved illustrative covers. Keep illustration labels visible.
 
 ## Read-only production checks
 
@@ -106,8 +87,12 @@ Direct enquiries: `directEnquiries: true` makes `prepare:release` verify the int
 - **Invitations (owner only):** enter an email; the person receives a 7-day link from `MAIL_FROM` to choose a password and becomes an operator. No prior account is needed. The owner can resend, deactivate (ends sessions at once) and reactivate members. Operators cannot invite.
 - **Enquiries:** the public form posts to `/api/enquiry` (`intake: "site"` in `data/site-config.js`). The Worker validates like the former Supabase intake, stores the enquiry in D1 `enquiries` (idempotent on `requestId`, rate-limited per connection and email) and emails the active owner(s), with Reply-To set to the enquirer. Staff accept, reopen, delete and restore them. Enquiries received before this change stay in the main site's database.
 - **Buyer accounts:** D1 `users` — search, confirm manually (also invalidates outstanding confirmation links), delete (cascades).
-- **Listings:** listing content still comes from the main site's public `published_listings` (read-only). D1 `listing_settings` hides or pins a listing on this site only; public pages pick it up within a minute.
+- **Listings:** create, edit, upload photos, publish, unpublish and renew free listings (see *Listings, photos and indexing*). D1 `listing_settings` still hides or pins a published listing; public pages pick changes up within a minute.
 - **Audit:** D1 `staff_audit` records the staff email, action and target.
-- Page-view metrics (`metricsEndpoint`) are unchanged.
+- **Visits:** 30-day aggregate counts from D1 `metric_counts`.
 
-Deploy: apply D1 migrations `0003_staff_workspace.sql` and `0004_independent_staff.sql` (record them in `d1_migrations` if run from the dashboard console), then merge to `main`.
+Deploy (listings release, 1.11.0), in this order:
+
+1. Create the R2 bucket once: dashboard → R2 → Create bucket `motel-a-vendre-photos` (or `npx wrangler r2 bucket create motel-a-vendre-photos`). The deploy fails if the bucket does not exist.
+2. Apply D1 migration `0005_own_listings.sql` to `motel-a-vendre-accounts` (`npx wrangler d1 migrations apply motel-a-vendre-accounts --remote`, or paste it into the dashboard console and record it in `d1_migrations`).
+3. Merge to `main`, then check that the Workers build for that commit succeeded, `/api/catalogue` reports `live` with six listings, and an admin photo upload works.
