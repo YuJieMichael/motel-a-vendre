@@ -209,7 +209,6 @@ html{scroll-padding-top:112px}
 .header-social svg,.footer-social svg{width:20px;height:20px;display:block}
 .footer-social{flex-wrap:wrap;gap:8px}
 .footer-social a{border-color:#ffffff6b;color:#fff}
-.footer-social .broker-facebook{display:inline-flex;width:auto;gap:8px;padding:0 12px;border-radius:22px;white-space:nowrap}
 .footer-social a:hover,.footer-social a:focus-visible{background:#ffffff26;border-color:currentColor}
 .footer-social a:focus-visible{outline:2px solid #f6d59a;outline-offset:3px}
 .site-footer .brand-footer .brand-mark{filter:none;opacity:1}
