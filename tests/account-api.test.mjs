@@ -11,7 +11,7 @@ function setup(){
  const client=(ip='203.0.113.1')=>{let jar='';const call=async(method,route,body,extra={})=>{const r=await api(new Request(ORIGIN+'/api/account/'+route,{method,headers:{'x-mav-account':'1',origin:ORIGIN,'content-type':'application/json','cf-connecting-ip':ip,cookie:jar,...extra},body:body===undefined?undefined:JSON.stringify(body)}),env);const c=r.headers.get('set-cookie');if(c)jar=c.split(';')[0];return {status:r.status,body:await r.json(),headers:r.headers};};return {call,get jar(){return jar;}};};
  const tokenFrom=(kind,i=mails.length-1)=>mails[i].text.match(new RegExp('#'+kind+'=([\\w-]+)'))[1];
  const verified=async(c,email='buyer@example.com',password='harbour-lights-42')=>{await c.call('POST','signup',{email,password,language:'fr',consent:true});await c.call('POST','verify',{token:tokenFrom('verify')});return c;};
- return {env,mails,client,tokenFrom,verified,tick:s=>clock+=s*1000,db:env.ACCOUNTS.raw};
+ return {env,mails,client,tokenFrom,verified,now:()=>clock,tick:s=>clock+=s*1000,db:env.ACCOUNTS.raw};
 }
 
 test('passwords use salted PBKDF2 and verify in constant form',async()=>{
@@ -162,7 +162,7 @@ test('unconfirmed accounts expire and plain-HTTP sessions use a non-Secure local
  const t=setup();await t.client().call('POST','signup',{email:'late@example.com',password:'harbour-lights-42',consent:true});
  t.tick(8*86400);await t.client('192.0.2.7').call('POST','signup',{email:'other@example.com',password:'harbour-lights-42',consent:true});
  assert.equal(t.db.prepare("SELECT count(*) n FROM users WHERE email='late@example.com'").get().n,0);
- const api=createAccountApi({siteOrigin:ORIGIN});
+ const api=createAccountApi({siteOrigin:ORIGIN,now:t.now});
  const r=await api(new Request('http://127.0.0.1:5173/api/account/verify',{method:'POST',headers:{'x-mav-account':'1',origin:'http://127.0.0.1:5173','content-type':'application/json'},body:JSON.stringify({token:t.tokenFrom('verify')})}),t.env);
  assert.equal(r.status,200);assert.match(r.headers.get('set-cookie'),/^mav_session=/);assert.doesNotMatch(r.headers.get('set-cookie'),/Secure/);
 });
