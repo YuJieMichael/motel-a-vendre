@@ -17,6 +17,7 @@ const MAV_SITE = {
     "Instagram": "https://www.instagram.com/motelavendre/",
     "X": "https://x.com/MotelAvendre"
   },
+  "brokerFacebook": "https://www.facebook.com/lu.tianshu",
   "directEnquiries": true,
   "coverOverrides": {
     "100013": "assets/covers/100013.webp",

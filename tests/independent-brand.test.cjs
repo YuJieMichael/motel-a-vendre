@@ -15,8 +15,9 @@ test('all local and production pages keep customer navigation and branding on Mo
   const socialNavs=[...html.matchAll(/<nav class="(header|footer)-social"[^>]*>[\s\S]*?<\/nav>/g)];
   assert.deepEqual(socialNavs.map(([,placement])=>placement),['header','footer'],p.file+' social links');
   let rest=html;
-  for(const [social]of socialNavs){
-   assert.deepEqual([...social.matchAll(/href="([^"]+)"/g)].map(([,href])=>href),socialLinks);
+  for(const [social,placement]of socialNavs){
+   const expected=placement==='footer'?[...socialLinks,C.escapeHTML(site.brokerFacebook)]:socialLinks;
+   assert.deepEqual([...social.matchAll(/href="([^"]+)"/g)].map(([,href])=>href),expected);
    rest=rest.replace(social,'');
   }
   for(const [,href]of rest.matchAll(/<a\b[^>]*href="(https?:[^\"]+)"/g)){
