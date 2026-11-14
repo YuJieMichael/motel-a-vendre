@@ -13,7 +13,6 @@ const MAV_SITE = {
   "googleAds": { "tagId": "AW-18565441738", "buyer": "-KaHCPzQkbUdEMrR2JRF", "seller": "2uXECP_QkbUdEMrR2JRF" },
   "ownerEmail": "achat.vente.garderie@gmail.com",
   "socialLinks": {
-    "Facebook": "https://www.facebook.com/profile.php?id=61596159879012",
     "Instagram": "https://www.instagram.com/motelavendre/",
     "X": "https://x.com/MotelAvendre"
   },
