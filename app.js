@@ -219,11 +219,10 @@ function analyticsSource(){try{const u=new URL(location.href),v=u.searchParams.g
 function recordMetric(event,reference=""){let qa=false;try{if(new URLSearchParams(location.search).get('qa')==='1')sessionStorage.setItem('mav-qa','1');qa=sessionStorage.getItem('mav-qa')==='1';}catch{}if(qa||!["motelavendre.ca","www.motelavendre.ca"].includes(location.hostname)||navigator.doNotTrack==="1"||navigator.globalPrivacyControl===true)return;try{fetch("/api/events",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event,language,source:analyticsSource(),reference}),credentials:"omit",referrerPolicy:"no-referrer",keepalive:true}).catch(()=>{});}catch{}}
 try{sessionStorage.setItem("mav-source",analyticsSource());}catch{}
 recordMetric(page==="property"?"property_view":page==="guide"?"guide_view":"page_view",activeProperty?.reference||"");
-// Staff shortcut: only browsers where someone signed in to /admin/ carry the mav-staff flag.
-// The flag only decides whether to ask; the bar appears after /api/admin/me confirms an active session.
+// Staff shortcut: always ask /api/admin/me so a browser with an active staff session shows the bar
+// even when its local mav-staff flag is missing. The bar appears only after the server confirms the session.
 (function staffBar(){
- let flagged=false;try{flagged=localStorage.getItem('mav-staff')==='1';}catch{}
- if(!flagged||!document.body)return;
+ if(!document.body)return;
  fetch('/api/admin/me',{credentials:'same-origin',headers:{Accept:'application/json'}}).then(r=>{
   if(r.status===401){try{localStorage.removeItem('mav-staff');}catch{}return null;}
   return r.ok?r.json():null;
